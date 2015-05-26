@@ -255,6 +255,20 @@ public class DistributionController implements Initializable {
         StringBuilder approveMessage = new StringBuilder();
         ObservableList<DistributionRow> rows = distributionTable.getItems();
 
+        for (DistributionRow row : rows) {
+            for (Soldier soldier : row.getSoldiers()) {
+                if (soldier == null) {
+                    perfect = false;
+                    approveMessage.append(Messages.get("distribution.empty.points"))
+                            .append(System.lineSeparator())
+                            .append(System.lineSeparator());
+                    break;
+                }
+            }
+            if (!perfect) break;
+        }
+
+
         Comparator<Soldier> soldierComparator = new Comparator<Soldier>() {
             @Override
             public int compare(Soldier o1, Soldier o2) {
@@ -287,7 +301,9 @@ public class DistributionController implements Initializable {
                             "distribution.first.watch.after.yesterdays.last",
                     Joiner.on(", ").join(firstRowSoldiers));
 
-            approveMessage.append(message).append(System.lineSeparator());
+            approveMessage.append(message)
+                    .append(System.lineSeparator())
+                    .append(System.lineSeparator());
         }
 
         for (int i = 1; i < rows.size(); i++) {
@@ -315,7 +331,9 @@ public class DistributionController implements Initializable {
                         previousHourName,
                         currentHourName
                 );
-                approveMessage.append(message).append(System.lineSeparator());
+                approveMessage.append(message)
+                        .append(System.lineSeparator())
+                        .append(System.lineSeparator());
             }
         }
 
@@ -323,7 +341,9 @@ public class DistributionController implements Initializable {
         List<Watch> existingWatches = DbManager.findWatchesByDate(getCurrentDate());
         if (!existingWatches.isEmpty()) {
             perfect = false;
-            approveMessage.append(Messages.get("distribution.already.existing.records")).append(System.lineSeparator());
+            approveMessage.append(Messages.get("distribution.already.existing.records"))
+                    .append(System.lineSeparator())
+                    .append(System.lineSeparator());
         }
 
         approveMessage.append(System.lineSeparator());
