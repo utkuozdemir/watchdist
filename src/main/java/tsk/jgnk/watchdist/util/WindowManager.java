@@ -6,6 +6,10 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.thehecklers.monologfx.MonologFX;
+import org.thehecklers.monologfx.MonologFXBuilder;
+import org.thehecklers.monologfx.MonologFXButton;
+import org.thehecklers.monologfx.MonologFXButtonBuilder;
 import tsk.jgnk.watchdist.App;
 import tsk.jgnk.watchdist.controller.*;
 import tsk.jgnk.watchdist.i18n.Language;
@@ -129,6 +133,22 @@ public class WindowManager {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public static void showNewDbCreatedInfo(String dbPath) {
+        MonologFXButton ok = MonologFXButtonBuilder.create()
+                .label(Messages.get("app.continue"))
+                .type(MonologFXButton.Type.YES)
+                .defaultButton(true)
+                .build();
+        MonologFX mono = MonologFXBuilder.create()
+                .modal(true)
+                .titleText(Messages.get("new.db.initialized"))
+                .message(Messages.get("new.db.initialized.message", Constants.DB_NAME, dbPath))
+                .type(MonologFX.Type.INFO)
+                .button(ok)
+                .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
+                .build();
+        mono.show();
     }
 }

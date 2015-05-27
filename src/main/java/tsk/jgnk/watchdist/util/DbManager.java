@@ -1,6 +1,5 @@
 package tsk.jgnk.watchdist.util;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
@@ -18,9 +17,12 @@ import tsk.jgnk.watchdist.domain.Watch;
 import tsk.jgnk.watchdist.domain.WatchPoint;
 
 import java.io.File;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.concurrent.Callable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,9 +37,18 @@ public class DbManager {
 
     static {
         try {
-            String dbUrl = DbManager.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath() +
-                    File.separator +
-                    Constants.DB_NAME;
+            Path filePath = Paths.get(DbManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            Path dbDirectory = filePath.getParent().getParent();
+            String dbUrl = dbDirectory.toString() + File.separator + Constants.DB_NAME;
+
+            URL resource = DbManager.class.getClassLoader().getResource("clean_db.db");
+            checkNotNull(resource);
+            Path path = Paths.get(dbUrl);
+            if (!Files.exists(path)) {
+                Files.copy(Paths.get(resource.toURI()), path);
+                WindowManager.showNewDbCreatedInfo(dbDirectory.toString());
+            }
+
             ConnectionSource connectionSource = new JdbcConnectionSource("jdbc:sqlite:" + dbUrl);
             transactionManager = new TransactionManager(connectionSource);
 
@@ -79,15 +90,12 @@ public class DbManager {
 
     public static int createSoldier(final Soldier soldier) {
         try {
-            return transactionManager.callInTransaction(new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    int count = soldierDao.create(soldier);
-                    for (Availability availability : soldier.getAvailabilities()) {
-                        availabilityDao.create(availability);
-                    }
-                    return count;
+            return transactionManager.callInTransaction(() -> {
+                int count = soldierDao.create(soldier);
+                for (Availability availability : soldier.getAvailabilities()) {
+                    availabilityDao.create(availability);
                 }
+                return count;
             });
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -97,21 +105,18 @@ public class DbManager {
     @SuppressWarnings("unchecked")
     public static int updateSoldier(final Soldier soldier) {
         try {
-            return transactionManager.callInTransaction(new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    int count = soldierDao.update(soldier);
+            return transactionManager.callInTransaction(() -> {
+                int count = soldierDao.update(soldier);
 
-                    PreparedQuery<Availability> preparedDelete
-                            = availabilityDao.deleteBuilder().where().eq("soldier", soldier.getId()).prepare();
+                PreparedQuery<Availability> preparedDelete
+                        = availabilityDao.deleteBuilder().where().eq("soldier", soldier.getId()).prepare();
 
-                    availabilityDao.delete((PreparedDelete<Availability>) preparedDelete);
+                availabilityDao.delete((PreparedDelete<Availability>) preparedDelete);
 
-                    for (Availability availability : soldier.getAvailabilities()) {
-                        availabilityDao.create(availability);
-                    }
-                    return count;
+                for (Availability availability : soldier.getAvailabilities()) {
+                    availabilityDao.create(availability);
                 }
+                return count;
             });
 
         } catch (SQLException e) {
@@ -122,24 +127,17 @@ public class DbManager {
     @SuppressWarnings("unchecked")
     public static int deleteSoldiers(final Collection<Soldier> soldiers) {
         try {
-            return transactionManager.callInTransaction(new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    Collection<Integer> soldierIds = Collections2.transform(soldiers, new Function<Soldier, Integer>() {
-                        @Override
-                        public Integer apply(Soldier input) {
-                            return input == null ? 0 : input.getId();
-                        }
-                    });
+            return transactionManager.callInTransaction(() -> {
+                Collection<Integer> soldierIds
+                        = Collections2.transform(soldiers, input -> input == null ? 0 : input.getId());
 
-                    PreparedDelete<Availability> preparedDelete
-                            = (PreparedDelete<Availability>) availabilityDao.deleteBuilder()
-                            .where().in("soldier", soldierIds).prepare();
-                    availabilityDao.delete(preparedDelete);
+                PreparedDelete<Availability> preparedDelete
+                        = (PreparedDelete<Availability>) availabilityDao.deleteBuilder()
+                        .where().in("soldier", soldierIds).prepare();
+                availabilityDao.delete(preparedDelete);
 
-                    return soldierDao.delete(soldiers);
+                return soldierDao.delete(soldiers);
 
-                }
             });
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -178,9 +176,17 @@ public class DbManager {
         }
     }
 
-    public static int deleteWatchPoints(Collection<WatchPoint> watchPoints) {
+    public static int deleteWatchPoints(final Collection<WatchPoint> watchPoints) {
         try {
-            return watchPointDao.delete(watchPoints);
+            return transactionManager.callInTransaction(() -> {
+                int count = 0;
+                for (WatchPoint point : watchPoints) {
+                    point.setActive(false);
+                    watchPointDao.update(point);
+                    count++;
+                }
+                return count;
+            });
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -191,21 +197,18 @@ public class DbManager {
             final Collection<Watch> watches,
             final WatchRemovalMode removalMode) {
         try {
-            return transactionManager.callInTransaction(new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    deleteWatchesByDate(date, removalMode);
+            return transactionManager.callInTransaction(() -> {
+                deleteWatchesByDate(date, removalMode);
 
-                    int count = 0;
-                    for (Watch watch : watches) {
-                        watchDao.create(watch);
-                        Soldier soldier = soldierDao.queryForId(watch.getSoldier().getId());
-                        soldier.setPoints(soldier.getPoints() + WatchValue.of(watch.getHour()));
-                        soldierDao.update(soldier);
-                        count++;
-                    }
-                    return count;
+                int count = 0;
+                for (Watch watch : watches) {
+                    watchDao.create(watch);
+                    Soldier soldier = soldierDao.queryForId(watch.getSoldier().getId());
+                    soldier.setPoints(soldier.getPoints() + WatchValue.of(watch.getHour()));
+                    soldierDao.update(soldier);
+                    count++;
                 }
+                return count;
             });
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -238,34 +241,31 @@ public class DbManager {
         checkNotNull(date);
         checkNotNull(mode);
         try {
-            return transactionManager.callInTransaction(new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    PreparedQuery<Watch> preparedQuery
-                            = watchDao.queryBuilder().where().eq("date", date.toString(Constants.DATE_FORMAT)).prepare();
-                    List<Watch> watches = watchDao.query(preparedQuery);
+            return transactionManager.callInTransaction(() -> {
+                PreparedQuery<Watch> preparedQuery
+                        = watchDao.queryBuilder().where().eq("date", date.toString(Constants.DATE_FORMAT)).prepare();
+                List<Watch> watches = watchDao.query(preparedQuery);
 
-                    if (mode == WatchRemovalMode.UNDO_POINTS) {
-                        Map<Soldier, Double> soldierWonPoints = new HashMap<>();
-                        for (Watch watch : watches) {
-                            Soldier soldier = watch.getSoldier();
-                            double valueBefore
-                                    = soldierWonPoints.containsKey(soldier) ? soldierWonPoints.get(soldier) : 0;
-                            soldierWonPoints.put(soldier, valueBefore + watch.getPointsWon());
-                        }
-
-                        for (Map.Entry<Soldier, Double> entry : soldierWonPoints.entrySet()) {
-                            Soldier soldier = entry.getKey();
-                            soldier.setPoints(soldier.getPoints() - entry.getValue());
-                            soldierDao.update(soldier);
-                        }
+                if (mode == WatchRemovalMode.UNDO_POINTS) {
+                    Map<Soldier, Double> soldierWonPoints = new HashMap<>();
+                    for (Watch watch : watches) {
+                        Soldier soldier = watch.getSoldier();
+                        double valueBefore
+                                = soldierWonPoints.containsKey(soldier) ? soldierWonPoints.get(soldier) : 0;
+                        soldierWonPoints.put(soldier, valueBefore + watch.getPointsWon());
                     }
 
-                    PreparedDelete<Watch> preparedDelete
-                            = (PreparedDelete<Watch>) watchDao.deleteBuilder()
-                            .where().eq("date", date.toString(Constants.DATE_FORMAT)).prepare();
-                    return watchDao.delete(preparedDelete);
+                    for (Map.Entry<Soldier, Double> entry : soldierWonPoints.entrySet()) {
+                        Soldier soldier = entry.getKey();
+                        soldier.setPoints(soldier.getPoints() - entry.getValue());
+                        soldierDao.update(soldier);
+                    }
                 }
+
+                PreparedDelete<Watch> preparedDelete
+                        = (PreparedDelete<Watch>) watchDao.deleteBuilder()
+                        .where().eq("date", date.toString(Constants.DATE_FORMAT)).prepare();
+                return watchDao.delete(preparedDelete);
             });
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -1,12 +1,9 @@
 package tsk.jgnk.watchdist.controller;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
@@ -14,7 +11,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
-import javafx.util.Callback;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -135,7 +131,7 @@ public class DistributionController implements Initializable {
                         excelRow.createCell(0).setCellValue(row.getHours());
                         i = 1;
                         for (Soldier soldier : row.getSoldiers()) {
-                            excelRow.createCell(i).setCellValue(soldier.getFullName());
+                            excelRow.createCell(i).setCellValue(soldier != null ? soldier.getFullName() : "");
                             i++;
                         }
                         rowNum++;
@@ -269,14 +265,11 @@ public class DistributionController implements Initializable {
         }
 
 
-        Comparator<Soldier> soldierComparator = new Comparator<Soldier>() {
-            @Override
-            public int compare(Soldier o1, Soldier o2) {
-                if (o1 == null && o2 == null) return 0;
-                if (o1 == null) return 1;
-                if (o2 == null) return -1;
-                return o1.getFullName().compareTo(o2.getFullName());
-            }
+        Comparator<Soldier> soldierComparator = (o1, o2) -> {
+            if (o1 == null && o2 == null) return 0;
+            if (o1 == null) return 1;
+            if (o2 == null) return -1;
+            return o1.getFullName().compareTo(o2.getFullName());
         };
 
         Set<Soldier> firstRowSoldiers = new TreeSet<>(soldierComparator);
@@ -285,12 +278,7 @@ public class DistributionController implements Initializable {
         //noinspection ConstantConditions
         List<Watch> previousDaysLastWatches = DbManager.findWatchesByDateAndHour(getCurrentDate().minusDays(1), 11);
         List<Soldier> previousDaysLastWatchesSoldiers
-                = Lists.transform(previousDaysLastWatches, new Function<Watch, Soldier>() {
-            @Override
-            public Soldier apply(Watch input) {
-                return input.getSoldier();
-            }
-        });
+                = Lists.transform(previousDaysLastWatches, Watch::getSoldier);
 
         firstRowSoldiers.retainAll(previousDaysLastWatchesSoldiers);
         if (!firstRowSoldiers.isEmpty()) {
@@ -361,9 +349,39 @@ public class DistributionController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         distributionTable.setPlaceholder(new Label(Messages.get("distribution.no.data.in.table")));
-        hoursColumn.setCellValueFactory(new PropertyValueFactory<DistributionRow, String>("hours"));
-        List<WatchPoint> allActiveWatchPoints = DbManager.findAllActiveWatchPoints();
-        List<WatchPointFX> watchPointFXes = Lists.transform(allActiveWatchPoints, Constants.WATCH_POINT_TO_FX);
+        hoursColumn.setCellValueFactory(new PropertyValueFactory<>("hours"));
+
+        refreshTableColumns();
+
+        initDateFields();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void refreshTableColumns() {
+        Iterator<TableColumn<DistributionRow, ?>> columnIterator = distributionTable.getColumns().iterator();
+        while (columnIterator.hasNext()) {
+            TableColumn<DistributionRow, ?> column = columnIterator.next();
+            if (column != hoursColumn) columnIterator.remove();
+        }
+
+        List<WatchPoint> watchPoints;
+        LocalDate currentDate = getCurrentDate();
+        List<Watch> watches = DbManager.findWatchesByDate(currentDate != null ? currentDate : LocalDate.now());
+        if (watches.isEmpty()) {
+            watchPoints = DbManager.findAllActiveWatchPoints();
+        } else {
+            watchPoints = Lists.transform(watches, input -> {
+                if (input == null) return null;
+                return input.getWatchPoint();
+            });
+
+            watchPoints.removeAll(Collections.<WatchPoint>singleton(null));
+            Set<WatchPoint> dupesRemoved = new TreeSet<>(Constants.WATCH_POINT_COMPARATOR);
+            dupesRemoved.addAll(watchPoints);
+            watchPoints = new ArrayList<>(dupesRemoved);
+        }
+
+        List<WatchPointFX> watchPointFXes = Lists.transform(watchPoints, Constants.WATCH_POINT_TO_FX);
 
         final ObservableList<Soldier> soldiers
                 = FXCollections.observableArrayList(DbManager.findAllActiveSoldiersOrderedByFullName());
@@ -378,66 +396,52 @@ public class DistributionController implements Initializable {
                 column.setMinWidth(90);
 
                 final int finalNum = num;
-                column.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<DistributionRow, Soldier>, ObservableValue<Soldier>>() {
-                    @Override
-                    public ObservableValue<Soldier> call(TableColumn.CellDataFeatures<DistributionRow, Soldier> distributionRowSoldierCellDataFeatures) {
-                        SimpleObjectProperty<Soldier>[] soldiersProperties
-                                = distributionRowSoldierCellDataFeatures.getValue().soldiersProperties();
-                        if (soldiersProperties.length == 0) return null;
-                        return soldiersProperties[finalNum];
-                    }
+                column.setCellValueFactory(distributionRowSoldierCellDataFeatures -> {
+                    SimpleObjectProperty<Soldier>[] soldiersProperties
+                            = distributionRowSoldierCellDataFeatures.getValue().soldiersProperties();
+                    if (soldiersProperties.length == 0) return null;
+                    return soldiersProperties[finalNum];
                 });
 
-                column.setCellFactory(new Callback<TableColumn<DistributionRow, Soldier>, TableCell<DistributionRow, Soldier>>() {
-                    @Override
-                    public TableCell<DistributionRow, Soldier> call(TableColumn<DistributionRow, Soldier> distributionRowSoldierTableColumn) {
-                        final ComboBoxTableCell<DistributionRow, Soldier> cell = new ComboBoxTableCell<>();
-                        cell.editingProperty().addListener(new ChangeListener<Boolean>() {
-                            @SuppressWarnings("unchecked")
-                            @Override
-                            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
-                                if (t1) {
-                                    TableRow<DistributionRow> tableRow = cell.getTableRow();
-                                    DistributionRow distributionRow = tableRow.getItem();
-                                    selectedSoldiersBeforeEdit = Arrays.copyOf(distributionRow.getSoldiers(), distributionRow.getSoldiers().length);
-                                }
+                column.setCellFactory(distributionRowSoldierTableColumn -> {
+                    final ComboBoxTableCell<DistributionRow, Soldier> cell = new ComboBoxTableCell<>();
+                    cell.editingProperty().addListener((observableValue, aBoolean, t1) -> {
+                        if (t1) {
+                            TableRow<DistributionRow> tableRow = cell.getTableRow();
+                            DistributionRow distributionRow = tableRow.getItem();
+                            selectedSoldiersBeforeEdit = Arrays.copyOf(distributionRow.getSoldiers(), distributionRow.getSoldiers().length);
+                        }
+                    });
+
+
+                    cell.itemProperty().addListener((observableValue, soldier, t1) -> {
+                        TableRow<DistributionRow> r = cell.getTableRow();
+                        DistributionRow row = r.getItem();
+                        if (row != null) {
+                            List<Soldier> rowSoldiers = Arrays.asList(row.getSoldiers());
+                            if (Collections.frequency(rowSoldiers, t1) > 1) {
+                                MonologFXButton ok = MonologFXButtonBuilder.create()
+                                        .label(Messages.get("undo"))
+                                        .defaultButton(true)
+                                        .type(MonologFXButton.Type.OK).build();
+
+                                MonologFX mono = MonologFXBuilder.create()
+                                        .modal(true)
+                                        .titleText(Messages.get("error"))
+                                        .message(Messages.get("distribution.soldier.already.has.watch.select.another"))
+                                        .type(MonologFX.Type.ERROR)
+                                        .button(ok)
+                                        .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
+                                        .build();
+                                mono.show();
+
+                                row.setSoldiers(selectedSoldiersBeforeEdit);
+                                cell.setItem(soldier);
                             }
-                        });
-
-
-                        cell.itemProperty().addListener(new ChangeListener<Soldier>() {
-                            @SuppressWarnings("unchecked")
-                            @Override
-                            public void changed(ObservableValue<? extends Soldier> observableValue, Soldier soldier, Soldier t1) {
-                                TableRow<DistributionRow> r = cell.getTableRow();
-                                DistributionRow row = r.getItem();
-                                if (row != null) {
-                                    List<Soldier> rowSoldiers = Arrays.asList(row.getSoldiers());
-                                    if (Collections.frequency(rowSoldiers, t1) > 1) {
-                                        MonologFXButton ok = MonologFXButtonBuilder.create()
-                                                .label(Messages.get("undo"))
-                                                .defaultButton(true)
-                                                .type(MonologFXButton.Type.OK).build();
-
-                                        MonologFX mono = MonologFXBuilder.create()
-                                                .modal(true)
-                                                .titleText(Messages.get("error"))
-                                                .message(Messages.get("distribution.soldier.already.has.watch.select.another"))
-                                                .type(MonologFX.Type.ERROR)
-                                                .button(ok)
-                                                .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
-                                                .build();
-                                        mono.show();
-
-                                        row.setSoldiers(selectedSoldiersBeforeEdit);
-                                        cell.setItem(soldier);
-                                    }
-                                }
-                            }
-                        });
-                        cell.getItems().addAll(soldiers);
-                        return cell;
-                    }
+                        }
+                    });
+                    cell.getItems().addAll(soldiers);
+                    return cell;
                 });
 
                 column.setId(String.valueOf(watchPointFX.idProperty().get() + "-" + i));
@@ -445,41 +449,30 @@ public class DistributionController implements Initializable {
                 num++;
             }
         }
-
-        initDateFelds();
     }
 
-    private void initDateFelds() {
+    private void initDateFields() {
         final List<Integer> years = new ArrayList<>();
         for (int i = 2015; i < 2050; i++) {
             years.add(i);
         }
 
-        year.valueProperty().addListener(new ChangeListener<Integer>() {
-            @Override
-            public void changed(ObservableValue<? extends Integer> observableValue, Integer ınteger, Integer t1) {
-                if (day.getValue() != null && month.getValue() != null) {
-                    refreshDay();
-                    refreshData();
-                }
+        year.valueProperty().addListener((observableValue, ınteger, t1) -> {
+            if (day.getValue() != null && month.getValue() != null) {
+                refreshDay();
+                refreshData();
             }
         });
-        month.valueProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                if (day.getValue() != null && year.getValue() != null) {
-                    refreshDay();
-                    refreshData();
-                }
+        month.valueProperty().addListener((observableValue, s, t1) -> {
+            if (day.getValue() != null && year.getValue() != null) {
+                refreshDay();
+                refreshData();
             }
         });
-        day.valueProperty().addListener(new ChangeListener<Integer>() {
-            @Override
-            public void changed(ObservableValue<? extends Integer> observableValue, Integer ınteger, Integer t1) {
-                if (month.getValue() != null && year.getValue() != null) {
-                    refreshDayName();
-                    refreshData();
-                }
+        day.valueProperty().addListener((observableValue, ınteger, t1) -> {
+            if (month.getValue() != null && year.getValue() != null) {
+                refreshDayName();
+                refreshData();
             }
         });
 
@@ -519,8 +512,20 @@ public class DistributionController implements Initializable {
     private void refreshData() {
         LocalDate date = getCurrentDate();
         if (date != null) {
+            refreshTableColumns();
             List<Watch> watches = DbManager.findWatchesByDate(date);
-            int soldierCount = WatchPointUtil.getTotalWatchPointSoldierCount();
+
+            List<WatchPoint> watchPoints
+                    = Lists.transform(watches, input -> input == null ? null : input.getWatchPoint());
+            watchPoints.removeAll(Collections.<WatchPoint>singleton(null));
+
+            TreeSet<WatchPoint> dupesRemovedSortedWatchPoints = new TreeSet<>(Constants.WATCH_POINT_COMPARATOR);
+            dupesRemovedSortedWatchPoints.addAll(watchPoints);
+
+            int soldierCount = 0;
+            for (WatchPoint point : dupesRemovedSortedWatchPoints) {
+                soldierCount += point.getRequiredSoldierCount();
+            }
             Soldier[][] soldiers = new Soldier[12][soldierCount];
             for (Watch watch : watches) {
                 for (TableColumn<DistributionRow, ?> column : distributionTable.getColumns()) {
@@ -539,8 +544,9 @@ public class DistributionController implements Initializable {
                             Integer.parseInt(watchPointId) == watch.getWatchPoint().getId() &&
                             Integer.parseInt(watchPointSlot) == watch.getWatchPointSlot()
                             ) {
-                        soldiers[watch.getHour()][distributionTable.getColumns().indexOf(column) - 1]
-                                = watch.getSoldier();
+                        int i = watch.getHour();
+                        int j = distributionTable.getColumns().indexOf(column) - 1;
+                        soldiers[i][j] = watch.getSoldier();
                     }
                 }
             }

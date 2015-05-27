@@ -1,7 +1,6 @@
 package tsk.jgnk.watchdist.controller;
 
 import com.google.common.base.Strings;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -31,12 +30,9 @@ public class AddNewSoldierController implements Initializable {
     }
 
     private void addEventHandlers() {
-        EventHandler<KeyEvent> eventHandler = new EventHandler<KeyEvent>() {
-            @Override
-            public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-                    saveSoldier();
-                }
+        EventHandler<KeyEvent> eventHandler = keyEvent -> {
+            if (keyEvent.getCode().equals(KeyCode.ENTER)) {
+                saveSoldier();
             }
         };
         fullName.setOnKeyPressed(eventHandler);
@@ -44,12 +40,7 @@ public class AddNewSoldierController implements Initializable {
     }
 
     private void addListenersToButtons() {
-        saveButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent actionEvent) {
-                saveSoldier();
-            }
-        });
+        saveButton.setOnAction(actionEvent -> saveSoldier());
     }
 
     private void saveSoldier() {

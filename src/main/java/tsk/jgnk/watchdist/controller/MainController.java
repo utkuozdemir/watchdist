@@ -1,10 +1,7 @@
 package tsk.jgnk.watchdist.controller;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
@@ -16,7 +13,6 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,6 +80,7 @@ public class MainController implements Initializable {
         for (int i = 0; i < 7; i++) {
             TableColumn<SoldierFX, String> empty = new TableColumn<>("");
             empty.setMinWidth(60);
+            empty.setMaxWidth(60);
             soldiersTable.getColumns().add(empty);
             for (int j = 0; j < 12; j++) {
                 String startTime = String.format("%02d", j * 2);
@@ -99,91 +96,58 @@ public class MainController implements Initializable {
                 Group g = new Group(columnNameBox);
                 column.setGraphic(g);
 
-                column.setCellFactory(new Callback<TableColumn<SoldierFX, Boolean>, TableCell<SoldierFX, Boolean>>() {
-                    @Override
-                    public TableCell<SoldierFX, Boolean> call(TableColumn<SoldierFX, Boolean> soldierBooleanTableColumn) {
-                        return new CheckBoxTableCell<>();
-                    }
-                });
+                column.setCellFactory(soldierBooleanTableColumn -> new CheckBoxTableCell<>());
                 column.setId(String.valueOf(j));
 
                 final int finalI = i;
                 final int finalJ = j;
                 column.setCellValueFactory(
-                        new Callback<TableColumn.CellDataFeatures<SoldierFX, Boolean>, ObservableValue<Boolean>>() {
-                            @Override
-                            public ObservableValue<Boolean> call(
-                                    TableColumn.CellDataFeatures<SoldierFX, Boolean> soldierBooleanCellDataFeatures) {
-                                SoldierFX soldierFX = soldierBooleanCellDataFeatures.getValue();
-                                return soldierFX.availabilitiesBooleansProperties()[finalI][finalJ];
-                            }
+                        soldierBooleanCellDataFeatures -> {
+                            SoldierFX soldierFX = soldierBooleanCellDataFeatures.getValue();
+                            return soldierFX.availabilitiesBooleansProperties()[finalI][finalJ];
                         });
                 soldiersTable.getColumns().add(column);
             }
         }
 
 
-        idColumn.setCellValueFactory(new PropertyValueFactory<SoldierFX, Integer>("id"));
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 
-        fullNameColumn.setCellFactory(new Callback<TableColumn<SoldierFX, String>, TableCell<SoldierFX, String>>() {
-            @Override
-            public TableCell<SoldierFX, String> call(TableColumn<SoldierFX, String> soldierStringTableColumn) {
-                return new TextFieldTableCell<>(Constants.STRING_STRING_CONVERTER);
-            }
-        });
-        fullNameColumn.setCellValueFactory(new PropertyValueFactory<SoldierFX, String>("fullName"));
+        fullNameColumn.setCellFactory(soldierStringTableColumn -> new TextFieldTableCell<>(Constants.STRING_STRING_CONVERTER));
+        fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
 
-        dutyColumn.setCellFactory(new Callback<TableColumn<SoldierFX, String>, TableCell<SoldierFX, String>>() {
-            @Override
-            public TableCell<SoldierFX, String> call(TableColumn<SoldierFX, String> soldierStringTableColumn) {
-                return new TextFieldTableCell<>(Constants.STRING_STRING_CONVERTER);
-            }
-        });
-        dutyColumn.setCellValueFactory(new PropertyValueFactory<SoldierFX, String>("duty"));
+        dutyColumn.setCellFactory(soldierStringTableColumn -> new TextFieldTableCell<>(Constants.STRING_STRING_CONVERTER));
+        dutyColumn.setCellValueFactory(new PropertyValueFactory<>("duty"));
 
-        availableColumn.setCellFactory(new Callback<TableColumn<SoldierFX, Boolean>, TableCell<SoldierFX, Boolean>>() {
-            @Override
-            public TableCell<SoldierFX, Boolean> call(TableColumn<SoldierFX, Boolean> p) {
-                CheckBoxTableCell<SoldierFX, Boolean> cell = new CheckBoxTableCell<>();
-                cell.setAlignment(Pos.CENTER);
-                return cell;
-            }
+        availableColumn.setCellFactory(p -> {
+            CheckBoxTableCell<SoldierFX, Boolean> cell = new CheckBoxTableCell<>();
+            cell.setAlignment(Pos.CENTER);
+            return cell;
         });
         availableColumn.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<SoldierFX, Boolean>, ObservableValue<Boolean>>() {
-                    @Override
-                    public ObservableValue<Boolean> call(
-                            TableColumn.CellDataFeatures<SoldierFX, Boolean> soldierBooleanCellDataFeatures) {
-                        return soldierBooleanCellDataFeatures.getValue().availableProperty();
-                    }
-                });
+                soldierBooleanCellDataFeatures -> soldierBooleanCellDataFeatures.getValue().availableProperty());
 
-        pointsColumn.setCellFactory(new Callback<TableColumn<SoldierFX, Double>, TableCell<SoldierFX, Double>>() {
+        pointsColumn.setCellFactory(soldierDoubleTableColumn -> new TextFieldTableCell<>(new StringConverter<Double>() {
             @Override
-            public TableCell<SoldierFX, Double> call(TableColumn<SoldierFX, Double> soldierDoubleTableColumn) {
-                return new TextFieldTableCell<>(new StringConverter<Double>() {
-                    @Override
-                    public String toString(Double aDouble) {
-                        return String.valueOf(aDouble);
-                    }
-
-                    @Override
-                    public Double fromString(String s) {
-                        double value = -1;
-                        try {
-                            value = Double.parseDouble(s);
-                        } catch (NumberFormatException e) {
-                            logger.debug(e.getMessage(), e);
-                            //logger.debug
-                            e.printStackTrace();
-                        }
-
-                        return value;
-                    }
-                });
+            public String toString(Double aDouble) {
+                return String.valueOf(aDouble);
             }
-        });
-        pointsColumn.setCellValueFactory(new PropertyValueFactory<SoldierFX, Double>("points"));
+
+            @Override
+            public Double fromString(String s) {
+                double value = -1;
+                try {
+                    value = Double.parseDouble(s);
+                } catch (NumberFormatException e) {
+                    logger.debug(e.getMessage(), e);
+                    //logger.debug
+                    e.printStackTrace();
+                }
+
+                return value;
+            }
+        }));
+        pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
     }
 
 
@@ -199,11 +163,8 @@ public class MainController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         language.setItems(FXCollections.observableArrayList(Arrays.asList(Language.values())));
         language.setValue(Language.forLocale(Messages.getLocale()));
-        language.valueProperty().addListener(new ChangeListener<Language>() {
-            @Override
-            public void changed(ObservableValue<? extends Language> observableValue, Language language, Language t1) {
-                WindowManager.switchLanguage(t1);
-            }
+        language.valueProperty().addListener((observableValue, language1, t1) -> {
+            WindowManager.switchLanguage(t1);
         });
         initializeTable();
         refreshTableData();
@@ -214,12 +175,7 @@ public class MainController implements Initializable {
         List<Soldier> soldiers = Lists.transform(selectedItems, Constants.FX_TO_SOLDIER);
 
         List<SoldierFX> filtered = Lists.newCopyOnWriteArrayList(
-                Iterables.filter(selectedItems, new Predicate<SoldierFX>() {
-                    @Override
-                    public boolean apply(SoldierFX soldier) {
-                        return soldier != null;
-                    }
-                }));
+                Iterables.filter(selectedItems, soldier -> soldier != null));
 
         if (!filtered.isEmpty()) {
             MonologFXButton yes = MonologFXButtonBuilder.create()

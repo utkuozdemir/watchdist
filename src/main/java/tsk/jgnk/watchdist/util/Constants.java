@@ -11,10 +11,18 @@ import tsk.jgnk.watchdist.fx.SoldierFX;
 import tsk.jgnk.watchdist.fx.WatchPointFX;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 public class Constants {
     public static final String DB_NAME = "nobet_veritabani.db";
     public static final String DATE_FORMAT = "dd.MM.yyyy";
+
+    public static final Comparator<WatchPoint> WATCH_POINT_COMPARATOR = new Comparator<WatchPoint>() {
+        @Override
+        public int compare(WatchPoint o1, WatchPoint o2) {
+            return o1.getId().compareTo(o2.getId());
+        }
+    };
 
     public static final StringConverter<String> STRING_STRING_CONVERTER = new StringConverter<String>() {
         @Override

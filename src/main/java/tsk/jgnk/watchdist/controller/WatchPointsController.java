@@ -1,6 +1,5 @@
 package tsk.jgnk.watchdist.controller;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import javafx.collections.FXCollections;
@@ -9,7 +8,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.thehecklers.monologfx.MonologFX;
 import org.thehecklers.monologfx.MonologFXBuilder;
@@ -47,17 +45,10 @@ public class WatchPointsController implements Initializable {
         watchPointsTable.setPlaceholder(new Label(Messages.get("watchpoints.no.watch.points")));
         watchPointsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        nameColumn.setCellFactory(new Callback<TableColumn<WatchPointFX, String>, TableCell<WatchPointFX, String>>() {
-            @Override
-            public TableCell<WatchPointFX, String> call(TableColumn<WatchPointFX, String> watchPointStringTableColumn) {
-                return new TextFieldTableCell<>(Constants.STRING_STRING_CONVERTER);
-            }
-        });
+        nameColumn.setCellFactory(watchPointStringTableColumn -> new TextFieldTableCell<>(Constants.STRING_STRING_CONVERTER));
 
-        requiredSoldierCountColumn.setCellFactory(new Callback<TableColumn<WatchPointFX, Integer>, TableCell<WatchPointFX, Integer>>() {
-            @Override
-            public TableCell<WatchPointFX, Integer> call(TableColumn<WatchPointFX, Integer> watchPointIntegerTableColumn) {
-                return new TextFieldTableCell<>(new StringConverter<Integer>() {
+        requiredSoldierCountColumn
+                .setCellFactory(watchPointIntegerTableColumn -> new TextFieldTableCell<>(new StringConverter<Integer>() {
                     @Override
                     public String toString(Integer integer) {
                         return Integer.toString(integer);
@@ -71,13 +62,11 @@ public class WatchPointsController implements Initializable {
                             return -1;
                         }
                     }
-                });
-            }
-        });
+                }));
 
-        idColumn.setCellValueFactory(new PropertyValueFactory<WatchPointFX, Integer>("id"));
-        nameColumn.setCellValueFactory(new PropertyValueFactory<WatchPointFX, String>("name"));
-        requiredSoldierCountColumn.setCellValueFactory(new PropertyValueFactory<WatchPointFX, Integer>("requiredSoldierCount"));
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        requiredSoldierCountColumn.setCellValueFactory(new PropertyValueFactory<>("requiredSoldierCount"));
 
         refreshTableData();
     }
@@ -85,12 +74,7 @@ public class WatchPointsController implements Initializable {
     public void removeSelectedWatchPoints() {
         ObservableList<WatchPointFX> selectedItems = watchPointsTable.getSelectionModel().getSelectedItems();
         List<WatchPointFX> filtered = Lists.newCopyOnWriteArrayList(
-                Iterables.filter(selectedItems, new Predicate<WatchPointFX>() {
-                    @Override
-                    public boolean apply(WatchPointFX input) {
-                        return input != null;
-                    }
-                }));
+                Iterables.filter(selectedItems, input -> input != null));
 
         if (!filtered.isEmpty()) {
             MonologFXButton yes = MonologFXButtonBuilder.create()

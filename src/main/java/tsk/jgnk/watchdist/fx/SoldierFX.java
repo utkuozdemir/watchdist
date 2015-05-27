@@ -1,11 +1,8 @@
 package tsk.jgnk.watchdist.fx;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Collections2;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import tsk.jgnk.watchdist.domain.Availability;
 import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
@@ -37,12 +34,7 @@ public class SoldierFX {
         this.points = new SimpleDoubleProperty(points);
         this.active = new SimpleBooleanProperty(active);
 
-        this.availabilities = Collections2.transform(availabilities, new Function<Availability, SimpleObjectProperty<Availability>>() {
-            @Override
-            public SimpleObjectProperty<Availability> apply(Availability input) {
-                return new SimpleObjectProperty<>(input);
-            }
-        });
+        this.availabilities = Collections2.transform(availabilities, SimpleObjectProperty::new);
 
         refreshAvailabilitiesBooleansFromAvailabilities();
 
@@ -78,55 +70,37 @@ public class SoldierFX {
     }
 
     private void addListeners() {
-        this.fullName.addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
-            }
+        this.fullName.addListener((observableValue, s, t1) -> {
+            DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
         });
 
-        this.duty.addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
-            }
+        this.duty.addListener((observableValue, s, t1) -> {
+            DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
         });
 
-        this.available.addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
-                DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
-            }
+        this.available.addListener((observableValue, aBoolean, t1) -> {
+            DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
         });
 
         for (SimpleObjectProperty<Availability> availability : availabilities) {
-            availability.addListener(new ChangeListener<Availability>() {
-                @Override
-                public void changed(ObservableValue<? extends Availability> observableValue, Availability availability, Availability t1) {
-                    DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
-                }
+            availability.addListener((observableValue, availability1, t1) -> {
+                DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
             });
         }
 
-        this.points.addListener(new ChangeListener<Number>() {
-            @Override
-            public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                if (t1.doubleValue() < 0) {
-                    SoldierFX.this.points.set(number.doubleValue());
-                }
-                DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
+        this.points.addListener((observableValue, number, t1) -> {
+            if (t1.doubleValue() < 0) {
+                SoldierFX.this.points.set(number.doubleValue());
             }
+            DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
         });
 
         for (int i = 0; i < 7; i++) {
             for (int j = 0; j < 12; j++) {
                 SimpleBooleanProperty property = availabilitiesBooleans[i][j];
-                property.addListener(new ChangeListener<Boolean>() {
-                    @Override
-                    public void changed(ObservableValue<? extends Boolean> observableValue, Boolean aBoolean, Boolean t1) {
-                        refreshAvailabilitiesFromAvailabilitiesBooleans();
-                        DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
-                    }
+                property.addListener((observableValue, aBoolean, t1) -> {
+                    refreshAvailabilitiesFromAvailabilitiesBooleans();
+                    DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
                 });
             }
         }
