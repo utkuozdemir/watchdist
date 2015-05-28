@@ -8,13 +8,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.thehecklers.monologfx.MonologFX;
@@ -28,13 +26,13 @@ import tsk.jgnk.watchdist.fx.WatchPointFX;
 import tsk.jgnk.watchdist.i18n.Messages;
 import tsk.jgnk.watchdist.util.*;
 
+import java.awt.*;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -96,53 +94,42 @@ public class DistributionController implements Initializable {
     public void exportToExcel() {
         LocalDate currentDate = getCurrentDate();
         if (currentDate != null) {
-            FileChooser fileChooser = new FileChooser();
+            List<Watch> watches = DbManager.findWatchesByDate(getCurrentDate());
+            if (watches.isEmpty()) {
+                MonologFXButton ok = MonologFXButtonBuilder.create()
+                        .label(Messages.get("ok"))
+                        .type(MonologFXButton.Type.YES)
+                        .defaultButton(true)
+                        .build();
+                MonologFX mono = MonologFXBuilder.create()
+                        .modal(true)
+                        .titleText(Messages.get("distribution.approve.before.export.title"))
+                        .message(Messages.get("distribution.approve.before.export.message"))
+                        .type(MonologFX.Type.INFO)
+                        .button(ok)
+                        .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
+                        .build();
+                mono.show();
+            } else {
+                FileChooser fileChooser = new FileChooser();
 
-            FileChooser.ExtensionFilter extFilter
-                    = new FileChooser.ExtensionFilter(Messages.get("distribution.excel.file") + " (*.xls)", "*.xls");
-            fileChooser.getExtensionFilters().add(extFilter);
-            fileChooser.setTitle(Messages.get("distribution.save.distribution.as.excel.file"));
-            String fileName = currentDate.toString(Constants.DATE_FORMAT) + "-" +
-                    Messages.get("distribution.excel.file.name.suffix");
-            fileChooser.setInitialFileName(fileName);
+                FileChooser.ExtensionFilter extFilter
+                        = new FileChooser.ExtensionFilter(Messages.get("distribution.excel.file") + " (*.xls)", "*.xls");
+                fileChooser.getExtensionFilters().add(extFilter);
+                fileChooser.setTitle(Messages.get("distribution.save.distribution.as.excel.file"));
+                String fileName = currentDate.toString(Constants.DATE_FORMAT) + "-" +
+                        Messages.get("distribution.excel.file.name.suffix");
+                fileChooser.setInitialFileName(fileName);
 
-            //Show save file dialog
-            File file = fileChooser.showSaveDialog(distributionTable.getScene().getWindow());
-            if (file != null) {
-                if (!file.getName().endsWith(".xls")) file = new File(file.getPath() + ".xls");
-
-                try {
-                    HSSFWorkbook workbook = new HSSFWorkbook();
-
-
-                    HSSFSheet sheet = workbook.createSheet(currentDate.toString(Constants.DATE_FORMAT));
-
-                    HSSFRow firstRow = sheet.createRow((short) 0);
-                    ObservableList<TableColumn<DistributionRow, ?>> columns = distributionTable.getColumns();
-                    int i = 0;
-                    for (TableColumn<DistributionRow, ?> column : columns) {
-                        firstRow.createCell(i).setCellValue(column.getText());
-                        i++;
+                File file = fileChooser.showSaveDialog(distributionTable.getScene().getWindow());
+                if (file != null) {
+                    try {
+                        if (!file.getName().endsWith(".xls")) file = new File(file.getPath() + ".xls");
+                        ExcelExporter.export(file, currentDate, watches);
+                        Desktop.getDesktop().open(file);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
                     }
-
-                    int rowNum = 1;
-                    for (DistributionRow row : distributionTable.getItems()) {
-                        HSSFRow excelRow = sheet.createRow(rowNum);
-                        excelRow.createCell(0).setCellValue(row.getHours());
-                        i = 1;
-                        for (Soldier soldier : row.getSoldiers()) {
-                            excelRow.createCell(i).setCellValue(soldier != null ? soldier.getFullName() : "");
-                            i++;
-                        }
-                        rowNum++;
-                    }
-
-                    FileOutputStream outputStream = new FileOutputStream(file);
-                    workbook.write(outputStream);
-                    outputStream.close();
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
                 }
             }
         }
@@ -245,6 +232,23 @@ public class DistributionController implements Initializable {
         setCurrentDate(LocalDate.now());
     }
 
+    @SuppressWarnings("unused")
+    public void jumpToPreviousDay() {
+        LocalDate currentDate = getCurrentDate();
+        if (currentDate != null) {
+            setCurrentDate(currentDate.minusDays(1));
+        }
+
+    }
+
+    @SuppressWarnings("unused")
+    public void jumpToNextDay() {
+        LocalDate currentDate = getCurrentDate();
+        if (currentDate != null) {
+            setCurrentDate(currentDate.plusDays(1));
+        }
+    }
+
     private String buildConfirmMessage() {
         boolean perfect = true;
 
@@ -263,7 +267,6 @@ public class DistributionController implements Initializable {
             }
             if (!perfect) break;
         }
-
 
         Comparator<Soldier> soldierComparator = (o1, o2) -> {
             if (o1 == null && o2 == null) return 0;

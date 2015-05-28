@@ -121,7 +121,7 @@ public class WindowManager {
             AddNewSoldierController controller = new AddNewSoldierController(mainController);
             fxmlLoader.setController(controller);
 
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
@@ -135,18 +135,32 @@ public class WindowManager {
         }
     }
 
-    public static void showNewDbCreatedInfo(String dbPath) {
-        MonologFXButton ok = MonologFXButtonBuilder.create()
+    public static void showInitializationInfo(String dbPath, String templatePath) {
+        if (dbPath == null && templatePath == null) return;
+
+        StringBuilder message = new StringBuilder();
+        if (dbPath != null) {
+            message.append(Messages.get("new.db.initialized.message", Constants.DB_NAME, dbPath));
+        }
+
+        message.append(System.lineSeparator());
+        message.append(System.lineSeparator());
+
+        if (templatePath != null) {
+            message.append(Messages.get("new.template.initialized.message", Constants.TEMPLATE_NAME, templatePath));
+        }
+
+        MonologFXButton continueButton = MonologFXButtonBuilder.create()
                 .label(Messages.get("app.continue"))
                 .type(MonologFXButton.Type.YES)
                 .defaultButton(true)
                 .build();
         MonologFX mono = MonologFXBuilder.create()
                 .modal(true)
-                .titleText(Messages.get("new.db.initialized"))
-                .message(Messages.get("new.db.initialized.message", Constants.DB_NAME, dbPath))
+                .titleText(Messages.get("new.initializations"))
+                .message(message.toString().trim())
                 .type(MonologFX.Type.INFO)
-                .button(ok)
+                .button(continueButton)
                 .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
                 .build();
         mono.show();

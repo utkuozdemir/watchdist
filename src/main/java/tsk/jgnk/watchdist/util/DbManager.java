@@ -5,7 +5,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedDelete;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -16,42 +15,23 @@ import tsk.jgnk.watchdist.domain.Soldier;
 import tsk.jgnk.watchdist.domain.Watch;
 import tsk.jgnk.watchdist.domain.WatchPoint;
 
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DbManager {
-
-    private static final TransactionManager transactionManager;
+    private static TransactionManager transactionManager;
 
     private static Dao<Availability, Integer> availabilityDao;
     private static Dao<Soldier, Integer> soldierDao;
     private static Dao<Watch, Integer> watchDao;
     private static Dao<WatchPoint, Integer> watchPointDao;
 
-    static {
+
+    public static void initialize(ConnectionSource connectionSource) {
         try {
-            Path filePath = Paths.get(DbManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            Path dbDirectory = filePath.getParent().getParent();
-            String dbUrl = dbDirectory.toString() + File.separator + Constants.DB_NAME;
-
-            URL resource = DbManager.class.getClassLoader().getResource("clean_db.db");
-            checkNotNull(resource);
-            Path path = Paths.get(dbUrl);
-            if (!Files.exists(path)) {
-                Files.copy(Paths.get(resource.toURI()), path);
-                WindowManager.showNewDbCreatedInfo(dbDirectory.toString());
-            }
-
-            ConnectionSource connectionSource = new JdbcConnectionSource("jdbc:sqlite:" + dbUrl);
-            transactionManager = new TransactionManager(connectionSource);
-
+            DbManager.transactionManager = new TransactionManager(connectionSource);
             availabilityDao = DaoManager.createDao(connectionSource, Availability.class);
             soldierDao = DaoManager.createDao(connectionSource, Soldier.class);
             watchDao = DaoManager.createDao(connectionSource, Watch.class);
@@ -60,7 +40,6 @@ public class DbManager {
             throw new RuntimeException(e);
         }
     }
-
 
     public static List<Soldier> findAllActiveSoldiersOrderedByFullName() {
         try {
