@@ -22,7 +22,7 @@ public class DistributionEngine {
 
         List<Soldier> soldiers = DbManager.findAllActiveSoldiersOrderedByPointsAsc();
 
-        int pointCount = WatchPointUtil.getTotalWatchPointSoldierCount();
+        int pointCount = WatchPointUtil.getTotalWatchPointSoldierCount(DbManager.findAllActiveWatchPoints());
 
         Soldier[][] distribution = new Soldier[12][pointCount];
 

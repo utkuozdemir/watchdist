@@ -28,13 +28,7 @@ public class ExcelExporter {
         checkNotNull(date);
         checkNotNull(watches);
 
-        Collection<WatchPoint> points
-                = Collections2.transform(watches, input -> input != null ? input.getWatchPoint() : null);
-
-        Set<WatchPoint> watchPoints = new TreeSet<>(Constants.WATCH_POINT_COMPARATOR);
-        watchPoints.addAll(points);
-        watchPoints.remove(null);
-
+        Set<WatchPoint> watchPoints = extractWatchPoints(watches);
         try {
             Workbook workbook = getWorkbookTemplate();
             Sheet sheet = workbook.getSheetAt(0);
@@ -58,12 +52,28 @@ public class ExcelExporter {
 
             CellStyle tableCellStyle = sheet.getRow(6).getCell(1).getCellStyle();
 
+
+            int totalWatchPointSoldierCount = WatchPointUtil.getTotalWatchPointSoldierCount(watchPoints);
+            int extraPageCount = (totalWatchPointSoldierCount / 5);
+
+            for (int i = 0; i < extraPageCount; i++) {
+                workbook.cloneSheet(0);
+            }
+
             int pointCount = 0;
             int column = 1;
+            int currentSheetNum = -1;
             List<WatchPoint> watchPointList = new ArrayList<>();
             for (WatchPoint point : watchPoints) {
                 for (int i = 0; i < point.getRequiredSoldierCount(); i++) {
                     pointCount++;
+
+                    if ((pointCount - 1) % 5 == 0) {
+                        currentSheetNum++;
+                        column = 1;
+                    }
+                    sheet = workbook.getSheetAt(currentSheetNum);
+
                     sheet.setColumnWidth(column, watchPointTitleColumnWidth);
                     sheet.setColumnWidth(column + 1, signatureTitleWidth);
 
@@ -88,6 +98,9 @@ public class ExcelExporter {
                 WatchPoint watchPoint = watch.getWatchPoint();
                 int index = nthIndexOf(watchPointList, watchPoint, watch.getWatchPointSlot() + 1);
 
+                sheet = workbook.getSheetAt(index / 5);
+                index = index % 5;
+
                 int rowNum = 6 + watch.getHour();
                 int colNum = 1 + (2 * index);
 
@@ -107,8 +120,9 @@ public class ExcelExporter {
                 }
             }
 
-            if (pointCount < 5) {
-                for (int i = pointCount; i < 5; i++) {
+            if (pointCount % 5 < 5) {
+                sheet = workbook.getSheetAt(pointCount / 5);
+                for (int i = pointCount % 5; i < 5; i++) {
                     int emptyColNum = (i * 2) + 1;
 
                     Row titleRow = sheet.getRow(5);
@@ -131,16 +145,14 @@ public class ExcelExporter {
         }
     }
 
-    private static <T> int nthIndexOf(List<T> list, T object, int n) {
-        checkArgument(n > 0, "n must be at least 1!");
-        int i = 0;
-        int index = 0;
-        for (T t : list) {
-            if (Objects.equals(object, t)) i++;
-            if (i == n) return index;
-            index++;
-        }
-        return -1;
+    private static Set<WatchPoint> extractWatchPoints(Collection<Watch> watches) {
+        Collection<WatchPoint> points
+                = Collections2.transform(watches, input -> input != null ? input.getWatchPoint() : null);
+
+        Set<WatchPoint> watchPoints = new TreeSet<>(Constants.WATCH_POINT_COMPARATOR);
+        watchPoints.addAll(points);
+        watchPoints.remove(null);
+        return watchPoints;
     }
 
     private static Workbook getWorkbookTemplate() throws IOException {
@@ -159,5 +171,17 @@ public class ExcelExporter {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static <T> int nthIndexOf(List<T> list, T object, int n) {
+        checkArgument(n > 0, "n must be at least 1!");
+        int i = 0;
+        int index = 0;
+        for (T t : list) {
+            if (Objects.equals(object, t)) i++;
+            if (i == n) return index;
+            index++;
+        }
+        return -1;
     }
 }
