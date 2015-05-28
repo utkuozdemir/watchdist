@@ -31,7 +31,7 @@ public class WindowManager {
             checkNotNull(resource);
             FXMLLoader fxmlLoader = new FXMLLoader(resource);
             fxmlLoader.setResources(Messages.getBundle());
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
 
             Scene scene = new Scene(root);
 
@@ -57,7 +57,7 @@ public class WindowManager {
             checkNotNull(resource);
 
             FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
@@ -76,7 +76,7 @@ public class WindowManager {
             checkNotNull(resource);
             FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
             fxmlLoader.setController(new DistributionController(mainController));
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
@@ -98,7 +98,7 @@ public class WindowManager {
             AddNewWatchPointController addNewWatchPointController
                     = new AddNewWatchPointController(watchPointsController);
             fxmlLoader.setController(addNewWatchPointController);
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
             Scene scene = new Scene(root);
             Stage stage = new Stage();
             stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));

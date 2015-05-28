@@ -19,6 +19,7 @@ import org.thehecklers.monologfx.MonologFX;
 import org.thehecklers.monologfx.MonologFXBuilder;
 import org.thehecklers.monologfx.MonologFXButton;
 import org.thehecklers.monologfx.MonologFXButtonBuilder;
+import tsk.jgnk.watchdist.domain.NullSoldier;
 import tsk.jgnk.watchdist.domain.Soldier;
 import tsk.jgnk.watchdist.domain.Watch;
 import tsk.jgnk.watchdist.domain.WatchPoint;
@@ -166,7 +167,7 @@ public class DistributionController implements Initializable {
                         WatchPoint watchPoint = columnWatchPointMap.get(columns.get(j + 1));
                         Soldier soldier = soldiers[j];
 
-                        if (soldier != null) {
+                        if (soldier != null && !(soldier instanceof NullSoldier)) {
                             Watch watch = new Watch(soldier, watchPoint, Collections.frequency(used, watchPoint),
                                     currentDate.toString(Constants.DATE_FORMAT), i, WatchValue.of(i));
                             watchesToBeSaved.add(watch);
@@ -418,31 +419,35 @@ public class DistributionController implements Initializable {
 
 
                     cell.itemProperty().addListener((observableValue, soldier, t1) -> {
-                        TableRow<DistributionRow> r = cell.getTableRow();
-                        DistributionRow row = r.getItem();
-                        if (row != null) {
-                            List<Soldier> rowSoldiers = Arrays.asList(row.getSoldiers());
-                            if (Collections.frequency(rowSoldiers, t1) > 1) {
-                                MonologFXButton ok = MonologFXButtonBuilder.create()
-                                        .label(Messages.get("undo"))
-                                        .defaultButton(true)
-                                        .type(MonologFXButton.Type.OK).build();
+                        if (t1 instanceof NullSoldier) cell.setItem(null);
+                        if (t1 != null) {
+                            TableRow<DistributionRow> r = cell.getTableRow();
+                            DistributionRow row = r.getItem();
+                            if (row != null) {
+                                List<Soldier> rowSoldiers = Arrays.asList(row.getSoldiers());
+                                if (Collections.frequency(rowSoldiers, t1) > 1) {
+                                    MonologFXButton ok = MonologFXButtonBuilder.create()
+                                            .label(Messages.get("undo"))
+                                            .defaultButton(true)
+                                            .type(MonologFXButton.Type.OK).build();
 
-                                MonologFX mono = MonologFXBuilder.create()
-                                        .modal(true)
-                                        .titleText(Messages.get("error"))
-                                        .message(Messages.get("distribution.soldier.already.has.watch.select.another"))
-                                        .type(MonologFX.Type.ERROR)
-                                        .button(ok)
-                                        .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
-                                        .build();
-                                mono.show();
+                                    MonologFX mono = MonologFXBuilder.create()
+                                            .modal(true)
+                                            .titleText(Messages.get("error"))
+                                            .message(Messages.get("distribution.soldier.already.has.watch.select.another"))
+                                            .type(MonologFX.Type.ERROR)
+                                            .button(ok)
+                                            .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
+                                            .build();
+                                    mono.show();
 
-                                row.setSoldiers(selectedSoldiersBeforeEdit);
-                                cell.setItem(soldier);
+                                    row.setSoldiers(selectedSoldiersBeforeEdit);
+                                    cell.setItem(soldier);
+                                }
                             }
                         }
                     });
+                    cell.getItems().add(new NullSoldier());
                     cell.getItems().addAll(soldiers);
                     return cell;
                 });
