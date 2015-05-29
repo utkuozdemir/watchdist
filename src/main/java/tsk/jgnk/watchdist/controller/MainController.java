@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -38,20 +39,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 
+@SuppressWarnings("unused")
 public class MainController implements Initializable {
-    public TableView<SoldierFX> soldiersTable;
-    public TableColumn<SoldierFX, Integer> idColumn;
-    public TableColumn<SoldierFX, String> fullNameColumn;
-    public TableColumn<SoldierFX, String> dutyColumn;
-    public TableColumn<SoldierFX, Boolean> availableColumn;
-    public TableColumn<SoldierFX, Double> pointsColumn;
-    public TableColumn<SoldierFX, Boolean> sergeantColumn;
+    @FXML
+    private TableView<SoldierFX> soldiersTable;
+    @FXML
+    private TableColumn<SoldierFX, Integer> idColumn;
+    @FXML
+    private TableColumn<SoldierFX, String> fullNameColumn;
+    @FXML
+    private TableColumn<SoldierFX, String> dutyColumn;
+    @FXML
+    private TableColumn<SoldierFX, Boolean> availableColumn;
+    @FXML
+    private TableColumn<SoldierFX, Double> pointsColumn;
+    @FXML
+    private TableColumn<SoldierFX, Boolean> sergeantColumn;
 
-    public Button addNewSoldierButton;
-    public Button deleteSoldiersButton;
-    public Button editWatchPointsButton;
-    public Button watchDistributionScreenButton;
-    public ComboBox<Language> language;
+    @FXML
+    private Button addNewSoldierButton;
+    @FXML
+    private Button deleteSoldiersButton;
+    @FXML
+    private Button editWatchPointsButton;
+    @FXML
+    private Button watchDistributionScreenButton;
+    @FXML
+    private ComboBox<Language> language;
 
     public void refreshTableData() {
         List<Soldier> allActiveSoldiers = DbManager.findAllActiveSoldiers();

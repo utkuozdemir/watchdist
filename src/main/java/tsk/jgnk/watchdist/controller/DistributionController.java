@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
@@ -37,13 +38,22 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@SuppressWarnings("unused")
 public class DistributionController implements Initializable {
-    public TableView<DistributionRow> distributionTable;
-    public TableColumn<DistributionRow, String> hoursColumn;
-    public ComboBox<Integer> day;
-    public ComboBox<String> month;
-    public ComboBox<Integer> year;
-    public Label dayName;
+    @FXML
+    private TableView<DistributionRow> distributionTable;
+    @FXML
+    private TableColumn<DistributionRow, String> hoursColumn;
+    @FXML
+    private ComboBox<Integer> day;
+    @FXML
+    private ComboBox<String> month;
+    @FXML
+    private ComboBox<Integer> year;
+    @FXML
+    private Label dayName;
+
+
     private MainController mainController;
     private Soldier[] selectedSoldiersBeforeEdit;
 

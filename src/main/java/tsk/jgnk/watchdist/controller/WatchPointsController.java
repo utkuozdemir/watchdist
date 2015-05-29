@@ -4,6 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -24,14 +25,21 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
+@SuppressWarnings("unused")
 public class WatchPointsController implements Initializable {
-    public TableView<WatchPointFX> watchPointsTable;
-    public TableColumn<WatchPointFX, Integer> idColumn;
-    public TableColumn<WatchPointFX, String> nameColumn;
-    public TableColumn<WatchPointFX, Integer> requiredSoldierCountColumn;
+    @FXML
+    private TableView<WatchPointFX> watchPointsTable;
+    @FXML
+    private TableColumn<WatchPointFX, Integer> idColumn;
+    @FXML
+    private TableColumn<WatchPointFX, String> nameColumn;
+    @FXML
+    private TableColumn<WatchPointFX, Integer> requiredSoldierCountColumn;
 
-    public Button addWatchPointButton;
-    public Button removeSelectedWatchPointsButton;
+    @FXML
+    private Button addWatchPointButton;
+    @FXML
+    private Button removeSelectedWatchPointsButton;
 
     public void addWatchPoint() {
         showAddNewWatchPointWindow();

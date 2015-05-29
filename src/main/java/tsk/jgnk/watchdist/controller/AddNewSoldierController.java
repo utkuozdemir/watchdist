@@ -2,6 +2,7 @@ package tsk.jgnk.watchdist.controller;
 
 import com.google.common.base.Strings;
 import javafx.event.EventHandler;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -17,13 +18,21 @@ import tsk.jgnk.watchdist.util.DbManager;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+@SuppressWarnings("unused")
 public class AddNewSoldierController implements Initializable {
-    public TextField fullName;
-    public TextField duty;
-    public Button saveButton;
-    public CheckBox available;
-    public CheckBox sergeant;
-    public Label errorLabel;
+    @FXML
+    private TextField fullName;
+    @FXML
+    private TextField duty;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private CheckBox available;
+    @FXML
+    private CheckBox sergeant;
+    @FXML
+    private Label errorLabel;
+
     private MainController mainController;
 
     public AddNewSoldierController(MainController mainController) {

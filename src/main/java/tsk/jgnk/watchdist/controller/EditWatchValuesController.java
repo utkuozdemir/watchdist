@@ -3,6 +3,7 @@ package tsk.jgnk.watchdist.controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -20,11 +21,16 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+@SuppressWarnings("unused")
 public class EditWatchValuesController implements Initializable {
-    public TableView<WatchValueFX> valuesTable;
-    public TableColumn<WatchValueFX, String> hoursColumn;
-    public TableColumn<WatchValueFX, Double> valueColumn;
-    public TextField sergeantDailyPoints;
+    @FXML
+    private TableView<WatchValueFX> valuesTable;
+    @FXML
+    private TableColumn<WatchValueFX, String> hoursColumn;
+    @FXML
+    private TableColumn<WatchValueFX, Double> valueColumn;
+    @FXML
+    private TextField sergeantDailyPoints;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
