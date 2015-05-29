@@ -140,6 +140,16 @@ public class DistributionController implements Initializable {
     public void approveDistribution() {
         LocalDate currentDate = getCurrentDate();
         if (currentDate != null) {
+            for (DistributionRow row : distributionTable.getItems()) {
+                Soldier[] soldiers = Arrays.copyOf(row.getSoldiers(), row.getSoldiers().length);
+                for (int i = 0; i < row.getSoldiers().length; i++) {
+                    if (row.getSoldiers()[i] instanceof NullSoldier) {
+                        soldiers[i] = null;
+                    }
+                }
+                row.setSoldiers(soldiers);
+            }
+
             MonologFXButton.Type result = showApproveConfirmMessage();
             if (result == MonologFXButton.Type.YES) {
                 Map<TableColumn<DistributionRow, ?>, WatchPoint> columnWatchPointMap = new HashMap<>();
@@ -169,7 +179,7 @@ public class DistributionController implements Initializable {
 
                         if (soldier != null && !(soldier instanceof NullSoldier)) {
                             Watch watch = new Watch(soldier, watchPoint, Collections.frequency(used, watchPoint),
-                                    currentDate.toString(Constants.DATE_FORMAT), i, WatchValue.of(i));
+                                    currentDate.toString(Constants.DATE_FORMAT), i, WatchValues.get(i));
                             watchesToBeSaved.add(watch);
                         }
                         used.add(watchPoint);

@@ -21,7 +21,6 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -175,7 +174,7 @@ public class MonologFX {
 
     private void initDialog(Type t) {
         stage = new Stage();
-        stage.initStyle(StageStyle.UTILITY);
+//        stage.initStyle(StageStyle.UTILITY);
 
         setType(t);
         stage.initModality(Modality.APPLICATION_MODAL);

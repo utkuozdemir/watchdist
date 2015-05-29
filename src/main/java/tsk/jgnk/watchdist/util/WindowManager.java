@@ -89,6 +89,24 @@ public class WindowManager {
         }
     }
 
+    public static void showEditWatchValuesWindow() {
+        try {
+            URL resource = App.class.getClassLoader().getResource("view/EditWatchValues.fxml");
+            checkNotNull(resource);
+            FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+            Parent root = fxmlLoader.load();
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(scene);
+            stage.setTitle(Messages.get("edit.watch.values"));
+            stage.show();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void showAddNewWatchPointWindow(WatchPointsController watchPointsController) {
         try {
             URL resource = App.class.getClassLoader().getResource("view/AddNewWatchPoint.fxml");

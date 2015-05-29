@@ -22,6 +22,7 @@ public class AddNewSoldierController implements Initializable {
     public TextField duty;
     public Button saveButton;
     public CheckBox available;
+    public CheckBox sergeant;
     public Label errorLabel;
     private MainController mainController;
 
@@ -37,17 +38,15 @@ public class AddNewSoldierController implements Initializable {
         };
         fullName.setOnKeyPressed(eventHandler);
         duty.setOnKeyPressed(eventHandler);
+        sergeant.setOnKeyPressed(eventHandler);
     }
 
-    private void addListenersToButtons() {
-        saveButton.setOnAction(actionEvent -> saveSoldier());
-    }
-
-    private void saveSoldier() {
+    public void saveSoldier() {
         try {
             validateFields();
 
-            Soldier soldier = new Soldier(fullName.getText(), duty.getText(), available.isSelected());
+            Soldier soldier
+                    = new Soldier(fullName.getText(), duty.getText(), available.isSelected(), sergeant.isSelected());
             DbManager.createSoldier(soldier);
 
             Stage stage = (Stage) saveButton.getScene().getWindow();
@@ -68,6 +67,12 @@ public class AddNewSoldierController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         addEventHandlers();
-        addListenersToButtons();
+
+        sergeant.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                available.selectedProperty().setValue(false);
+            }
+            available.setDisable(newValue);
+        });
     }
 }

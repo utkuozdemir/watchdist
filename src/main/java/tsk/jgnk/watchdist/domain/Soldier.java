@@ -30,16 +30,21 @@ public class Soldier {
     @DatabaseField(columnName = "active")
     private boolean active = true;
 
+    @DatabaseField(columnName = "sergeant")
+    private boolean sergeant;
+
+
     @ForeignCollectionField(eager = true)
     private Collection<Availability> availabilities;
 
     Soldier() {
     }
 
-    public Soldier(String fullName, String duty, boolean available) {
+    public Soldier(String fullName, String duty, boolean available, boolean sergeant) {
         this.fullName = fullName;
         this.duty = duty;
         this.available = available;
+        this.sergeant = sergeant;
 
         this.availabilities = new ArrayList<>();
         for (int i = 0; i < 7; i++) {
@@ -51,13 +56,14 @@ public class Soldier {
     }
 
     public Soldier(Integer id, String fullName, String duty, boolean available,
-                   double points, boolean active, Collection<Availability> availabilities) {
+                   double points, boolean active, boolean sergeant, Collection<Availability> availabilities) {
         this.id = id;
         this.fullName = fullName;
         this.duty = duty;
         this.available = available;
         this.points = points;
         this.active = active;
+        this.sergeant = sergeant;
         this.availabilities = availabilities;
     }
 
@@ -107,6 +113,14 @@ public class Soldier {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isSergeant() {
+        return sergeant;
+    }
+
+    public void setSergeant(boolean sergeant) {
+        this.sergeant = sergeant;
     }
 
     public Collection<Availability> getAvailabilities() {

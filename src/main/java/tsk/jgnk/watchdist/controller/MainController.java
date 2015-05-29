@@ -8,14 +8,13 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.control.Button;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
-import javafx.util.StringConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.thehecklers.monologfx.MonologFX;
 import org.thehecklers.monologfx.MonologFXBuilder;
 import org.thehecklers.monologfx.MonologFXButton;
@@ -26,9 +25,13 @@ import tsk.jgnk.watchdist.i18n.Language;
 import tsk.jgnk.watchdist.i18n.Messages;
 import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
+import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
 
+import java.awt.*;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,15 +39,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
-    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
-
-
     public TableView<SoldierFX> soldiersTable;
     public TableColumn<SoldierFX, Integer> idColumn;
     public TableColumn<SoldierFX, String> fullNameColumn;
     public TableColumn<SoldierFX, String> dutyColumn;
     public TableColumn<SoldierFX, Boolean> availableColumn;
     public TableColumn<SoldierFX, Double> pointsColumn;
+    public TableColumn<SoldierFX, Boolean> sergeantColumn;
 
     public Button addNewSoldierButton;
     public Button deleteSoldiersButton;
@@ -127,26 +128,15 @@ public class MainController implements Initializable {
         availableColumn.setCellValueFactory(
                 soldierBooleanCellDataFeatures -> soldierBooleanCellDataFeatures.getValue().availableProperty());
 
-        pointsColumn.setCellFactory(soldierDoubleTableColumn -> new TextFieldTableCell<>(new StringConverter<Double>() {
-            @Override
-            public String toString(Double aDouble) {
-                return String.valueOf(aDouble);
-            }
+        sergeantColumn.setCellFactory(p -> {
+            CheckBoxTableCell<SoldierFX, Boolean> cell = new CheckBoxTableCell<>();
+            cell.setAlignment(Pos.CENTER);
+            return cell;
+        });
 
-            @Override
-            public Double fromString(String s) {
-                double value = -1;
-                try {
-                    value = Double.parseDouble(s);
-                } catch (NumberFormatException e) {
-                    logger.debug(e.getMessage(), e);
-                    //logger.debug
-                    e.printStackTrace();
-                }
+        sergeantColumn.setCellValueFactory(s -> s.getValue().sergeantProperty());
 
-                return value;
-            }
-        }));
+        pointsColumn.setCellFactory(soldierDoubleTableColumn -> new TextFieldTableCell<>(Constants.DOUBLE_STRING_CONVERTER));
         pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
     }
 
@@ -212,4 +202,16 @@ public class MainController implements Initializable {
         showAddNewSoldierWindow();
     }
 
+    public void editExcelTemplate() {
+        try {
+            Path excelTemplate = FileManager.getExcelTemplate();
+            Desktop.getDesktop().open(excelTemplate.toFile());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void editWatchValues() {
+        WindowManager.showEditWatchValuesWindow();
+    }
 }

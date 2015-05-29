@@ -14,11 +14,10 @@ import org.thehecklers.monologfx.MonologFXBuilder;
 import org.thehecklers.monologfx.MonologFXButton;
 import org.thehecklers.monologfx.MonologFXButtonBuilder;
 import tsk.jgnk.watchdist.i18n.Messages;
-import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
+import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,27 +55,24 @@ public class App extends Application {
             Path dbDirectory = dbFilePath.getParent();
             logger.info("Using DB Directory: " + dbDirectory.toString());
 
-            String dbUrl = dbDirectory.toString() + File.separator + Constants.DB_NAME;
-
             InputStream dbInputStream = DbManager.class.getClassLoader().getResourceAsStream("clean_db.db");
 //            URL dbResource = (URL) resourceAsStream;
             checkNotNull(dbInputStream);
-            Path dbPath = Paths.get(dbUrl);
+            Path dbPath = FileManager.getDatabaseTemplate();
             if (!Files.exists(dbPath)) {
                 Files.copy(dbInputStream, dbPath);
                 newDbCreated = true;
             }
 
-            ConnectionSource connectionSource = new JdbcConnectionSource("jdbc:sqlite:" + dbUrl);
+            ConnectionSource connectionSource = new JdbcConnectionSource("jdbc:sqlite:" + dbPath.toString());
             DbManager.initialize(connectionSource);
 
             Path templateFilePath = Paths.get(App.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             Path templateDirectory = templateFilePath.getParent();
-            String templateUrl = templateDirectory.toString() + File.separator + Constants.TEMPLATE_NAME;
 
             InputStream templateInputStream = DbManager.class.getClassLoader().getResourceAsStream("template.xls");
             checkNotNull(templateInputStream);
-            Path templatePath = Paths.get(templateUrl);
+            Path templatePath = FileManager.getExcelTemplate();
             if (!Files.exists(templatePath)) {
                 Files.copy(templateInputStream, templatePath);
                 newTemplateCreated = true;

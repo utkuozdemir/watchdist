@@ -4,8 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity"
-            prefHeight="218.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/null">
+            minWidth="-Infinity" prefHeight="218.0" prefWidth="250.0" xmlns="http://javafx.com/javafx/null">
     <TextField fx:id="fullName" layoutX="14.0" layoutY="43.0" prefHeight="23.0" prefWidth="216.0"
                promptText="%full.name" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0"
                AnchorPane.topAnchor="43.0"/>
@@ -15,8 +14,8 @@
               AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="117.0"/>
     <Label layoutX="14.0" layoutY="14.0" text="%addnewsoldier.add.new.soldier" AnchorPane.leftAnchor="14.0"
            AnchorPane.topAnchor="14.0"/>
-    <Button fx:id="saveButton" layoutX="117.0" layoutY="155.0" mnemonicParsing="false" prefHeight="23.0"
-            prefWidth="113.0" text="%addnewsoldier.save.soldier" AnchorPane.bottomAnchor="20.0"
+    <Button fx:id="saveButton" layoutX="117.0" layoutY="155.0" mnemonicParsing="false" onAction="#saveSoldier"
+            prefHeight="23.0" prefWidth="113.0" text="%addnewsoldier.save.soldier" AnchorPane.bottomAnchor="20.0"
             AnchorPane.rightAnchor="20.0"/>
     <Label fx:id="errorLabel" layoutX="14.0" layoutY="147.0" text="%addnewsoldier.fill.missing.fields" textFill="RED"
            visible="false" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="147.0">
@@ -24,4 +23,5 @@
             <Font name="System Bold" size="11.0"/>
         </font>
     </Label>
+    <CheckBox fx:id="sergeant" layoutX="14.0" layoutY="139.0" mnemonicParsing="false" text="%sergeant"/>
 </AnchorPane>

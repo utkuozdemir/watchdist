@@ -10,14 +10,12 @@ import com.j256.ormlite.stmt.PreparedDelete;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.support.ConnectionSource;
 import org.joda.time.LocalDate;
-import tsk.jgnk.watchdist.domain.Availability;
-import tsk.jgnk.watchdist.domain.Soldier;
-import tsk.jgnk.watchdist.domain.Watch;
-import tsk.jgnk.watchdist.domain.WatchPoint;
+import tsk.jgnk.watchdist.domain.*;
 
 import java.sql.SQLException;
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DbManager {
@@ -27,6 +25,8 @@ public class DbManager {
     private static Dao<Soldier, Integer> soldierDao;
     private static Dao<Watch, Integer> watchDao;
     private static Dao<WatchPoint, Integer> watchPointDao;
+    private static Dao<WatchValue, Integer> watchValueDao;
+    private static Dao<Property, String> propertyDao;
 
 
     public static void initialize(ConnectionSource connectionSource) {
@@ -36,6 +36,8 @@ public class DbManager {
             soldierDao = DaoManager.createDao(connectionSource, Soldier.class);
             watchDao = DaoManager.createDao(connectionSource, Watch.class);
             watchPointDao = DaoManager.createDao(connectionSource, WatchPoint.class);
+            watchValueDao = DaoManager.createDao(connectionSource, WatchValue.class);
+            propertyDao = DaoManager.createDao(connectionSource, Property.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -177,16 +179,29 @@ public class DbManager {
             final WatchRemovalMode removalMode) {
         try {
             return transactionManager.callInTransaction(() -> {
-                deleteWatchesByDate(date, removalMode);
+                int deleted = deleteWatchesByDate(date, removalMode);
 
                 int count = 0;
                 for (Watch watch : watches) {
                     watchDao.create(watch);
                     Soldier soldier = soldierDao.queryForId(watch.getSoldier().getId());
-                    soldier.setPoints(soldier.getPoints() + WatchValue.of(watch.getHour()));
+
+                    double watchValue = watchValueDao.queryForId(watch.getHour()).getValue();
+                    soldier.setPoints(soldier.getPoints() + watchValue);
                     soldierDao.update(soldier);
                     count++;
                 }
+
+                if (deleted == 0) {
+                    List<Soldier> activeSergeants
+                            = soldierDao.queryForFieldValuesArgs(ImmutableMap.of("active", true, "sergeant", true));
+                    double sergeantPoints = Double.valueOf(getProperty(Constants.SERGEANT_DAILY_POINTS));
+                    for (Soldier sergeant : activeSergeants) {
+                        sergeant.setPoints(sergeant.getPoints() + sergeantPoints);
+                        soldierDao.update(sergeant);
+                    }
+                }
+
                 return count;
             });
         } catch (Exception e) {
@@ -241,12 +256,49 @@ public class DbManager {
                     }
                 }
 
+
                 PreparedDelete<Watch> preparedDelete
                         = (PreparedDelete<Watch>) watchDao.deleteBuilder()
                         .where().eq("date", date.toString(Constants.DATE_FORMAT)).prepare();
                 return watchDao.delete(preparedDelete);
             });
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<WatchValue> findAllWatchValues() {
+        try {
+            return watchValueDao.queryForAll();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static int updateWatchValue(int hour, double value) {
+        checkArgument(hour >= 0 && hour <= 11, "Invalid hour!");
+        checkArgument(value > 0, "Invalid value!");
+
+        try {
+            return watchValueDao.update(new WatchValue(hour, value));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String getProperty(String key) {
+        try {
+            Property property = propertyDao.queryForId(key);
+            return property != null ? property.getValue() : null;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void setProperty(String key, String value) {
+        try {
+            propertyDao.createOrUpdate(new Property(key, value));
+        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }

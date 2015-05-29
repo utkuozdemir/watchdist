@@ -18,12 +18,13 @@ public class SoldierFX {
     private SimpleBooleanProperty available;
     private SimpleDoubleProperty points;
     private SimpleBooleanProperty active;
+    private SimpleBooleanProperty sergeant;
 
     private Collection<SimpleObjectProperty<Availability>> availabilities;
     private SimpleBooleanProperty[][] availabilitiesBooleans;
 
     public SoldierFX(int id, String fullName, String duty,
-                     boolean available, double points, boolean active,
+                     boolean available, double points, boolean active, boolean sergeant,
                      Collection<Availability> availabilities) {
 
 
@@ -33,6 +34,7 @@ public class SoldierFX {
         this.available = new SimpleBooleanProperty(available);
         this.points = new SimpleDoubleProperty(points);
         this.active = new SimpleBooleanProperty(active);
+        this.sergeant = new SimpleBooleanProperty(sergeant);
 
         this.availabilities = Collections2.transform(availabilities, SimpleObjectProperty::new);
 
@@ -79,6 +81,12 @@ public class SoldierFX {
         });
 
         this.available.addListener((observableValue, aBoolean, t1) -> {
+            if (this.sergeantProperty().get()) this.availableProperty().set(false);
+            DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
+        });
+
+        this.sergeant.addListener((observable, oldValue, newValue) -> {
+            if (newValue) SoldierFX.this.available.set(false);
             DbManager.updateSoldier(Constants.FX_TO_SOLDIER.apply(SoldierFX.this));
         });
 
@@ -128,6 +136,10 @@ public class SoldierFX {
 
     public SimpleBooleanProperty activeProperty() {
         return active;
+    }
+
+    public SimpleBooleanProperty sergeantProperty() {
+        return sergeant;
     }
 
     public Collection<SimpleObjectProperty<Availability>> availabilitiesProperties() {
