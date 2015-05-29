@@ -6,12 +6,11 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${user.home}/socialcars/logs/socialcars.log</file>
+        <file>NobetYonetim.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <fileNamePattern>nobet.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <!-- keep 30 days' worth of history -->
-            <maxHistory>1</maxHistory>
+            <fileNamePattern>NobetYonetim_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>5</maxHistory>
         </rollingPolicy>
 
         <encoder>

@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -160,11 +159,9 @@ public class ExcelExporter {
             Path templateFilePath = Paths.get(
                     ExcelExporter.class.getProtectionDomain().getCodeSource().getLocation().toURI()
             );
-            Path templateDirectory = templateFilePath.getParent().getParent();
+            Path templateDirectory = templateFilePath.getParent();
             String templateUrl = templateDirectory.toString() + File.separator + Constants.TEMPLATE_NAME;
 
-            URL templateResource = DbManager.class.getClassLoader().getResource("clean_db.db");
-            checkNotNull(templateResource);
             Path templatePath = Paths.get(templateUrl);
             InputStream inputStream = Files.newInputStream(templatePath);
             return new HSSFWorkbook(inputStream);

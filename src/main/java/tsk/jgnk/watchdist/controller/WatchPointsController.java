@@ -8,6 +8,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import org.thehecklers.monologfx.MonologFX;
 import org.thehecklers.monologfx.MonologFXBuilder;
@@ -112,5 +113,9 @@ public class WatchPointsController implements Initializable {
                 = Lists.transform(DbManager.findAllActiveWatchPoints(), Constants.WATCH_POINT_TO_FX);
         ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
         watchPointsTable.setItems(items);
+    }
+
+    public void closeWindow() {
+        ((Stage) addWatchPointButton.getScene().getWindow()).close();
     }
 }
