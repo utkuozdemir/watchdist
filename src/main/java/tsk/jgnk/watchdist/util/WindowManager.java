@@ -30,7 +30,7 @@ public class WindowManager {
 		try {
 			if (stage == null) stage = new Stage();
 			mainStage = stage;
-			URL resource = App.class.getClassLoader().getResource("view/main_.fxml");
+			URL resource = App.class.getClassLoader().getResource("view/main.fxml");
 			checkNotNull(resource);
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource);
@@ -122,7 +122,7 @@ public class WindowManager {
 				}
 			}
 
-			URL resource = App.class.getClassLoader().getResource("view/distribution_.fxml");
+			URL resource = App.class.getClassLoader().getResource("view/distribution.fxml");
 			checkNotNull(resource);
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			fxmlLoader.setController(new DistributionController(mainController));
