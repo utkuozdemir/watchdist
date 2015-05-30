@@ -16,7 +16,7 @@ public class Tests {
 //
 //        InputStream dbInputStream = DbManager.class.getClassLoader().getResourceAsStream("clean_db.db");
 //        checkNotNull(dbInputStream);
-//        Path dbPath = FileManager.getDatabaseTemplate();
+//        Path dbPath = FileManager.getDatabasePath();
 //        if (!Files.exists(dbPath)) {
 //            Files.copy(dbInputStream, dbPath);
 //        }

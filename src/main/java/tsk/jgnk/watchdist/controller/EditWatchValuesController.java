@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+import static tsk.jgnk.watchdist.util.Converters.DOUBLE_STRING_CONVERTER;
+
 @SuppressWarnings("unused")
 public class EditWatchValuesController implements Initializable {
     @FXML
@@ -41,7 +43,7 @@ public class EditWatchValuesController implements Initializable {
             return new SimpleStringProperty(startTime + ":00 - " + endTime + ":00");
         });
 
-        valueColumn.setCellFactory(c -> new TextFieldTableCell<>(Constants.DOUBLE_STRING_CONVERTER));
+        valueColumn.setCellFactory(c -> new TextFieldTableCell<>(DOUBLE_STRING_CONVERTER));
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));
 
         Map<Integer, Double> values = WatchValues.getAllValues();

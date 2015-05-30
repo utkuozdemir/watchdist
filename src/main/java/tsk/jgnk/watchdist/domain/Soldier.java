@@ -5,6 +5,7 @@ import com.google.common.base.Objects;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
+import tsk.jgnk.watchdist.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +34,8 @@ public class Soldier {
     @DatabaseField(columnName = "sergeant")
     private boolean sergeant;
 
+	@DatabaseField(columnName = "max_watches_per_day")
+	private int maxWatchesPerDay;
 
     @ForeignCollectionField(eager = true)
     private Collection<Availability> availabilities;
@@ -40,32 +43,38 @@ public class Soldier {
     Soldier() {
     }
 
-    public Soldier(String fullName, String duty, boolean available, boolean sergeant) {
+	public Soldier(String fullName, String duty, boolean available, boolean sergeant, int maxWatchesPerDay) {
+		if (maxWatchesPerDay < 1 || maxWatchesPerDay > Constants.TOTAL_WATCHES_IN_DAY)
+			throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
+
         this.fullName = fullName;
         this.duty = duty;
         this.available = available;
         this.sergeant = sergeant;
+		this.maxWatchesPerDay = maxWatchesPerDay;
 
-        this.availabilities = new ArrayList<>();
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 12; j++) {
-                Availability availability = new Availability(this, i, j);
-                this.availabilities.add(availability);
+		this.availabilities = new ArrayList<>();
+		for (int i = 0; i < 7; i++) {
+			for (int j = 0; j < Constants.TOTAL_WATCHES_IN_DAY; j++) {
+				Availability availability = new Availability(this, i, j);
+				this.availabilities.add(availability);
             }
         }
     }
 
     public Soldier(Integer id, String fullName, String duty, boolean available,
-                   double points, boolean active, boolean sergeant, Collection<Availability> availabilities) {
-        this.id = id;
-        this.fullName = fullName;
+				   double points, boolean active, boolean sergeant, int maxWatchesPerDay,
+				   Collection<Availability> availabilities) {
+		this.id = id;
+		this.fullName = fullName;
         this.duty = duty;
         this.available = available;
         this.points = points;
         this.active = active;
         this.sergeant = sergeant;
-        this.availabilities = availabilities;
-    }
+		this.maxWatchesPerDay = maxWatchesPerDay;
+		this.availabilities = availabilities;
+	}
 
     public Integer getId() {
         return id;
@@ -123,9 +132,19 @@ public class Soldier {
         this.sergeant = sergeant;
     }
 
-    public Collection<Availability> getAvailabilities() {
-        return availabilities;
-    }
+	public int getMaxWatchesPerDay() {
+		return maxWatchesPerDay;
+	}
+
+	public void setMaxWatchesPerDay(int maxWatchesPerDay) {
+		if (maxWatchesPerDay < 1 || maxWatchesPerDay > Constants.TOTAL_WATCHES_IN_DAY)
+			throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
+		this.maxWatchesPerDay = maxWatchesPerDay;
+	}
+
+	public Collection<Availability> getAvailabilities() {
+		return availabilities;
+	}
 
     @Override
     public String toString() {

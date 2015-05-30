@@ -1,0 +1,5 @@
+package tsk.jgnk.watchdist;
+
+public enum AppWindow {
+	MAIN, WATCH_POINTS, ADD_NEW_WATCH_POINT, ADD_NEW_SOLDIER, ADMINISTRATION, WATCH_DISTRIBUTION, WATCH_VALUES
+}

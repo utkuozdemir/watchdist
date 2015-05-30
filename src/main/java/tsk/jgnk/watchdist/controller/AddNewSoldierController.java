@@ -1,18 +1,18 @@
 package tsk.jgnk.watchdist.controller;
 
 import com.google.common.base.Strings;
-import javafx.event.EventHandler;
+import com.google.common.collect.ContiguousSet;
+import com.google.common.collect.DiscreteDomain;
+import com.google.common.collect.Range;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.stage.Stage;
+import javafx.scene.control.*;
 import tsk.jgnk.watchdist.domain.Soldier;
 import tsk.jgnk.watchdist.exception.ValidationException;
+import tsk.jgnk.watchdist.i18n.Messages;
+import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
 
 import java.net.URL;
@@ -20,68 +20,87 @@ import java.util.ResourceBundle;
 
 @SuppressWarnings("unused")
 public class AddNewSoldierController implements Initializable {
-    @FXML
-    private TextField fullName;
-    @FXML
-    private TextField duty;
-    @FXML
-    private Button saveButton;
-    @FXML
-    private CheckBox available;
-    @FXML
-    private CheckBox sergeant;
-    @FXML
-    private Label errorLabel;
+	@FXML
+	private TextField fullName;
+	@FXML
+	private TextField duty;
+	@FXML
+	private Button saveButton;
+	@FXML
+	private CheckBox available;
+	@FXML
+	private CheckBox sergeant;
+	@FXML
+	private Label errorLabel;
+	@FXML
+	private Label maxWatchCountPerDayLabel;
+	@FXML
+	private ComboBox<Integer> maxWatchCountPerDay;
 
-    private MainController mainController;
+	private MainController mainController;
 
-    public AddNewSoldierController(MainController mainController) {
-        this.mainController = mainController;
-    }
+	public AddNewSoldierController(MainController mainController) {
+		this.mainController = mainController;
+	}
 
-    private void addEventHandlers() {
-        EventHandler<KeyEvent> eventHandler = keyEvent -> {
-            if (keyEvent.getCode().equals(KeyCode.ENTER)) {
-                saveSoldier();
-            }
-        };
-        fullName.setOnKeyPressed(eventHandler);
-        duty.setOnKeyPressed(eventHandler);
-        sergeant.setOnKeyPressed(eventHandler);
-    }
+	public void saveSoldier() {
+		try {
+			validateFields();
+			Soldier soldier
+					= new Soldier(fullName.getText(), duty.getText(), available.isSelected(),
+					sergeant.isSelected(), maxWatchCountPerDay.getValue()
+			);
+			DbManager.createSoldier(soldier);
+			resetFields();
+			mainController.refreshTableData();
+			mainController.scrollToLastElementInTable();
+			fullName.requestFocus();
+		} catch (ValidationException e) {
+			errorLabel.setVisible(true);
+		}
+	}
 
-    public void saveSoldier() {
-        try {
-            validateFields();
+	private void validateFields() {
+		if (Strings.isNullOrEmpty(fullName.getText()) || Strings.isNullOrEmpty(duty.getText())) {
+			throw new ValidationException();
+		}
+	}
 
-            Soldier soldier
-                    = new Soldier(fullName.getText(), duty.getText(), available.isSelected(), sergeant.isSelected());
-            DbManager.createSoldier(soldier);
+	@Override
+	public void initialize(URL url, ResourceBundle resourceBundle) {
+		maxWatchCountPerDayLabel.setText(Messages.get("max.watch.count.per.day", Constants.WATCH_DURATION_IN_HOURS));
 
-            Stage stage = (Stage) saveButton.getScene().getWindow();
-            stage.close();
+		sergeant.selectedProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue) {
+				available.selectedProperty().setValue(false);
+			}
+			available.setDisable(newValue);
+		});
 
-            mainController.refreshTableData();
-        } catch (ValidationException e) {
-            errorLabel.setVisible(true);
-        }
-    }
+		ObservableList<Integer> hours = FXCollections.observableArrayList(
+				ContiguousSet.create(Range.closed(1, Constants.TOTAL_WATCHES_IN_DAY + 1), DiscreteDomain.integers())
+		);
+		maxWatchCountPerDay.setItems(hours);
+		resetFields();
+	}
 
-    private void validateFields() {
-        if (Strings.isNullOrEmpty(fullName.getText()) || Strings.isNullOrEmpty(duty.getText())) {
-            throw new ValidationException();
-        }
-    }
+	private void resetFields() {
+		fullName.clear();
+		duty.clear();
+		sergeant.setSelected(false);
+		available.setSelected(true);
+		maxWatchCountPerDay.setValue(Constants.MAX_WATCHES_IN_A_DAY);
+		errorLabel.setVisible(false);
+	}
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        addEventHandlers();
 
-        sergeant.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                available.selectedProperty().setValue(false);
-            }
-            available.setDisable(newValue);
-        });
-    }
+	private boolean isValidInteger(String string) {
+		try {
+			//noinspection ResultOfMethodCallIgnored
+			Integer.parseInt(string);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
 }

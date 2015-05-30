@@ -4,8 +4,9 @@ import com.google.common.base.Strings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
+
+import static tsk.jgnk.watchdist.util.Converters.FX_TO_WATCH_POINT;
 
 @SuppressWarnings("unused")
 public class WatchPointFX {
@@ -28,7 +29,7 @@ public class WatchPointFX {
             if (Strings.isNullOrEmpty(t1)) {
                 WatchPointFX.this.name.set(s);
             }
-            DbManager.updateWatchPoint(Constants.FX_TO_WATCH_POINT.apply(WatchPointFX.this));
+            DbManager.updateWatchPoint(FX_TO_WATCH_POINT.apply(WatchPointFX.this));
         });
 
         this.requiredSoldierCount.addListener((observableValue, number, t1) -> {
@@ -36,7 +37,7 @@ public class WatchPointFX {
             if (value < 0) value = number.intValue();
             else if (value > 10) value = 10;
             WatchPointFX.this.requiredSoldierCount.set(value);
-            DbManager.updateWatchPoint(Constants.FX_TO_WATCH_POINT.apply(WatchPointFX.this));
+            DbManager.updateWatchPoint(FX_TO_WATCH_POINT.apply(WatchPointFX.this));
         });
     }
 

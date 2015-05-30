@@ -88,7 +88,7 @@ public class ExcelExporter {
 
                     signatureCell.setCellStyle(signatureTitleStyle);
 
-                    signatureCell.setCellValue(Messages.get("template.signature"));
+                    signatureCell.setCellValue(Messages.get("template.SIGNATURE"));
                     column += 2;
                 }
             }
@@ -126,7 +126,7 @@ public class ExcelExporter {
 
                     Row titleRow = sheet.getRow(5);
                     titleRow.getCell(emptyColNum).setCellValue("-");
-                    titleRow.getCell(emptyColNum + 1).setCellValue(Messages.get("template.signature"));
+                    titleRow.getCell(emptyColNum + 1).setCellValue(Messages.get("template.SIGNATURE"));
 
                     for (int j = 6; j < 18; j++) {
                         Row row = sheet.getRow(j);
@@ -148,7 +148,7 @@ public class ExcelExporter {
         Collection<WatchPoint> points
                 = Collections2.transform(watches, input -> input != null ? input.getWatchPoint() : null);
 
-        Set<WatchPoint> watchPoints = new TreeSet<>(Constants.WATCH_POINT_COMPARATOR);
+        Set<WatchPoint> watchPoints = new TreeSet<>(Comparators.WATCH_POINT_ID_ASC_COMPARATOR);
         watchPoints.addAll(points);
         watchPoints.remove(null);
         return watchPoints;

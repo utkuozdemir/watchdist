@@ -5,6 +5,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
+import com.j256.ormlite.jdbc.JdbcConnectionSource;
 import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedDelete;
 import com.j256.ormlite.stmt.PreparedQuery;
@@ -12,6 +13,7 @@ import com.j256.ormlite.support.ConnectionSource;
 import org.joda.time.LocalDate;
 import tsk.jgnk.watchdist.domain.*;
 
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -19,7 +21,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class DbManager {
-    private static TransactionManager transactionManager;
+	private static ConnectionSource connectionSource;
+	private static TransactionManager transactionManager;
 
     private static Dao<Availability, Integer> availabilityDao;
     private static Dao<Soldier, Integer> soldierDao;
@@ -29,19 +32,26 @@ public class DbManager {
     private static Dao<Property, String> propertyDao;
 
 
-    public static void initialize(ConnectionSource connectionSource) {
-        try {
-            DbManager.transactionManager = new TransactionManager(connectionSource);
-            availabilityDao = DaoManager.createDao(connectionSource, Availability.class);
-            soldierDao = DaoManager.createDao(connectionSource, Soldier.class);
+	public static void initialize(Path dbPath) {
+		try {
+			connectionSource = new JdbcConnectionSource("jdbc:sqlite:" + dbPath.toString());
+			transactionManager = new TransactionManager(connectionSource);
+			availabilityDao = DaoManager.createDao(connectionSource, Availability.class);
+			soldierDao = DaoManager.createDao(connectionSource, Soldier.class);
             watchDao = DaoManager.createDao(connectionSource, Watch.class);
             watchPointDao = DaoManager.createDao(connectionSource, WatchPoint.class);
             watchValueDao = DaoManager.createDao(connectionSource, WatchValue.class);
             propertyDao = DaoManager.createDao(connectionSource, Property.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
+		}
+	}
+
+	public static void close() {
+		if (connectionSource != null) {
+			connectionSource.closeQuietly();
+		}
+	}
 
     public static List<Soldier> findAllActiveSoldiersOrderedByFullName() {
         try {

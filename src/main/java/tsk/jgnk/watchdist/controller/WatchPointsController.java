@@ -11,19 +11,16 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.thehecklers.monologfx.MonologFX;
-import org.thehecklers.monologfx.MonologFXBuilder;
-import org.thehecklers.monologfx.MonologFXButton;
-import org.thehecklers.monologfx.MonologFXButtonBuilder;
 import tsk.jgnk.watchdist.fx.WatchPointFX;
 import tsk.jgnk.watchdist.i18n.Messages;
-import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
 import tsk.jgnk.watchdist.util.WindowManager;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import static tsk.jgnk.watchdist.util.Converters.*;
 
 @SuppressWarnings("unused")
 public class WatchPointsController implements Initializable {
@@ -54,7 +51,7 @@ public class WatchPointsController implements Initializable {
         watchPointsTable.setPlaceholder(new Label(Messages.get("watchpoints.no.watch.points")));
         watchPointsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
-        nameColumn.setCellFactory(watchPointStringTableColumn -> new TextFieldTableCell<>(Constants.STRING_STRING_CONVERTER));
+		nameColumn.setCellFactory(watchPointStringTableColumn -> new TextFieldTableCell<>(STRING_STRING_CONVERTER));
 
         requiredSoldierCountColumn
                 .setCellFactory(watchPointIntegerTableColumn -> new TextFieldTableCell<>(new StringConverter<Integer>() {
@@ -86,42 +83,34 @@ public class WatchPointsController implements Initializable {
                 Iterables.filter(selectedItems, input -> input != null));
 
         if (!filtered.isEmpty()) {
-            MonologFXButton yes = MonologFXButtonBuilder.create()
-                    .label(Messages.get("yes"))
-                    .type(MonologFXButton.Type.YES)
-                    .defaultButton(true)
-                    .build();
-            MonologFXButton no = MonologFXButtonBuilder.create()
-                    .label(Messages.get("no"))
-                    .type(MonologFXButton.Type.NO)
-                    .build();
+			boolean approved = WindowManager.showWarningConfirmationAlert(
+					Messages.get("watchpoints.watch.point.removal.approval"),
+					Messages.get("watchpoints.watch.point.removal.approval.message", filtered.size()),
+					Messages.get("delete.selected.watch.points"),
+					Messages.get("cancel")
+			);
 
-
-            MonologFX mono = MonologFXBuilder.create()
-                    .modal(true)
-                    .titleText(Messages.get("watchpoints.watch.point.removal.approval"))
-                    .message(Messages.get("watchpoints.watch.point.removal.approval.message", filtered.size()))
-                    .type(MonologFX.Type.QUESTION)
-                    .button(yes)
-                    .button(no)
-                    .buttonAlignment(MonologFX.ButtonAlignment.RIGHT)
-                    .build();
-
-            MonologFXButton.Type result = mono.show();
-            if (result == MonologFXButton.Type.YES) {
-                DbManager.deleteWatchPoints(Lists.transform(filtered, Constants.FX_TO_WATCH_POINT));
-                refreshTableData();
-                watchPointsTable.getSelectionModel().clearSelection();
+			if (approved) {
+				DbManager.deleteWatchPoints(Lists.transform(filtered, FX_TO_WATCH_POINT));
+				refreshTableData();
+				watchPointsTable.getSelectionModel().clearSelection();
             }
         }
     }
 
     public void refreshTableData() {
         List<WatchPointFX> watchPointFXes
-                = Lists.transform(DbManager.findAllActiveWatchPoints(), Constants.WATCH_POINT_TO_FX);
-        ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
-        watchPointsTable.setItems(items);
+				= Lists.transform(DbManager.findAllActiveWatchPoints(), WATCH_POINT_TO_FX);
+		ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
+		watchPointsTable.setItems(items);
     }
+
+	public void scrollToLastElementInTable() {
+		ObservableList<WatchPointFX> items = watchPointsTable.getItems();
+		if (!items.isEmpty()) {
+			watchPointsTable.scrollTo(items.size() - 1);
+		}
+	}
 
     public void closeWindow() {
         ((Stage) addWatchPointButton.getScene().getWindow()).close();

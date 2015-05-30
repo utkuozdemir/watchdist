@@ -7,7 +7,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
 import tsk.jgnk.watchdist.domain.WatchPoint;
 import tsk.jgnk.watchdist.util.DbManager;
 
@@ -16,40 +15,46 @@ import java.util.ResourceBundle;
 
 @SuppressWarnings("unused")
 public class AddNewWatchPointController implements Initializable {
-    @FXML
-    private TextField watchPointName;
-    @FXML
-    private ComboBox requiredSoldierCount;
-    @FXML
-    private Label errorLabel;
-    @FXML
-    private Button saveWatchPointButton;
+	@FXML
+	private TextField watchPointName;
+	@FXML
+	private ComboBox<Integer> requiredSoldierCount;
+	@FXML
+	private Label errorLabel;
+	@FXML
+	private Button saveWatchPointButton;
 
-    private WatchPointsController watchPointsController;
+	private WatchPointsController watchPointsController;
 
 
-    public AddNewWatchPointController(WatchPointsController watchPointsController) {
-        this.watchPointsController = watchPointsController;
-    }
+	public AddNewWatchPointController(WatchPointsController watchPointsController) {
+		this.watchPointsController = watchPointsController;
+	}
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
+	@Override
+	public void initialize(URL url, ResourceBundle resourceBundle) {
+		resetFields();
+	}
 
-    }
+	private void resetFields() {
+		watchPointName.clear();
+		requiredSoldierCount.setValue(1);
+		errorLabel.setVisible(false);
+	}
 
-    @SuppressWarnings("unused")
-    public void saveWatchPoint() {
-        if (Strings.isNullOrEmpty(watchPointName.getText())) {
-            errorLabel.setVisible(true);
-            return;
-        }
+	@SuppressWarnings("unused")
+	public void saveWatchPoint() {
+		if (Strings.isNullOrEmpty(watchPointName.getText())) {
+			errorLabel.setVisible(true);
+			return;
+		}
 
-        WatchPoint watchPoint = new WatchPoint(watchPointName.getText(), (int) requiredSoldierCount.getValue());
-        DbManager.createWatchPoint(watchPoint);
+		WatchPoint watchPoint = new WatchPoint(watchPointName.getText(), requiredSoldierCount.getValue());
+		DbManager.createWatchPoint(watchPoint);
 
-        Stage stage = (Stage) saveWatchPointButton.getScene().getWindow();
-        stage.close();
-
-        watchPointsController.refreshTableData();
-    }
+		resetFields();
+		watchPointsController.refreshTableData();
+		watchPointsController.scrollToLastElementInTable();
+		watchPointName.requestFocus();
+	}
 }
