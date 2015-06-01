@@ -10,4 +10,8 @@ public class Constants {
     public static final String TEMPLATE_DAY_NAME = "%GÜN%";
     public static final String DATE_FORMAT = "dd.MM.yyyy";
     public static final String SERGEANT_DAILY_POINTS = "sergeant.daily.points";
+
+	public static final String MASTER_PASSWORD = "master.password";
+	public static final String APP_PASSWORD = "app.password";
+	public static final String DB_RESET_PASSWORD = "db.reset.password";
 }

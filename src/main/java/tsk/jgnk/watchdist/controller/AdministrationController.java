@@ -1,42 +1,27 @@
 package tsk.jgnk.watchdist.controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import tsk.jgnk.watchdist.i18n.Messages;
-import tsk.jgnk.watchdist.util.DbManager;
 import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
-import java.util.ResourceBundle;
 
 @SuppressWarnings("unused")
-public class AdministrationController implements Initializable {
+public class AdministrationController {
 	@FXML
 	private Button done;
-
-	private MainController mainController;
-
-	public AdministrationController(MainController mainController) {
-		this.mainController = mainController;
-	}
-
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
-
-	}
 
 	@SuppressWarnings("unused")
 	public void editExcelTemplate() {
@@ -89,35 +74,13 @@ public class AdministrationController implements Initializable {
 
 	@SuppressWarnings("unused")
 	public void resetDatabase() {
-		boolean approved = showResetDatabaseConfirmationDialog();
-		if (approved) {
-			DbManager.close();
-			FileManager.resetDatabase();
-			DbManager.initialize(FileManager.getDatabasePath());
-			mainController.refreshTableData();
-			WindowManager.showInfoAlert(Messages.get("success"), Messages.get("database.reset.success.message"));
-		}
+		WindowManager.showResetDbPasswordWindow();
+
 	}
 
 	@SuppressWarnings("unused")
 	public void closeWindow() {
 		((Stage) done.getScene().getWindow()).close();
-	}
-
-	private boolean showResetDatabaseConfirmationDialog() {
-		Alert alert = new Alert(Alert.AlertType.WARNING);
-		alert.setTitle(Messages.get("reset.database"));
-		alert.setHeaderText(Messages.get("confirmation"));
-		alert.setContentText(Messages.get("reset.database.confirmation"));
-
-		ButtonType resetButtonType = new ButtonType(Messages.get("reset.database"));
-		ButtonType cancelButtonType = new ButtonType(Messages.get("cancel"));
-
-		alert.getButtonTypes().setAll(resetButtonType, cancelButtonType);
-		alert.getDialogPane().lookupButton(resetButtonType).setStyle("-fx-base: #F78181;");
-
-		Optional<ButtonType> buttonType = alert.showAndWait();
-		return buttonType.isPresent() && buttonType.get() == resetButtonType;
 	}
 
 	private boolean showResetExcelTemplateConfirmationDialog() {

@@ -1,5 +1,6 @@
 package tsk.jgnk.watchdist;
 
+import com.google.common.base.Strings;
 import com.j256.ormlite.logger.LocalLog;
 import com.sun.javafx.runtime.VersionInfo;
 import javafx.application.Application;
@@ -7,6 +8,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tsk.jgnk.watchdist.i18n.Messages;
+import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
 import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
@@ -31,8 +33,16 @@ public class App extends Application {
 
         Thread.currentThread().setUncaughtExceptionHandler((t, e) -> takeErrorAction(e));
 
-        WindowManager.showMainWindow(stage);
-    }
+		String appPassword = DbManager.getProperty(Constants.APP_PASSWORD);
+		String dbResetPassword = DbManager.getProperty(Constants.DB_RESET_PASSWORD);
+		if (Strings.isNullOrEmpty(appPassword) || Strings.isNullOrEmpty(dbResetPassword)) {
+			WindowManager.showSetPasswordsWindow();
+		} else {
+			WindowManager.showAppPasswordWindow();
+		}
+
+//        WindowManager.showMainWindow(stage);
+	}
 
     private void initialize() {
         try {

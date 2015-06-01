@@ -24,7 +24,92 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static tsk.jgnk.watchdist.AppWindow.*;
 
 public class WindowManager {
+	private static MainController mainController;
 	private static Stage mainStage;
+
+	public static void showSetPasswordsWindow() {
+		try {
+			for (Stage stage : StageHelper.getStages()) {
+				if (stage.getUserData() == SET_PASSWORDS) {
+					stage.requestFocus();
+					return;
+				}
+			}
+
+			URL resource = App.class.getClassLoader().getResource("view/set_passwords.fxml");
+			checkNotNull(resource);
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+			Scene scene = new Scene(root);
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setResizable(false);
+			stage.setTitle(Messages.get("set.passwords"));
+			stage.show();
+			stage.setUserData(SET_PASSWORDS);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void showAppPasswordWindow() {
+		try {
+			for (Stage stage : StageHelper.getStages()) {
+				if (stage.getUserData() == APP_PASSWORD) {
+					stage.requestFocus();
+					return;
+				}
+			}
+
+			URL resource = App.class.getClassLoader().getResource("view/app_password.fxml");
+			checkNotNull(resource);
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+			Scene scene = new Scene(root);
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setResizable(false);
+			stage.setTitle(Messages.get("app.password"));
+			stage.show();
+			stage.setUserData(APP_PASSWORD);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void showResetDbPasswordWindow() {
+		try {
+			for (Stage stage : StageHelper.getStages()) {
+				if (stage.getUserData() == RESET_DB_PASSWORD) {
+					stage.requestFocus();
+					return;
+				}
+			}
+
+			URL resource = App.class.getClassLoader().getResource("view/reset_db_password.fxml");
+			checkNotNull(resource);
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+			Scene scene = new Scene(root);
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setResizable(false);
+			stage.setTitle(Messages.get("app.password"));
+			stage.show();
+			stage.setUserData(RESET_DB_PASSWORD);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	public static void showMainWindow(Stage stage) {
 		try {
@@ -42,6 +127,7 @@ public class WindowManager {
 			stage.setScene(scene);
 			stage.show();
 			stage.setUserData(MAIN);
+			mainController = fxmlLoader.getController();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -96,7 +182,6 @@ public class WindowManager {
 			checkNotNull(resource);
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
-			fxmlLoader.setController(new AdministrationController(mainController));
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
 			Stage stage = new Stage();
@@ -334,5 +419,9 @@ public class WindowManager {
 
 		Optional<ButtonType> result = alert.showAndWait();
 		return (result.isPresent() && result.get() == dangerousConfirmButtonType);
+	}
+
+	public static MainController getMainController() {
+		return mainController;
 	}
 }
