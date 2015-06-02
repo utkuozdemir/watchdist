@@ -29,6 +29,32 @@ public class WindowManager {
 	private static MainController mainController;
 	private static WatchPointsController watchPointsController;
 
+	public static void showLanguageSelectionWindow() {
+		try {
+			if (alreadyOpened(LANGUAGE_SELECTION)) return;
+
+			URL resource = App.class.getClassLoader().getResource("view/language_selection.fxml");
+			checkNotNull(resource);
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setResizable(false);
+			stage.setTitle(Messages.get("language.selection"));
+			stage.setUserData(LANGUAGE_SELECTION);
+			stage.show();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
 	public static void showSetExcelTemplatePathWindow(String infoMessage) {
 		try {
 			if (alreadyOpened(SET_EXCEL_TEMPLATE_PATH)) return;
@@ -214,6 +240,7 @@ public class WindowManager {
 		checkNotNull(language);
 		mainWindow.close();
 		Messages.setLocale(language.getLocale());
+		DbManager.setProperty(Constants.LOCALE_KEY, language.name());
 		WindowManager.showMainWindow();
 	}
 

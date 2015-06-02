@@ -9,7 +9,8 @@ public class Messages {
     private static ResourceBundle bundle;
 
     static {
-        setLocale(Locale.forLanguageTag("tr"));
+        // set default language
+        setLocale(Language.TR.getLocale());
     }
 
     public static Locale getLocale() {

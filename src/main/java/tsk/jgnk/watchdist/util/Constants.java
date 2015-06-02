@@ -12,4 +12,5 @@ public class Constants {
     public static final String DATE_FORMAT = "dd.MM.yyyy";
     public static final String SERGEANT_DAILY_POINTS = "sergeant.daily.points";
 	public static final String EXCEL_TEMPLATE_PATH_KEY = "excel.template.path";
+	public static final String LOCALE_KEY = "locale";
 }

@@ -6,7 +6,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 public enum Language {
-    EN(Messages.get("english"), Locale.ENGLISH), TR(Messages.get("turkish"), Locale.forLanguageTag("tr"));
+    EN("English", Locale.ENGLISH), TR("Türkçe", Locale.forLanguageTag("tr"));
 
     private String languageName;
     private Locale locale;

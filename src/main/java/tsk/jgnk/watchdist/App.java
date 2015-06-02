@@ -7,7 +7,9 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tsk.jgnk.watchdist.i18n.Language;
 import tsk.jgnk.watchdist.i18n.Messages;
+import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
 import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
@@ -20,21 +22,36 @@ import static tsk.jgnk.watchdist.type.PasswordType.APP_PASSWORD;
 import static tsk.jgnk.watchdist.type.PasswordType.DB_RESET_PASSWORD;
 
 public class App extends Application {
-    private static final Logger logger = LoggerFactory.getLogger(App.class);
+	private static final Logger logger = LoggerFactory.getLogger(App.class);
 
-    public static void main(String[] args) {
-        System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
-        launch(args);
-    }
+	private static boolean newDbInitialized = false;
+	private static String initializedDbDirectory;
 
-    @Override
-    public void start(Stage stage) throws Exception {
+	public static void main(String[] args) {
+		System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
+		launch(args);
+	}
+
+	@Override
+	public void start(Stage stage) throws Exception {
 		Thread.currentThread().setUncaughtExceptionHandler((t, e) -> takeErrorAction(e));
 		logger.info("Using JAVAFX Version " + VersionInfo.getVersion());
-        logger.info("Using JAVAFX Runtime Version " + VersionInfo.getRuntimeVersion());
+		logger.info("Using JAVAFX Runtime Version " + VersionInfo.getRuntimeVersion());
 
 		initializeDb();
-		initializePasswordPrompt();
+
+		String language = DbManager.getProperty(Constants.LOCALE_KEY);
+		if (language == null) {
+			WindowManager.showLanguageSelectionWindow();
+		} else {
+			if (!isValidLanguage(language)) {
+				DbManager.setProperty(Constants.LOCALE_KEY, null);
+				WindowManager.showLanguageSelectionWindow();
+			} else {
+				Messages.setLocale(Language.valueOf(language).getLocale());
+				initializePasswordPrompt();
+			}
+		}
 	}
 
 	private void initializePasswordPrompt() {
@@ -49,30 +66,45 @@ public class App extends Application {
 
 	private void initializeDb() {
 		try {
-            boolean newDbCreated = false;
+			Path dbFilePath = Paths.get(App.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			logger.info("Using DB Path: " + dbFilePath.toString());
 
-            Path dbFilePath = Paths.get(App.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            logger.info("Using DB Path: " + dbFilePath.toString());
-
-            Path dbDirectory = dbFilePath.getParent();
-            logger.info("Using DB Directory: " + dbDirectory.toString());
+			Path dbDirectory = dbFilePath.getParent();
+			logger.info("Using DB Directory: " + dbDirectory.toString());
 
 			Path dbPath = FileManager.getDatabasePath();
 			if (!Files.exists(dbPath)) {
 				FileManager.resetDatabase();
-				newDbCreated = true;
+				newDbInitialized = true;
+				App.initializedDbDirectory = dbDirectory.toString();
 			}
 			DbManager.initialize(dbPath);
-
-			WindowManager.showInitializationInfo(newDbCreated ? dbDirectory.toString() : null, null);
 		} catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+			throw new RuntimeException(e);
+		}
+	}
 
 	private void takeErrorAction(Throwable e) {
 		logger.error(e.getMessage(), e);
 
 		WindowManager.showErrorAlert(Messages.get("error"), Messages.get("error.message"));
+	}
+
+	public static boolean isNewDbInitialized() {
+		return newDbInitialized;
+	}
+
+	public static String getInitializedDbDirectory() {
+		return initializedDbDirectory;
+	}
+
+	private static boolean isValidLanguage(String language) {
+		try {
+			Language l = Language.valueOf(language);
+			return l != null;
+		} catch (IllegalArgumentException e) {
+			logger.info("Invalid language name: " + language);
+			return false;
+		}
 	}
 }

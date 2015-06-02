@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="107.0"
+            prefWidth="250.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="tsk.jgnk.watchdist.controller.LanguageSelectionController">
+    <children>
+        <Label layoutX="14.0" layoutY="14.0" text="%language.selection" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0"
+               AnchorPane.topAnchor="14.0">
+            <font>
+                <Font name="System Bold" size="12.0"/>
+            </font>
+        </Label>
+        <ComboBox fx:id="language" layoutX="14.0" layoutY="29.0" prefWidth="150.0" AnchorPane.leftAnchor="14.0"
+                  AnchorPane.rightAnchor="14.0"/>
+        <Button fx:id="saveAndContinue" defaultButton="true" layoutX="14.0" layoutY="62.0" mnemonicParsing="false"
+                onAction="#saveAndContinue" prefHeight="30.0" prefWidth="172.0" text="%save.and.continue"
+                AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+            <font>
+                <Font name="System Bold" size="12.0"/>
+            </font>
+        </Button>
+    </children>
+</AnchorPane>
