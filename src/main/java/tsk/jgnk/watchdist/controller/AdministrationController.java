@@ -6,28 +6,53 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tsk.jgnk.watchdist.i18n.Messages;
+import tsk.jgnk.watchdist.type.PasswordType;
+import tsk.jgnk.watchdist.util.Constants;
+import tsk.jgnk.watchdist.util.DbManager;
 import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
 public class AdministrationController {
+	private static final Logger logger = LoggerFactory.getLogger(AdministrationController.class);
+
 	@FXML
 	private Button done;
 
 	@SuppressWarnings("unused")
 	public void editExcelTemplate() {
 		try {
-			Path excelTemplate = FileManager.getExcelTemplatePath();
-			Desktop.getDesktop().open(excelTemplate.toFile());
+			String templatePath = DbManager.getProperty(Constants.EXCEL_TEMPLATE_PATH_KEY);
+			if (templatePath == null) {
+				WindowManager.showSetExcelTemplatePathWindow(Messages.get("excel.template.path.not.set"));
+			} else {
+				try {
+					Path path = Paths.get(templatePath);
+					if (!Files.exists(path) || !Files.isWritable(path)) {
+						WindowManager.showSetExcelTemplatePathWindow(
+								Messages.get("excel.template.path.problem", templatePath)
+						);
+					} else {
+						Desktop.getDesktop().open(path.toFile());
+					}
+				} catch (InvalidPathException | SecurityException e) {
+					logger.debug("Invalid path set for excel template: " + templatePath);
+					WindowManager.showSetExcelTemplatePathWindow(
+							Messages.get("excel.template.path.problem", templatePath)
+					);
+				}
+			}
+
+
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -65,11 +90,7 @@ public class AdministrationController {
 
 	@SuppressWarnings("unused")
 	public void resetExcelTemplate() {
-		boolean approved = showResetExcelTemplateConfirmationDialog();
-		if (approved) {
-			FileManager.resetExcelTemplate();
-			WindowManager.showInfoAlert(Messages.get("success"), Messages.get("excel.template.reset.success.message"));
-		}
+		WindowManager.showSetExcelTemplatePathWindow(Messages.get("excel.template.path.not.set"));
 	}
 
 	@SuppressWarnings("unused")
@@ -99,4 +120,11 @@ public class AdministrationController {
 		return buttonType.isPresent() && buttonType.get() == resetButtonType;
 	}
 
+	public void changeAppPassword() {
+		WindowManager.showChangePasswordWindow(PasswordType.APP_PASSWORD);
+	}
+
+	public void changeDbResetPassword() {
+		WindowManager.showChangePasswordWindow(PasswordType.DB_RESET_PASSWORD);
+	}
 }

@@ -33,10 +33,11 @@ import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static tsk.jgnk.watchdist.util.Constants.DATE_FORMAT;
-import static tsk.jgnk.watchdist.util.Constants.TOTAL_WATCHES_IN_DAY;
+import static tsk.jgnk.watchdist.util.Constants.*;
 
 @SuppressWarnings("unused")
 public class DistributionController implements Initializable {
@@ -90,7 +91,7 @@ public class DistributionController implements Initializable {
 		distributionTable.getItems().clear();
 		for (int i = 0; i < TOTAL_WATCHES_IN_DAY; i++) {
 			String startTime = String.format("%02d", i * 2);
-			String endTime = String.format("%02d", (i + 1) * 2);
+			String endTime = String.format("%02d", ((i + 1) % TOTAL_WATCHES_IN_DAY) * 2);
 			String hours = startTime + ":00 - " + endTime + ":00";
 			distributionRows[i] = new DistributionRow(hours, new Soldier[0]);
 			if (soldiers.length > 0) {
@@ -177,11 +178,11 @@ public class DistributionController implements Initializable {
 						WatchPoint watchPoint = columnWatchPointMap.get(columns.get(j + 1));
 						Soldier soldier = soldiers[j];
 
-						if (soldier != null && !(soldier instanceof NullSoldier)) {
-							Watch watch = new Watch(soldier, watchPoint, Collections.frequency(used, watchPoint),
-									currentDate.toString(DATE_FORMAT), i, WatchValues.get(i));
-							watchesToBeSaved.add(watch);
-						}
+						if (soldier instanceof NullSoldier) soldier = null;
+						Watch watch = new Watch(soldier, watchPoint, Collections.frequency(used, watchPoint),
+								currentDate.toString(DATE_FORMAT), i, WatchValues.get(i));
+						watchesToBeSaved.add(watch);
+
 						used.add(watchPoint);
 					}
 				}
@@ -218,6 +219,9 @@ public class DistributionController implements Initializable {
 	}
 
 	private String buildConfirmMessage() {
+		LocalDate currentDate = getCurrentDate();
+		if (currentDate == null) throw new RuntimeException("Current date is null!");
+
 		boolean perfect = true;
 
 		StringBuilder approveMessage = new StringBuilder();
@@ -243,42 +247,72 @@ public class DistributionController implements Initializable {
 			return o1.getFullName().compareTo(o2.getFullName());
 		};
 
-		Set<Soldier> firstRowSoldiers = new TreeSet<>(soldierComparator);
-		firstRowSoldiers.addAll(Arrays.asList(rows.get(0).getSoldiers()));
+//		Set<Soldier> firstRowSoldiers = new TreeSet<>(soldierComparator);
+//		firstRowSoldiers.addAll(Arrays.asList(rows.get(0).getSoldiers()));
+//
+//		Set<Soldier> secondRowSoldiers = new TreeSet<>(soldierComparator);
+//		secondRowSoldiers.addAll(Arrays.asList(rows.get(1).getSoldiers()));
+//
+//		//noinspection ConstantConditions
+//		List<Watch> previousDays22_24Watches = DbManager.findWatchesByDateAndHour(getCurrentDate().minusDays(1), 11);
+//		List<Soldier> previousDays22_24WatchesSoldiers
+//				= Lists.transform(previousDays22_24Watches, Watch::getSoldier);
+//		previousDays22_24WatchesSoldiers.removeAll(Collections.<Soldier>singleton(null));
 
-		//noinspection ConstantConditions
-		List<Watch> previousDaysLastWatches = DbManager.findWatchesByDateAndHour(getCurrentDate().minusDays(1), 11);
-		List<Soldier> previousDaysLastWatchesSoldiers
-				= Lists.transform(previousDaysLastWatches, Watch::getSoldier);
+//		//noinspection ConstantConditions
+//		List<Watch> previousDays20_22watches = DbManager.findWatchesByDateAndHour(getCurrentDate().minusDays(1), 10);
+//		List<Soldier> previousDays20_22watchesSoldiers
+//				= Lists.transform(previousDays20_22watches, Watch::getSoldier);
+//		previousDays20_22watchesSoldiers.removeAll(Collections.<Soldier>singleton(null));
+//
+//		firstRowSoldiers.retainAll(previousDays22_24WatchesSoldiers);
+//		secondRowSoldiers.retainAll(pre)
+//		if (!firstRowSoldiers.isEmpty()) {
+//			perfect = false;
+//
+//			String message = Messages.get(firstRowSoldiers.size() > 1 ?
+//							"distribution.first.watch.after.yesterdays.last.multiple" :
+//							"distribution.first.watch.after.yesterdays.last",
+//					Joiner.on(", ").join(firstRowSoldiers));
+//
+//			approveMessage.append(message)
+//					.append(System.lineSeparator())
+//					.append(System.lineSeparator());
+//		}
 
-		firstRowSoldiers.retainAll(previousDaysLastWatchesSoldiers);
-		if (!firstRowSoldiers.isEmpty()) {
-			perfect = false;
+		for (int i = 0; i < rows.size(); i++) {
+			List<Soldier> previousFirstRowSoldiers;
+			List<Soldier> previousSecondRowSoldiers;
+			if (i == 0) {
+				previousFirstRowSoldiers = DbManager.findWatchesByDateAndHour(currentDate.minusDays(1), 11)
+						.stream().map(Watch::getSoldier).collect(Collectors.toList());
+				previousSecondRowSoldiers = DbManager.findWatchesByDateAndHour(currentDate.minusDays(1), 10)
+						.stream().map(Watch::getSoldier).collect(Collectors.toList());
+			} else if (i == 1) {
+				previousFirstRowSoldiers = Arrays.asList(rows.get(i - 1).getSoldiers());
+				previousSecondRowSoldiers = DbManager.findWatchesByDateAndHour(currentDate.minusDays(1), 11)
+						.stream().map(Watch::getSoldier).collect(Collectors.toList());
+			} else {
+				previousFirstRowSoldiers = Arrays.asList(rows.get(i - 1).getSoldiers());
+				previousSecondRowSoldiers = Arrays.asList(rows.get(i - 2).getSoldiers());
+			}
 
-			String message = Messages.get(firstRowSoldiers.size() > 1 ?
-							"distribution.first.watch.after.yesterdays.last.multiple" :
-							"distribution.first.watch.after.yesterdays.last",
-					Joiner.on(", ").join(firstRowSoldiers));
-
-			approveMessage.append(message)
-					.append(System.lineSeparator())
-					.append(System.lineSeparator());
-		}
-
-		for (int i = 1; i < rows.size(); i++) {
-			DistributionRow previousRow = rows.get(i - 1);
-			DistributionRow currentRow = rows.get(i);
 
 			TreeSet<Soldier> currentRowSoldiers = new TreeSet<>(soldierComparator);
-			currentRowSoldiers.addAll(Arrays.asList(currentRow.getSoldiers()));
-			currentRowSoldiers.retainAll(Arrays.asList(previousRow.getSoldiers()));
+			currentRowSoldiers.addAll(Arrays.asList(rows.get(i).getSoldiers()));
+			currentRowSoldiers.retainAll(
+					Stream.concat(previousFirstRowSoldiers.stream(), previousSecondRowSoldiers.stream())
+							.collect(Collectors.toList()));
 
 			currentRowSoldiers.remove(null);
 			if (!currentRowSoldiers.isEmpty()) {
 				perfect = false;
-				String previousStartTime = String.format("%02d", (i - 1) * 2);
-				String currentStartTime = String.format("%02d", i * 2);
-				String currentEndTime = String.format("%02d", (i + 1) * 2);
+				String previousStartTime = String.format("%02d",
+						((i + (TOTAL_WATCHES_IN_DAY - 1)) % TOTAL_WATCHES_IN_DAY) * 2);
+				String currentStartTime = String.format("%02d",
+						((i + TOTAL_WATCHES_IN_DAY) % TOTAL_WATCHES_IN_DAY) * 2
+				);
+				String currentEndTime = String.format("%02d", ((i + 1) % TOTAL_WATCHES_IN_DAY) * 2);
 
 				String previousHourName = previousStartTime + ":00 - " + currentStartTime + ":00";
 				String currentHourName = currentStartTime + ":00 - " + currentEndTime + ":00";
@@ -288,7 +322,8 @@ public class DistributionController implements Initializable {
 								"distribution.consequent.watches",
 						Joiner.on(", ").join(currentRowSoldiers),
 						previousHourName,
-						currentHourName
+						currentHourName,
+						(MIN_WATCHES_BETWEEN_TWO_WATCHES * WATCH_DURATION_IN_HOURS) + WATCH_DURATION_IN_HOURS
 				);
 				approveMessage.append(message)
 						.append(System.lineSeparator())
@@ -386,8 +421,11 @@ public class DistributionController implements Initializable {
 
 
 					cell.itemProperty().addListener((observableValue, soldier, t1) -> {
+						ComboBoxTableCell<DistributionRow, Soldier> cellBean
+								= (ComboBoxTableCell<DistributionRow, Soldier>) ((SimpleObjectProperty) observableValue)
+								.getBean();
 						if (t1 instanceof NullSoldier) cell.setItem(null);
-						if (t1 != null) {
+						if (t1 != null && !(t1 instanceof NullSoldier)) {
 							TableRow<DistributionRow> r = cell.getTableRow();
 							DistributionRow row = r.getItem();
 							if (row != null) {
@@ -486,17 +524,19 @@ public class DistributionController implements Initializable {
 			refreshTableColumns();
 			List<Watch> watches = DbManager.findWatchesByDate(date);
 
-			List<WatchPoint> watchPoints
-					= Lists.transform(watches, input -> input == null ? null : input.getWatchPoint());
+			List<WatchPoint> watchPoints;
+			if (watches.isEmpty()) {
+				watchPoints = DbManager.findAllActiveWatchPoints();
+			} else {
+				watchPoints = Lists.transform(watches, input -> input == null ? null : input.getWatchPoint());
+			}
 			watchPoints.removeAll(Collections.<WatchPoint>singleton(null));
 
 			TreeSet<WatchPoint> dupesRemovedSortedWatchPoints = new TreeSet<>(Comparators.WATCH_POINT_ID_ASC_COMPARATOR);
 			dupesRemovedSortedWatchPoints.addAll(watchPoints);
 
-			int soldierCount = 0;
-			for (WatchPoint point : dupesRemovedSortedWatchPoints) {
-				soldierCount += point.getRequiredSoldierCount();
-			}
+			int soldierCount = WatchPointSoldierCalculator
+					.getTotalWatchPointSoldierCount(dupesRemovedSortedWatchPoints);
 			Soldier[][] soldiers = new Soldier[TOTAL_WATCHES_IN_DAY][soldierCount];
 			for (Watch watch : watches) {
 				for (TableColumn<DistributionRow, ?> column : distributionTable.getColumns()) {

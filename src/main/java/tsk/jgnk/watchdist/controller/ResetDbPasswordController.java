@@ -8,12 +8,13 @@ import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 import tsk.jgnk.watchdist.i18n.Messages;
-import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
 import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
 
 import java.util.Optional;
+
+import static tsk.jgnk.watchdist.type.PasswordType.*;
 
 @SuppressWarnings("unused")
 public class ResetDbPasswordController {
@@ -23,23 +24,23 @@ public class ResetDbPasswordController {
 	private PasswordField password;
 
 	public void login() {
-		String appPassword = DbManager.getProperty(Constants.APP_PASSWORD);
-		String masterPassword = DbManager.getProperty(Constants.MASTER_PASSWORD);
+		String appPassword = DbManager.getProperty(APP_PASSWORD.getKey());
+		String masterPassword = DbManager.getProperty(MASTER_PASSWORD.getKey());
 
 		String enteredPassword = password.getText();
 
 		if (BCrypt.checkpw(enteredPassword, appPassword) || BCrypt.checkpw(enteredPassword, masterPassword)) {
 			((Stage) error.getScene().getWindow()).close();
-			WindowManager.showMainWindow(null);
+			WindowManager.showMainWindow();
 		} else {
 			error.setVisible(true);
 		}
 	}
 
 	public void resetDatabase() {
-		String appPassword = DbManager.getProperty(Constants.APP_PASSWORD);
-		String dbResetPassword = DbManager.getProperty(Constants.DB_RESET_PASSWORD);
-		String masterPassword = DbManager.getProperty(Constants.MASTER_PASSWORD);
+		String appPassword = DbManager.getProperty(APP_PASSWORD.getKey());
+		String dbResetPassword = DbManager.getProperty(DB_RESET_PASSWORD.getKey());
+		String masterPassword = DbManager.getProperty(MASTER_PASSWORD.getKey());
 
 		String enteredPassword = password.getText();
 
@@ -49,8 +50,8 @@ public class ResetDbPasswordController {
 				DbManager.close();
 				FileManager.resetDatabase();
 				DbManager.initialize(FileManager.getDatabasePath());
-				DbManager.setProperty(Constants.APP_PASSWORD, appPassword);
-				DbManager.setProperty(Constants.DB_RESET_PASSWORD, dbResetPassword);
+				DbManager.setProperty(APP_PASSWORD.getKey(), appPassword);
+				DbManager.setProperty(DB_RESET_PASSWORD.getKey(), dbResetPassword);
 				WindowManager.getMainController().refreshTableData();
 				WindowManager.showInfoAlert(Messages.get("success"), Messages.get("database.reset.success.message"));
 			}

@@ -43,7 +43,7 @@ public class WatchPointsController implements Initializable {
     }
 
     private void showAddNewWatchPointWindow() {
-        WindowManager.showAddNewWatchPointWindow(this);
+        WindowManager.showAddNewWatchPointWindow();
     }
 
     @Override

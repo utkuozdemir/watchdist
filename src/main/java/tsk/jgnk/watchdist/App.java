@@ -8,7 +8,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tsk.jgnk.watchdist.i18n.Messages;
-import tsk.jgnk.watchdist.util.Constants;
 import tsk.jgnk.watchdist.util.DbManager;
 import tsk.jgnk.watchdist.util.FileManager;
 import tsk.jgnk.watchdist.util.WindowManager;
@@ -16,6 +15,9 @@ import tsk.jgnk.watchdist.util.WindowManager;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static tsk.jgnk.watchdist.type.PasswordType.APP_PASSWORD;
+import static tsk.jgnk.watchdist.type.PasswordType.DB_RESET_PASSWORD;
 
 public class App extends Application {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
@@ -27,27 +29,27 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        logger.info("Using JAVAFX Version " + VersionInfo.getVersion());
+		Thread.currentThread().setUncaughtExceptionHandler((t, e) -> takeErrorAction(e));
+		logger.info("Using JAVAFX Version " + VersionInfo.getVersion());
         logger.info("Using JAVAFX Runtime Version " + VersionInfo.getRuntimeVersion());
-        initialize();
 
-        Thread.currentThread().setUncaughtExceptionHandler((t, e) -> takeErrorAction(e));
+		initializeDb();
+		initializePasswordPrompt();
+	}
 
-		String appPassword = DbManager.getProperty(Constants.APP_PASSWORD);
-		String dbResetPassword = DbManager.getProperty(Constants.DB_RESET_PASSWORD);
+	private void initializePasswordPrompt() {
+		String appPassword = DbManager.getProperty(APP_PASSWORD.getKey());
+		String dbResetPassword = DbManager.getProperty(DB_RESET_PASSWORD.getKey());
 		if (Strings.isNullOrEmpty(appPassword) || Strings.isNullOrEmpty(dbResetPassword)) {
 			WindowManager.showSetPasswordsWindow();
 		} else {
 			WindowManager.showAppPasswordWindow();
 		}
-
-//        WindowManager.showMainWindow(stage);
 	}
 
-    private void initialize() {
-        try {
+	private void initializeDb() {
+		try {
             boolean newDbCreated = false;
-            boolean newTemplateCreated = false;
 
             Path dbFilePath = Paths.get(App.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             logger.info("Using DB Path: " + dbFilePath.toString());
@@ -62,24 +64,14 @@ public class App extends Application {
 			}
 			DbManager.initialize(dbPath);
 
-			Path templatePath = FileManager.getExcelTemplatePath();
-			if (!Files.exists(templatePath)) {
-				FileManager.resetExcelTemplate();
-				newTemplateCreated = true;
-			}
-
-            WindowManager.showInitializationInfo(
-					newDbCreated ? dbDirectory.toString() : null,
-					newTemplateCreated ? templatePath.getParent().toString() : null
-			);
-
-        } catch (Exception e) {
+			WindowManager.showInitializationInfo(newDbCreated ? dbDirectory.toString() : null, null);
+		} catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void takeErrorAction(Throwable e) {
-        logger.error(e.getMessage(), e);
+	private void takeErrorAction(Throwable e) {
+		logger.error(e.getMessage(), e);
 
 		WindowManager.showErrorAlert(Messages.get("error"), Messages.get("error.message"));
 	}

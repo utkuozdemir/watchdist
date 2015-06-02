@@ -6,7 +6,9 @@
 <?import javafx.scene.text.Font?>
 <?import java.lang.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity" prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/null">
+            minWidth="-Infinity"
+            prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/null"
+            fx:controller="tsk.jgnk.watchdist.controller.AddNewWatchPointController">
     <Label layoutX="14.0" layoutY="14.0" text="%addnewwatchpoint.new.watch.point" AnchorPane.leftAnchor="14.0"
            AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <font>
@@ -17,7 +19,7 @@
                promptText="%addnewwatchpoint.watch.point.name" AnchorPane.leftAnchor="14.0"
                AnchorPane.rightAnchor="14.0"/>
     <ComboBox fx:id="requiredSoldierCount" layoutX="194.0" layoutY="80.0" prefHeight="23.0" prefWidth="90.0"
-              promptText="%required.soldier.count" AnchorPane.rightAnchor="14.0">
+              promptText="%required.soldier.count" AnchorPane.leftAnchor="196.0" AnchorPane.rightAnchor="14.0">
         <items>
             <FXCollections fx:factory="observableArrayList">
                 <Integer fx:value="1"/>
@@ -36,8 +38,8 @@
             <Integer fx:value="1"/>
         </value>
     </ComboBox>
-    <Label layoutX="14.0" layoutY="84.0" text="%required.soldier.count" AnchorPane.leftAnchor="14.0"
-           AnchorPane.rightAnchor="14.0">
+    <Label layoutX="14.0" layoutY="84.0" prefHeight="15.0" prefWidth="173.0" text="%required.soldier.count"
+           AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="113.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
@@ -50,7 +52,7 @@
     </Label>
     <Button fx:id="saveWatchPointButton" defaultButton="true" layoutX="84.0" layoutY="115.0" mnemonicParsing="false"
             onAction="#saveWatchPoint" prefHeight="30.0" prefWidth="200.0" text="%addnewwatchpoint.save.watch.point"
-            AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="156.0">
+            AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>

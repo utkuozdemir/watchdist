@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import tsk.jgnk.watchdist.domain.WatchPoint;
 import tsk.jgnk.watchdist.util.DbManager;
+import tsk.jgnk.watchdist.util.WindowManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -24,11 +25,7 @@ public class AddNewWatchPointController implements Initializable {
 	@FXML
 	private Button saveWatchPointButton;
 
-	private WatchPointsController watchPointsController;
-
-
-	public AddNewWatchPointController(WatchPointsController watchPointsController) {
-		this.watchPointsController = watchPointsController;
+	public AddNewWatchPointController() {
 	}
 
 	@Override
@@ -53,8 +50,8 @@ public class AddNewWatchPointController implements Initializable {
 		DbManager.createWatchPoint(watchPoint);
 
 		resetFields();
-		watchPointsController.refreshTableData();
-		watchPointsController.scrollToLastElementInTable();
+		WindowManager.getWatchPointsController().refreshTableData();
+		WindowManager.getWatchPointsController().scrollToLastElementInTable();
 		watchPointName.requestFocus();
 	}
 }

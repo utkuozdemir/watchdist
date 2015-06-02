@@ -16,6 +16,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 import tsk.jgnk.watchdist.domain.Soldier;
 import tsk.jgnk.watchdist.fx.SoldierFX;
 import tsk.jgnk.watchdist.i18n.Language;
@@ -197,7 +198,7 @@ public class MainController implements Initializable {
 		language.setItems(FXCollections.observableArrayList(Arrays.asList(Language.values())));
 		language.setValue(Language.forLocale(Messages.getLocale()));
 		language.valueProperty().addListener((observableValue, language1, t1) -> {
-			WindowManager.switchLanguage(t1);
+			WindowManager.switchLanguage(((Stage) language.getScene().getWindow()), t1);
 		});
 		initializeTable();
 		refreshTableData();

@@ -15,33 +15,77 @@ import tsk.jgnk.watchdist.App;
 import tsk.jgnk.watchdist.controller.*;
 import tsk.jgnk.watchdist.i18n.Language;
 import tsk.jgnk.watchdist.i18n.Messages;
+import tsk.jgnk.watchdist.type.PasswordType;
+import tsk.jgnk.watchdist.type.WindowType;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static tsk.jgnk.watchdist.AppWindow.*;
+import static tsk.jgnk.watchdist.type.WindowType.*;
 
 public class WindowManager {
 	private static MainController mainController;
-	private static Stage mainStage;
+	private static WatchPointsController watchPointsController;
 
-	public static void showSetPasswordsWindow() {
+	public static void showSetExcelTemplatePathWindow(String infoMessage) {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == SET_PASSWORDS) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(SET_EXCEL_TEMPLATE_PATH)) return;
 
-			URL resource = App.class.getClassLoader().getResource("view/set_passwords.fxml");
+			URL resource = App.class.getClassLoader().getResource("view/set_excel_template_path.fxml");
 			checkNotNull(resource);
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
+
+			SetExcelTemplatePathController controller = fxmlLoader.getController();
+			controller.setInfoMessage(infoMessage);
+
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setResizable(false);
+			stage.setTitle(Messages.get("set.excel.template.path"));
+			stage.setUserData(SET_EXCEL_TEMPLATE_PATH);
+			stage.show();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public static void showChangePasswordWindow(PasswordType passwordType) {
+		WindowType windowType;
+		switch (passwordType) {
+			case APP_PASSWORD:
+				windowType = CHANGE_APP_PASSWORD;
+				break;
+			case DB_RESET_PASSWORD:
+				windowType = RESET_DB_PASSWORD;
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid password type to change: " + passwordType);
+		}
+		try {
+			if (alreadyOpened(windowType)) return;
+
+			URL resource = App.class.getClassLoader().getResource("view/change_password.fxml");
+			checkNotNull(resource);
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+
+			ChangePasswordController controller = fxmlLoader.getController();
+			controller.initialize(passwordType);
+
+			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
 			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
@@ -49,7 +93,43 @@ public class WindowManager {
 			stage.setResizable(false);
 			stage.setTitle(Messages.get("set.passwords"));
 			stage.show();
+			stage.setUserData(windowType);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	private static boolean alreadyOpened(WindowType windowType) {
+		for (Stage stage : StageHelper.getStages()) {
+			if (stage.getUserData() == windowType) {
+				stage.requestFocus();
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static void showSetPasswordsWindow() {
+		try {
+			if (alreadyOpened(SET_PASSWORDS)) return;
+
+			URL resource = App.class.getClassLoader().getResource("view/set_passwords.fxml");
+			checkNotNull(resource);
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setResizable(false);
+			stage.setTitle(Messages.get("set.passwords"));
 			stage.setUserData(SET_PASSWORDS);
+			stage.show();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -57,12 +137,7 @@ public class WindowManager {
 
 	public static void showAppPasswordWindow() {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == APP_PASSWORD) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(APP_PASSWORD)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/app_password.fxml");
 			checkNotNull(resource);
@@ -70,14 +145,16 @@ public class WindowManager {
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
 			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.setScene(scene);
 			stage.setResizable(false);
 			stage.setTitle(Messages.get("app.password"));
-			stage.show();
 			stage.setUserData(APP_PASSWORD);
+			stage.show();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -85,12 +162,7 @@ public class WindowManager {
 
 	public static void showResetDbPasswordWindow() {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == RESET_DB_PASSWORD) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(RESET_DB_PASSWORD)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/reset_db_password.fxml");
 			checkNotNull(resource);
@@ -98,6 +170,8 @@ public class WindowManager {
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
 			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
@@ -111,10 +185,11 @@ public class WindowManager {
 		}
 	}
 
-	public static void showMainWindow(Stage stage) {
+	public static void showMainWindow() {
 		try {
-			if (stage == null) stage = new Stage();
-			mainStage = stage;
+			if (alreadyOpened(MAIN)) return;
+
+			Stage stage = new Stage();
 			URL resource = App.class.getClassLoader().getResource("view/main.fxml");
 			checkNotNull(resource);
 
@@ -122,6 +197,8 @@ public class WindowManager {
 			fxmlLoader.setResources(Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.setTitle(Messages.get("main.window.title"));
 			stage.setScene(scene);
@@ -133,21 +210,16 @@ public class WindowManager {
 		}
 	}
 
-	public static void switchLanguage(Language language) {
+	public static void switchLanguage(Stage mainWindow, Language language) {
 		checkNotNull(language);
-		mainStage.close();
+		mainWindow.close();
 		Messages.setLocale(language.getLocale());
-		WindowManager.showMainWindow(mainStage);
+		WindowManager.showMainWindow();
 	}
 
 	public static void showWatchPointsWindow() {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == WATCH_POINTS) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(WATCH_POINTS)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/watch_points.fxml");
 			checkNotNull(resource);
@@ -155,14 +227,17 @@ public class WindowManager {
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
-			stage.initOwner(mainStage);
-			stage.initModality(Modality.WINDOW_MODAL);
+			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.setScene(scene);
 			stage.setTitle(Messages.get("watchpoints.title"));
 			stage.show();
 			stage.setUserData(WATCH_POINTS);
+
+			watchPointsController = fxmlLoader.getController();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -171,12 +246,7 @@ public class WindowManager {
 	public static void showAdministrationWindow(MainController mainController) {
 		checkNotNull(mainController);
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == ADMINISTRATION) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(ADMINISTRATION)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/administration.fxml");
 			checkNotNull(resource);
@@ -184,9 +254,10 @@ public class WindowManager {
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
-			stage.initOwner(mainStage);
-			stage.initModality(Modality.WINDOW_MODAL);
+			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.setResizable(false);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.setScene(scene);
@@ -200,12 +271,7 @@ public class WindowManager {
 
 	public static void showWatchDistributionWindow(MainController mainController) {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == WATCH_DISTRIBUTION) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(WATCH_DISTRIBUTION)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/distribution.fxml");
 			checkNotNull(resource);
@@ -213,9 +279,10 @@ public class WindowManager {
 			fxmlLoader.setController(new DistributionController(mainController));
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
-			stage.initOwner(mainStage);
-			stage.initModality(Modality.WINDOW_MODAL);
+			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.setScene(scene);
@@ -229,21 +296,17 @@ public class WindowManager {
 
 	public static void showWatchValuesWindow() {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == WATCH_VALUES) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(WATCH_VALUES)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/watch_values.fxml");
 			checkNotNull(resource);
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
-			stage.initOwner(mainStage);
-			stage.initModality(Modality.WINDOW_MODAL);
+			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.setResizable(false);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.setScene(scene);
@@ -255,24 +318,18 @@ public class WindowManager {
 		}
 	}
 
-	public static void showAddNewWatchPointWindow(WatchPointsController watchPointsController) {
+	public static void showAddNewWatchPointWindow() {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == ADD_NEW_WATCH_POINT) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(ADD_NEW_WATCH_POINT)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/add_new_watch_point.fxml");
 			checkNotNull(resource);
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
-			AddNewWatchPointController addNewWatchPointController
-					= new AddNewWatchPointController(watchPointsController);
-			fxmlLoader.setController(addNewWatchPointController);
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
 
 			Stage owner = StageHelper.getStages().stream()
@@ -293,12 +350,7 @@ public class WindowManager {
 
 	public static void showAddNewSoldierWindow(MainController mainController) {
 		try {
-			for (Stage stage : StageHelper.getStages()) {
-				if (stage.getUserData() == ADD_NEW_SOLDIER) {
-					stage.requestFocus();
-					return;
-				}
-			}
+			if (alreadyOpened(ADD_NEW_SOLDIER)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/add_new_soldier.fxml");
 			checkNotNull(resource);
@@ -309,9 +361,10 @@ public class WindowManager {
 
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
 			Stage stage = new Stage();
-			stage.initOwner(mainStage);
-			stage.initModality(Modality.WINDOW_MODAL);
+			stage.initModality(Modality.APPLICATION_MODAL);
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.setResizable(false);
 			stage.setScene(scene);
@@ -423,5 +476,9 @@ public class WindowManager {
 
 	public static MainController getMainController() {
 		return mainController;
+	}
+
+	public static WatchPointsController getWatchPointsController() {
+		return watchPointsController;
 	}
 }

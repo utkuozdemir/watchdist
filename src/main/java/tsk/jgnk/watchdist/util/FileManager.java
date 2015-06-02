@@ -19,17 +19,6 @@ public class FileManager {
 		}
 	}
 
-	public static Path getExcelTemplatePath() {
-		try {
-			Path filePath = Paths.get(FileManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-			Path directory = filePath.getParent();
-			String url = directory.toString() + File.separator + Constants.TEMPLATE_NAME;
-			return Paths.get(url);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	public static InputStream getCleanExcelTemplateInputStream() {
 		return FileManager.class.getClassLoader().getResourceAsStream("template.xls");
 	}
@@ -43,16 +32,6 @@ public class FileManager {
 			Path databasePath = getDatabasePath();
 			Files.deleteIfExists(databasePath);
 			Files.copy(getCleanDatabaseInputStream(), databasePath);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static void resetExcelTemplate() {
-		try {
-			Path excelTemplatePath = getExcelTemplatePath();
-			Files.deleteIfExists(excelTemplatePath);
-			Files.copy(getCleanExcelTemplateInputStream(), excelTemplatePath);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
