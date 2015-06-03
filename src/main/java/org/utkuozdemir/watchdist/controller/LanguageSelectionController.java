@@ -8,9 +8,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import org.utkuozdemir.watchdist.App;
+import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.i18n.Language;
 import org.utkuozdemir.watchdist.i18n.Messages;
-import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
@@ -50,7 +50,7 @@ public class LanguageSelectionController implements Initializable {
 		DbManager.setProperty(Constants.LOCALE_KEY, language.getValue().name());
 		Messages.setLocale(language.getValue().getLocale());
 
-		WindowManager.showInitializationInfo(App.isNewDbInitialized() ? App.getInitializedDbDirectory() : null, null);
+		WindowManager.showInitializationInfo(App.isNewDbInitialized() ? App.getInitializedDbDirectory() : null);
 		initializePasswordPrompt();
 		((Stage) language.getScene().getWindow()).close();
 	}

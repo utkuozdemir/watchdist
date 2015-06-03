@@ -39,7 +39,7 @@ public class FileManager {
 		return FileManager.class.getClassLoader().getResourceAsStream("template.xls");
 	}
 
-	public static InputStream getCleanDatabaseInputStream() {
+	private static InputStream getCleanDatabaseInputStream() {
 		return FileManager.class.getClassLoader().getResourceAsStream("clean_db.db");
 	}
 

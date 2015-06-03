@@ -186,11 +186,10 @@ public class DbManager {
 
 	public static int saveWatchesAddPointsDeleteOldWatches(
 			final LocalDate date,
-			final Collection<Watch> watches,
-			final WatchRemovalMode removalMode) {
+			final Collection<Watch> watches) {
 		try {
 			return transactionManager.callInTransaction(() -> {
-				int deleted = deleteWatchesByDate(date, removalMode);
+				int deleted = deleteWatchesByDate(date, WatchRemovalMode.UNDO_POINTS);
 
 				int count = 0;
 				for (Watch watch : watches) {
@@ -244,7 +243,7 @@ public class DbManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static int deleteWatchesByDate(final LocalDate date, final WatchRemovalMode mode) {
+	private static int deleteWatchesByDate(final LocalDate date, final WatchRemovalMode mode) {
 		checkNotNull(date);
 		checkNotNull(mode);
 		try {

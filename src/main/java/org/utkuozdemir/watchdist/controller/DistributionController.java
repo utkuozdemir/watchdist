@@ -17,12 +17,13 @@ import javafx.stage.FileChooser;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.utkuozdemir.watchdist.domain.NullSoldier;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
-import org.utkuozdemir.watchdist.domain.NullSoldier;
 import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
 import org.utkuozdemir.watchdist.i18n.Messages;
+import org.utkuozdemir.watchdist.util.Comparators;
 import org.utkuozdemir.watchdist.util.*;
 
 import java.awt.*;
@@ -186,7 +187,7 @@ public class DistributionController implements Initializable {
 					}
 				}
 				DbManager.saveWatchesAddPointsDeleteOldWatches(
-						getCurrentDate(), watchesToBeSaved, WatchRemovalMode.UNDO_POINTS
+						getCurrentDate(), watchesToBeSaved
 				);
 
 				WindowManager.showInfoAlert(Messages.get("success"), Messages.get("distribution.success.message"));

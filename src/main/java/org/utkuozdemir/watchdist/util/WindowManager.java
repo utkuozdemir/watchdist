@@ -413,20 +413,14 @@ public class WindowManager {
 		}
 	}
 
-	public static void showInitializationInfo(String dbPath, String templatePath) {
-		if (dbPath == null && templatePath == null) return;
+	public static void showInitializationInfo(String dbPath) {
+		if (dbPath == null) return;
 
 		StringBuilder message = new StringBuilder();
-		if (dbPath != null) {
-			message.append(Messages.get("new.db.initialized.message", Constants.DB_NAME, dbPath));
-		}
+		message.append(Messages.get("new.db.initialized.message", Constants.DB_NAME, dbPath));
 
 		message.append(System.lineSeparator());
 		message.append(System.lineSeparator());
-
-		if (templatePath != null) {
-			message.append(Messages.get("new.template.initialized.message", Constants.TEMPLATE_NAME, templatePath));
-		}
 
 		WindowManager.showInfoAlert(Messages.get("new.initializations"), message.toString().trim());
 	}

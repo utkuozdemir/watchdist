@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.joda.time.LocalDate;
 import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.domain.Availability;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
-import org.utkuozdemir.watchdist.domain.Availability;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -134,7 +134,7 @@ public class DistributionEngine {
 	}
 
 
-	public static List<Soldier> getSoldiersWithOnlyGivenHourAvailable(
+	private static List<Soldier> getSoldiersWithOnlyGivenHourAvailable(
 			Collection<Soldier> soldiers, final int dayNum, final int time) {
 
 		List<Soldier> filtered = soldiers.stream().filter(input -> {
