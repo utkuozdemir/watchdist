@@ -6,7 +6,7 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity"
             prefHeight="410.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/null"
-            fx:controller="tsk.jgnk.watchdist.controller.WatchPointsController">
+            fx:controller="org.utkuozdemir.watchdist.controller.WatchPointsController">
     <TableView fx:id="watchPointsTable" editable="true" layoutX="14.0" layoutY="39.0" prefHeight="350.0"
                prefWidth="420.0" AnchorPane.bottomAnchor="21.0" AnchorPane.leftAnchor="14.0"
                AnchorPane.rightAnchor="206.0" AnchorPane.topAnchor="39.0">

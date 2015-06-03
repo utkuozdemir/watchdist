@@ -18,11 +18,7 @@
         </encoder>
     </appender>
 
-    <logger name="tsk.jgnk">
-        <level value="ERROR"/>
-    </logger>
-
-    <logger name="org.thehecklers">
+    <logger name="org.utkuozdemir">
         <level value="ERROR"/>
     </logger>
 

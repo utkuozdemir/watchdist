@@ -6,7 +6,7 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity"
             prefHeight="310.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/null"
-            fx:controller="tsk.jgnk.watchdist.controller.AdministrationController">
+            fx:controller="org.utkuozdemir.watchdist.controller.AdministrationController">
     <children>
         <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#editExcelTemplate" prefHeight="30.0"
                 prefWidth="269.0" text="%edit.excel.template" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0"

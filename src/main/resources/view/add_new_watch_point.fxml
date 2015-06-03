@@ -8,7 +8,7 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity"
             prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/null"
-            fx:controller="tsk.jgnk.watchdist.controller.AddNewWatchPointController">
+            fx:controller="org.utkuozdemir.watchdist.controller.AddNewWatchPointController">
     <Label layoutX="14.0" layoutY="14.0" text="%addnewwatchpoint.new.watch.point" AnchorPane.leftAnchor="14.0"
            AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <font>

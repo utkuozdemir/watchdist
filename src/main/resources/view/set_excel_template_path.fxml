@@ -6,7 +6,7 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity"
             prefHeight="170.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/null"
-            fx:controller="tsk.jgnk.watchdist.controller.SetExcelTemplatePathController">
+            fx:controller="org.utkuozdemir.watchdist.controller.SetExcelTemplatePathController">
     <children>
         <Label fx:id="info" layoutX="14.0" layoutY="14.0" prefHeight="60.0" prefWidth="422.0" text="-" wrapText="true"
                AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">

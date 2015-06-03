@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>tsk.jgnk</groupId>
+    <groupId>org.utkuozdemir</groupId>
     <artifactId>watchdist</artifactId>
     <version>1.0</version>
 
@@ -99,15 +99,15 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx-maven-plugin.version}</version>
                 <configuration>
-                    <mainClass>tsk.jgnk.watchdist.App</mainClass>
-                    <vendor>JGNK</vendor>
+                    <mainClass>org.utkuozdemir.watchdist.App</mainClass>
+                    <vendor>UTKU OZDEMIR</vendor>
                     <appName>NobetYonetim</appName>
                 </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <configuration>
-                            <mainClass>tsk.jgnk.watchdist.App</mainClass>
+                            <mainClass>org.utkuozdemir.watchdist.App</mainClass>
                         </configuration>
                         <goals>
                             <goal>jar</goal>
