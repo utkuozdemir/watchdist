@@ -1,6 +1,8 @@
 .text-field {
+    /*noinspection CssInvalidFunction*/
     -fx-prompt-text-fill: derive(-fx-control-inner-background,-30%);
 }
 .text-field:focused {
+    /*noinspection CssInvalidFunction*/
     -fx-prompt-text-fill: derive(-fx-control-inner-background,-30%);
 }

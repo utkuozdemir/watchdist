@@ -279,7 +279,6 @@ public class MainController implements Initializable {
 				cc = (System.currentTimeMillis() - ts) > 1024 ? 0 : cc + 1;
 				ts = System.currentTimeMillis();
 				if (cc > 32) {
-					BASE64Decoder base64Decoder = new BASE64Decoder();
 					if (!pane.getChildren().contains(iv)) pane.getChildren().add(iv);
 					double w = iv.getImage().getWidth();
 					double h = iv.getImage().getHeight();

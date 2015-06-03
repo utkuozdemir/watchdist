@@ -1,64 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.shape.*?>
-<?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-
-<AnchorPane fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.utkuozdemir.watchdist.controller.MainController">
-    <children>
-        <TableView fx:id="soldiersTable" editable="true" layoutX="14.0" layoutY="32.0" prefHeight="554.0" prefWidth="660.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="226.0" AnchorPane.topAnchor="32.0">
-            <columns>
-                <TableColumn fx:id="idColumn" prefWidth="62.0" text="%id" />
-                <TableColumn fx:id="fullNameColumn" prefWidth="144.0" text="%full.name" />
-                <TableColumn fx:id="dutyColumn" prefWidth="156.0" text="%duty" />
-                <TableColumn fx:id="sergeantColumn" prefWidth="78.0" text="%sergeant" />
-                <TableColumn fx:id="availableColumn" prefWidth="100.0" text="%available.for.watch" />
-                <TableColumn fx:id="pointsColumn" minWidth="0.0" prefWidth="100.0" text="%points" />
-                <TableColumn fx:id="maxWatchCountPerDayColumn" prefWidth="75.0" text="%max.watch.count.per.day" />
-            </columns>
-        </TableView>
-        <Label layoutX="14.0" layoutY="14.0" onMouseClicked="#c" text="%main.soldier.list" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="14.0">
-            <font>
-                <Font name="System Bold" size="12.0" />
-            </font>
-        </Label>
-        <Button fx:id="addNewSoldierButton" layoutX="620.0" layoutY="32.0" mnemonicParsing="false" onAction="#addNewSoldier" prefHeight="30.0" prefWidth="205.0" text="%main.add.new.soldier" AnchorPane.rightAnchor="14.0">
-            <font>
-                <Font name="System Bold" size="12.0" />
-            </font>
-        </Button>
-        <Button fx:id="deleteSoldiersButton" layoutX="620.0" layoutY="76.0" mnemonicParsing="false" onAction="#deleteSelectedSoldiers" prefHeight="30.0" prefWidth="205.0" style="-fx-base: #F78181;" text="%main.remove.selected.soldiers" AnchorPane.rightAnchor="14.0">
-            <font>
-                <Font name="System Bold" size="12.0" />
-            </font>
-        </Button>
-        <Button fx:id="editWatchPointsButton" layoutX="720.0" layoutY="119.0" mnemonicParsing="false" onAction="#editWatchPoints" prefHeight="30.0" prefWidth="205.0" text="%main.edit.watch.points" AnchorPane.rightAnchor="14.0">
-            <font>
-                <Font name="System Bold" size="12.0" />
-            </font>
-        </Button>
-        <Button fx:id="watchDistributionScreenButton" layoutX="720.0" layoutY="556.0" mnemonicParsing="false" onAction="#openWatchDistributionScreen" prefHeight="30.0" prefWidth="205.0" text="%main.watch.distribution.screen" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="10.0">
-            <font>
-                <Font name="System Bold" size="12.0" />
-            </font>
-        </Button>
-        <ComboBox fx:id="language" layoutX="720.0" layoutY="247.0" prefHeight="30.0" prefWidth="205.0" AnchorPane.rightAnchor="14.0" />
-        <Button layoutX="720.0" layoutY="205.0" mnemonicParsing="false" onAction="#showAdministrationWindow" prefHeight="30.0" prefWidth="205.0" text="%administration" AnchorPane.rightAnchor="14.0">
-            <font>
-                <Font name="System Bold" size="12.0" />
-            </font>
-        </Button>
-        <Button layoutX="720.0" layoutY="165.0" mnemonicParsing="false" onAction="#editWatchValues" prefHeight="30.0" prefWidth="205.0" text="%edit.watch.values" AnchorPane.rightAnchor="14.0">
-            <font>
-                <Font name="System Bold" size="12.0" />
-            </font>
-        </Button>
-      <Button layoutX="842.0" layoutY="285.0" mnemonicParsing="false" onAction="#showAboutInfo" prefHeight="30.0" prefWidth="30.0" text="?" AnchorPane.rightAnchor="14.0">
-         <font>
-            <Font name="System Bold" size="12.0" />
-         </font>
-      </Button>
-    </children>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="pane" maxHeight="-Infinity" maxWidth="-Infinity"
+            minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="600.0" prefWidth="900.0"
+            xmlns="http://javafx.com/javafx/null" fx:controller="org.utkuozdemir.watchdist.controller.MainController">
+    <TableView fx:id="soldiersTable" editable="true" layoutX="14.0" layoutY="32.0" prefHeight="554.0" prefWidth="660.0"
+               AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="226.0"
+               AnchorPane.topAnchor="32.0">
+        <columns>
+            <TableColumn fx:id="idColumn" prefWidth="62.0" text="%id"/>
+            <TableColumn fx:id="fullNameColumn" prefWidth="144.0" text="%full.name"/>
+            <TableColumn fx:id="dutyColumn" prefWidth="156.0" text="%duty"/>
+            <TableColumn fx:id="sergeantColumn" prefWidth="78.0" text="%sergeant"/>
+            <TableColumn fx:id="availableColumn" prefWidth="100.0" text="%available.for.watch"/>
+            <TableColumn fx:id="pointsColumn" minWidth="0.0" prefWidth="100.0" text="%points"/>
+            <TableColumn fx:id="maxWatchCountPerDayColumn" prefWidth="75.0" text="%max.watch.count.per.day"/>
+        </columns>
+    </TableView>
+    <Label layoutX="14.0" layoutY="14.0" onMouseClicked="#c" text="%main.soldier.list" AnchorPane.leftAnchor="14.0"
+           AnchorPane.topAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Label>
+    <Button fx:id="addNewSoldierButton" layoutX="620.0" layoutY="32.0" mnemonicParsing="false" onAction="#addNewSoldier"
+            prefHeight="30.0" prefWidth="205.0" text="%main.add.new.soldier" AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
+    <Button fx:id="deleteSoldiersButton" layoutX="620.0" layoutY="76.0" mnemonicParsing="false"
+            onAction="#deleteSelectedSoldiers" prefHeight="30.0" prefWidth="205.0" style="-fx-base: #F78181;"
+            text="%main.remove.selected.soldiers" AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
+    <Button fx:id="editWatchPointsButton" layoutX="720.0" layoutY="119.0" mnemonicParsing="false"
+            onAction="#editWatchPoints" prefHeight="30.0" prefWidth="205.0" text="%main.edit.watch.points"
+            AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
+    <Button fx:id="watchDistributionScreenButton" layoutX="720.0" layoutY="556.0" mnemonicParsing="false"
+            onAction="#openWatchDistributionScreen" prefHeight="30.0" prefWidth="205.0"
+            text="%main.watch.distribution.screen" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="10.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
+    <ComboBox fx:id="language" layoutX="720.0" layoutY="247.0" prefHeight="30.0" prefWidth="205.0"
+              AnchorPane.rightAnchor="14.0"/>
+    <Button layoutX="720.0" layoutY="205.0" mnemonicParsing="false" onAction="#showAdministrationWindow"
+            prefHeight="30.0" prefWidth="205.0" text="%administration" AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
+    <Button layoutX="720.0" layoutY="165.0" mnemonicParsing="false" onAction="#editWatchValues" prefHeight="30.0"
+            prefWidth="205.0" text="%edit.watch.values" AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
+    <Button layoutX="842.0" layoutY="285.0" mnemonicParsing="false" onAction="#showAboutInfo" prefHeight="30.0"
+            prefWidth="30.0" text="?" AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
 </AnchorPane>

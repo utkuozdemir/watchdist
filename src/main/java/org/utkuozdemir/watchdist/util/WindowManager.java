@@ -313,7 +313,6 @@ public class WindowManager {
 			URL resource = App.class.getClassLoader().getResource("view/distribution.fxml");
 			checkNotNull(resource);
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
-			fxmlLoader.setController(new DistributionController(mainController));
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
 			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");

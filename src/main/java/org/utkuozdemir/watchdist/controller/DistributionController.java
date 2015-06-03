@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.utkuozdemir.watchdist.Constants.*;
 
 @SuppressWarnings("unused")
@@ -54,14 +53,8 @@ public class DistributionController implements Initializable {
 	@FXML
 	private Label dayName;
 
-
-	private MainController mainController;
 	private Soldier[] selectedSoldiersBeforeEdit;
 
-	public DistributionController(MainController mainController) {
-		this.mainController = mainController;
-		checkNotNull(mainController);
-	}
 
 	@SuppressWarnings("unused")
 	public void distribute() {
@@ -159,7 +152,7 @@ public class DistributionController implements Initializable {
 					TableColumn<DistributionRow, ?> column = columns.get(i);
 
 					String watchPointId = StringUtils.substringBefore(column.getId(), "-");
-					String watchPointSlotId = StringUtils.substringAfter(column.getId(), "-");
+//					String watchPointSlotId = StringUtils.substringAfter(column.getId(), "-");
 
 					Optional<WatchPoint> watchPointOptional
 							= DbManager.findWatchPointById(Integer.parseInt(watchPointId));
@@ -191,7 +184,7 @@ public class DistributionController implements Initializable {
 				);
 
 				WindowManager.showInfoAlert(Messages.get("success"), Messages.get("distribution.success.message"));
-				mainController.refreshTableData();
+				WindowManager.getMainController().refreshTableData();
 			}
 		}
 	}
