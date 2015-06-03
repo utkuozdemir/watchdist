@@ -7,6 +7,7 @@ public class Constants {
 	public static final int TOTAL_WATCHES_IN_DAY = 12;
 
 	public static final String DB_NAME = "nobet_veritabani.db";
+	public static final String LOG_FILE_NAME = "NobetYonetim.log";
 	public static final String TEMPLATE_NAME = "excel_sablonu.xls";
 	public static final String TEMPLATE_DAY_NAME = "%GÜN%";
 	public static final String DATE_FORMAT = "dd.MM.yyyy";

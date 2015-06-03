@@ -6,7 +6,7 @@
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>NobetYonetim.log</file>
+        <file>${user.home}/logs/NobetYonetim.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
             <fileNamePattern>NobetYonetim_%d{yyyy-MM-dd}.log</fileNamePattern>

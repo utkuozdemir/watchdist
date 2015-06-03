@@ -21,6 +21,20 @@ public class FileManager {
 		}
 	}
 
+	public static Path getLogFilePath() {
+		try {
+			return Paths.get(
+					System.getProperty("user.home") +
+							File.separator +
+							"logs" +
+							File.separator +
+							Constants.LOG_FILE_NAME
+			);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static InputStream getCleanExcelTemplateInputStream() {
 		return FileManager.class.getClassLoader().getResourceAsStream("template.xls");
 	}

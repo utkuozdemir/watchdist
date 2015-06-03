@@ -8,25 +8,34 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.utkuozdemir.watchdist.App;
 import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.controller.*;
 import org.utkuozdemir.watchdist.i18n.Language;
-import org.utkuozdemir.watchdist.type.PasswordType;
-import org.utkuozdemir.watchdist.App;
 import org.utkuozdemir.watchdist.i18n.Messages;
+import org.utkuozdemir.watchdist.type.PasswordType;
 import org.utkuozdemir.watchdist.type.WindowType;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.utkuozdemir.watchdist.type.WindowType.*;
 
 public class WindowManager {
+	private static final Logger logger = LoggerFactory.getLogger(WindowManager.class);
+
 	private static MainController mainController;
 	private static WatchPointsController watchPointsController;
 
@@ -440,16 +449,46 @@ public class WindowManager {
 		alert.setHeaderText(Messages.get("error"));
 		alert.setContentText(message);
 
+		ButtonType exportLogButtonType = new ButtonType(Messages.get("export.log"));
 		ButtonType continueButtonType = new ButtonType(Messages.get("continue"));
 		ButtonType exitButtonType = new ButtonType(Messages.get("exit"));
 
-		alert.getButtonTypes().setAll(continueButtonType, exitButtonType);
+		alert.getButtonTypes().setAll(exportLogButtonType, continueButtonType, exitButtonType);
 		((Button) alert.getDialogPane().lookupButton(continueButtonType)).setDefaultButton(true);
 		alert.getDialogPane().lookupButton(exitButtonType).setStyle("-fx-base: #F78181;");
 
+		Button exportLogButton = (Button) alert.getDialogPane().lookupButton(exportLogButtonType);
+		exportLogButton.setTooltip(new Tooltip(Messages.get("export.log")));
+		exportLogButton.setDisable(!Files.exists(FileManager.getLogFilePath()));
+
+		alert.setOnCloseRequest(event -> {
+			if (((Alert) event.getTarget()).resultProperty().getValue() == exportLogButtonType) {
+				FileChooser fileChooser = new FileChooser();
+
+				FileChooser.ExtensionFilter extFilter
+						= new FileChooser.ExtensionFilter(Messages.get("log.file") + " (*.log)", "*.log");
+				fileChooser.getExtensionFilters().add(extFilter);
+				fileChooser.setTitle(Messages.get("export.log"));
+
+				fileChooser.setInitialFileName(Constants.LOG_FILE_NAME);
+				File file = fileChooser.showSaveDialog(exportLogButton.getScene().getWindow());
+				if (file != null) {
+					if (!file.getName().endsWith(".log")) file = new File(file.getPath() + ".log");
+					try {
+						Files.copy(FileManager.getLogFilePath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+				event.consume();
+			}
+		});
+
 		Optional<ButtonType> result = alert.showAndWait();
-		if (result.isPresent() && result.get() == exitButtonType) {
-			Platform.exit();
+		if (result.isPresent()) {
+			if (result.get() == exitButtonType) {
+				Platform.exit();
+			}
 		}
 	}
 
