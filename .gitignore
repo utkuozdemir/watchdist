@@ -4,5 +4,5 @@
 
 *.log
 
-nobet_veritabani.db
-excel_sablonu.xls
+/nobet_veritabani.db
+/excel_sablonu.xls
