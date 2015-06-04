@@ -21,6 +21,7 @@ import org.utkuozdemir.watchdist.domain.NullSoldier;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
 import org.utkuozdemir.watchdist.domain.WatchPoint;
+import org.utkuozdemir.watchdist.engine.DistributionEngine;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.util.Comparators;
@@ -58,7 +59,8 @@ public class DistributionController implements Initializable {
 
 	@SuppressWarnings("unused")
 	public void distribute() {
-		Soldier[][] soldiers = DistributionEngine.createDistribution(getCurrentDate());
+		Soldier[][] soldiers = DistributionEngine
+				.distribute(getCurrentDate(), DbManager.findAllActiveSoldiers(), DbManager.findAllActiveWatchPoints());
 		loadDataToTable(soldiers);
 	}
 

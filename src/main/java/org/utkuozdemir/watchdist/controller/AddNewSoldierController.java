@@ -9,11 +9,12 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.exception.ValidationException;
 import org.utkuozdemir.watchdist.i18n.Messages;
-import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.util.DbManager;
+import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -37,12 +38,6 @@ public class AddNewSoldierController implements Initializable {
 	@FXML
 	private ComboBox<Integer> maxWatchCountPerDay;
 
-	private MainController mainController;
-
-	public AddNewSoldierController(MainController mainController) {
-		this.mainController = mainController;
-	}
-
 	public void saveSoldier() {
 		try {
 			validateFields();
@@ -52,8 +47,8 @@ public class AddNewSoldierController implements Initializable {
 			);
 			DbManager.createSoldier(soldier);
 			resetFields();
-			mainController.refreshTableData();
-			mainController.scrollToLastElementInTable();
+			WindowManager.getMainController().refreshTableData();
+			WindowManager.getMainController().scrollToLastElementInTable();
 			fullName.requestFocus();
 		} catch (ValidationException e) {
 			errorLabel.setVisible(true);

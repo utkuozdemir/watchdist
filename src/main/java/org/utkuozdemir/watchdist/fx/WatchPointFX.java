@@ -9,10 +9,10 @@ import org.utkuozdemir.watchdist.util.DbManager;
 
 @SuppressWarnings("unused")
 public class WatchPointFX {
-    private SimpleIntegerProperty id;
-    private SimpleStringProperty name;
-    private SimpleIntegerProperty requiredSoldierCount;
-    private SimpleBooleanProperty active;
+    private final SimpleIntegerProperty id;
+    private final SimpleStringProperty name;
+    private final SimpleIntegerProperty requiredSoldierCount;
+    private final SimpleBooleanProperty active;
 
     public WatchPointFX(int id, String name, int requiredSoldierCount, boolean active) {
         this.id = new SimpleIntegerProperty(id);

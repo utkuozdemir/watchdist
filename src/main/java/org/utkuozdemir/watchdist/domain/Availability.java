@@ -1,5 +1,6 @@
 package org.utkuozdemir.watchdist.domain;
 
+import com.google.common.base.Objects;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -64,5 +65,20 @@ public class Availability {
 
     public void setHour(int hour) {
         this.hour = hour;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Availability that = (Availability) o;
+        return Objects.equal(dayNum, that.dayNum) &&
+                Objects.equal(hour, that.hour) &&
+                Objects.equal(soldier, that.soldier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(soldier, dayNum, hour);
     }
 }

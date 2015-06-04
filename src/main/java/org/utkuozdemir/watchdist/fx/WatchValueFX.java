@@ -7,8 +7,8 @@ import org.utkuozdemir.watchdist.util.WatchValues;
 
 @SuppressWarnings("unused")
 public class WatchValueFX {
-    private SimpleIntegerProperty hour;
-    private SimpleDoubleProperty value;
+    private final SimpleIntegerProperty hour;
+    private final SimpleDoubleProperty value;
 
     public WatchValueFX(int hour, double value) {
         this.hour = new SimpleIntegerProperty(hour);

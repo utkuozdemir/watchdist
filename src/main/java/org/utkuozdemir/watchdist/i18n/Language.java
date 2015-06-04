@@ -8,8 +8,8 @@ import java.util.Objects;
 public enum Language {
     EN("English", Locale.ENGLISH), TR("Türkçe", Locale.forLanguageTag("tr"));
 
-    private String languageName;
-    private Locale locale;
+    private final String languageName;
+    private final Locale locale;
 
     Language(String languageName, Locale locale) {
         this.languageName = languageName;

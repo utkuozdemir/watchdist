@@ -14,7 +14,6 @@ import org.utkuozdemir.watchdist.i18n.Messages;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -164,7 +163,7 @@ public class ExcelExporter {
 		return watchPoints;
 	}
 
-	private static Workbook getWorkbookTemplate() throws IOException {
+	private static Workbook getWorkbookTemplate() {
 		try {
 			String templatePath = DbManager.getProperty(Constants.EXCEL_TEMPLATE_PATH_KEY);
 			if (templatePath == null) {

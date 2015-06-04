@@ -17,7 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.App;
 import org.utkuozdemir.watchdist.Constants;
-import org.utkuozdemir.watchdist.controller.*;
+import org.utkuozdemir.watchdist.controller.ChangePasswordController;
+import org.utkuozdemir.watchdist.controller.MainController;
+import org.utkuozdemir.watchdist.controller.SetExcelTemplatePathController;
+import org.utkuozdemir.watchdist.controller.WatchPointsController;
 import org.utkuozdemir.watchdist.i18n.Language;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.type.PasswordType;
@@ -392,9 +395,6 @@ public class WindowManager {
 			checkNotNull(resource);
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
-			AddNewSoldierController controller = new AddNewSoldierController(mainController);
-			fxmlLoader.setController(controller);
-
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
 			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
@@ -415,13 +415,8 @@ public class WindowManager {
 	public static void showInitializationInfo(String dbPath) {
 		if (dbPath == null) return;
 
-		StringBuilder message = new StringBuilder();
-		message.append(Messages.get("new.db.initialized.message", Constants.DB_NAME, dbPath));
-
-		message.append(System.lineSeparator());
-		message.append(System.lineSeparator());
-
-		WindowManager.showInfoAlert(Messages.get("new.initializations"), message.toString().trim());
+		WindowManager.showInfoAlert(Messages.get("new.initializations"),
+				Messages.get("new.db.initialized.message", Constants.DB_NAME, dbPath));
 	}
 
 	public static void showInfoAlert(String title, String message) {

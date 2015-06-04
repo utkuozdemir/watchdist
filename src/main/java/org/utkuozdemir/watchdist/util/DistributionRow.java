@@ -6,7 +6,7 @@ import org.utkuozdemir.watchdist.domain.Soldier;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class DistributionRow {
-    private SimpleStringProperty hours;
+    private final SimpleStringProperty hours;
     private SimpleObjectProperty<Soldier>[] soldiers;
 
     public DistributionRow(String hours, Soldier[] soldiers) {

@@ -14,14 +14,14 @@ import static org.utkuozdemir.watchdist.Constants.TOTAL_WATCHES_IN_DAY;
 
 @SuppressWarnings("unused")
 public class SoldierFX {
-	private SimpleIntegerProperty id;
-	private SimpleStringProperty fullName;
-	private SimpleStringProperty duty;
-	private SimpleBooleanProperty available;
-	private SimpleDoubleProperty points;
-	private SimpleBooleanProperty active;
-	private SimpleBooleanProperty sergeant;
-	private SimpleIntegerProperty maxWatchesPerDay;
+	private final SimpleIntegerProperty id;
+	private final SimpleStringProperty fullName;
+	private final SimpleStringProperty duty;
+	private final SimpleBooleanProperty available;
+	private final SimpleDoubleProperty points;
+	private final SimpleBooleanProperty active;
+	private final SimpleBooleanProperty sergeant;
+	private final SimpleIntegerProperty maxWatchesPerDay;
 
 	private Collection<SimpleObjectProperty<Availability>> availabilities;
 	private SimpleBooleanProperty[][] availabilitiesBooleans;

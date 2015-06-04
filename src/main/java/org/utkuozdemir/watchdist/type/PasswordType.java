@@ -6,7 +6,7 @@ public enum PasswordType {
 	DB_RESET_PASSWORD("db.reset.password", "old.and.new.db.reset.passwords");
 
 	private final String key;
-	private String messageKey;
+	private final String messageKey;
 
 	PasswordType(String key, String messageKey) {
 		this.key = key;
