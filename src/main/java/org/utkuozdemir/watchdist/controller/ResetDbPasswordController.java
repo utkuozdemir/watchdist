@@ -1,5 +1,6 @@
 package org.utkuozdemir.watchdist.controller;
 
+import com.sun.javafx.stage.StageHelper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -7,13 +8,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
-import org.utkuozdemir.watchdist.type.PasswordType;
-import org.utkuozdemir.watchdist.util.FileManager;
 import org.utkuozdemir.watchdist.i18n.Messages;
+import org.utkuozdemir.watchdist.type.PasswordType;
+import org.utkuozdemir.watchdist.type.WindowType;
 import org.utkuozdemir.watchdist.util.DbManager;
+import org.utkuozdemir.watchdist.util.FileManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public class ResetDbPasswordController {
@@ -55,6 +59,12 @@ public class ResetDbPasswordController {
 				WindowManager.showInfoAlert(Messages.get("success"), Messages.get("database.reset.success.message"));
 			}
 			((Stage) error.getScene().getWindow()).close();
+
+			WindowManager.showLanguageSelectionWindow();
+			List<Stage> stages = StageHelper.getStages()
+					.stream().filter(s -> s.getUserData() != WindowType.LANGUAGE_SELECTION)
+					.collect(Collectors.toList());
+			stages.forEach(Stage::close);
 		} else {
 			error.setVisible(true);
 		}

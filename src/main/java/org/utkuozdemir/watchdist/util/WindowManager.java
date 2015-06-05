@@ -241,6 +241,7 @@ public class WindowManager {
 			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
 			stage.setTitle(Messages.get("main.window.title"));
 			stage.setScene(scene);
+			stage.setOnCloseRequest(e -> Platform.exit());
 			stage.show();
 			stage.setUserData(MAIN);
 			mainController = fxmlLoader.getController();

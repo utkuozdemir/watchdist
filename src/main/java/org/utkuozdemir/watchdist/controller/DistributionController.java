@@ -59,8 +59,13 @@ public class DistributionController implements Initializable {
 
 	@SuppressWarnings("unused")
 	public void distribute() {
+		LocalDate currentDate = getCurrentDate();
+		List<Watch> watches = DbManager.findWatchesByDate(currentDate);
+		List<WatchPoint> watchPoints = watches.isEmpty() ?
+				DbManager.findAllActiveWatchPoints() :
+				watches.stream().map(Watch::getWatchPoint).distinct().collect(Collectors.toList());
 		Soldier[][] soldiers = DistributionEngine
-				.distribute(getCurrentDate(), DbManager.findAllActiveSoldiers(), DbManager.findAllActiveWatchPoints());
+				.distribute(getCurrentDate(), DbManager.findAllActiveSoldiers(), watchPoints);
 		loadDataToTable(soldiers);
 	}
 
