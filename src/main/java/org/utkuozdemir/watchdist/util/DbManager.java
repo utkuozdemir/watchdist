@@ -1,7 +1,6 @@
 package org.utkuozdemir.watchdist.util;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMap;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
@@ -17,6 +16,7 @@ import org.utkuozdemir.watchdist.domain.*;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -129,8 +129,10 @@ public class DbManager {
 		try {
 			DbManager dbManager = getInstance();
 			return dbManager.transactionManager.callInTransaction(() -> {
-				Collection<Integer> soldierIds
-						= Collections2.transform(soldiers, input -> input == null ? 0 : input.getId());
+				List<Integer> soldierIds
+						= soldiers.stream().mapToInt(input -> input == null ? 0 :
+						input.getId()).boxed().collect(Collectors.toList());
+
 				PreparedDelete<Availability> preparedDelete
 						= (PreparedDelete<Availability>) dbManager.availabilityDao.deleteBuilder()
 						.where().in("soldier", soldierIds).prepare();

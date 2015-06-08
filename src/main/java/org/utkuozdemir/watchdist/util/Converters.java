@@ -1,19 +1,17 @@
 package org.utkuozdemir.watchdist.util;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Availability;
+import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.WatchPoint;
-import org.utkuozdemir.watchdist.domain.WatchValue;
 import org.utkuozdemir.watchdist.fx.SoldierFX;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
-import org.utkuozdemir.watchdist.fx.WatchValueFX;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class Converters {
 	public static final StringConverter<String> STRING_STRING_CONVERTER = new StringConverter<String>() {
@@ -38,8 +36,6 @@ public class Converters {
 		if (input == null) return null;
 		return new WatchPointFX(input.getId(), input.getName(), input.getRequiredSoldierCount(), input.isActive());
 	};
-	public static final Function<WatchValue, WatchValueFX> WATCH_VALUE_TO_FX
-			= input -> input != null ? new WatchValueFX(input.getHour(), input.getValue()) : null;
 	public static final Function<Soldier, SoldierFX> SOLDIER_TO_FX = s -> {
 		if (s == null) return null;
 		return new SoldierFX(s.getId(), s.getFullName(), s.getDuty(), s.isAvailable(),
@@ -49,12 +45,11 @@ public class Converters {
 		if (sfx == null) return null;
 
 		Collection<Availability> availabilities
-				= Collections2.transform(sfx.availabilitiesProperties(),
-				input -> {
-					if (input == null) return null;
-					Availability value = input.getValue();
-					return new Availability(value.getId(), value.getSoldier(), value.getDayNum(), value.getHour());
-				});
+				= sfx.availabilitiesProperties().stream().map(input -> {
+			if (input == null) return null;
+			Availability value = input.getValue();
+			return new Availability(value.getId(), value.getSoldier(), value.getDayNum(), value.getHour());
+		}).collect(Collectors.toList());
 
 		return new Soldier(
 				sfx.idProperty().get(), sfx.fullNameProperty().get(), sfx.dutyProperty().get(),

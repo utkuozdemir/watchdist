@@ -1,7 +1,6 @@
 package org.utkuozdemir.watchdist.fx;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.Collections2;
 import javafx.beans.property.*;
 import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Availability;
@@ -10,6 +9,8 @@ import org.utkuozdemir.watchdist.util.DbManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
 @SuppressWarnings("unused")
@@ -40,8 +41,9 @@ public class SoldierFX {
 		this.sergeant = new SimpleBooleanProperty(sergeant);
 		this.maxWatchesPerDay = new SimpleIntegerProperty(maxWatchesPerDay);
 
-		this.availabilities = Collections2.transform(availabilities, SimpleObjectProperty::new);
-
+		this.availabilities = availabilities.stream()
+				.map((Function<Availability, SimpleObjectProperty<Availability>>) SimpleObjectProperty::new)
+				.collect(Collectors.toList());
 		refreshAvailabilitiesBooleansFromAvailabilities();
 
 		addListeners();

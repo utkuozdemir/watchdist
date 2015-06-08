@@ -35,6 +35,8 @@ public class SetInitialValuesController implements Initializable {
 	@FXML
 	private ComboBox<String> firstWatchStartHour;
 	@FXML
+	private ComboBox<String> firstWatchStartMinute;
+	@FXML
 	private ComboBox<Integer> watchesBetweenTwoWatches;
 	@FXML
 	private Label errorLabel;
@@ -52,6 +54,10 @@ public class SetInitialValuesController implements Initializable {
 			firstWatchStartHour.setValue(newValue != null ? String.format("%02d", 0) : null);
 		});
 
+		firstWatchStartMinute.setItems(FXCollections
+				.observableArrayList(IntStream.range(0, 60).mapToObj(i -> String.format("%02d", i)).collect
+						(Collectors.toList())));
+
 		String watchDurationInHours = DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS);
 		oneWatchDurationInHours.setValue(watchDurationInHours != null ? Integer.parseInt(watchDurationInHours) : null);
 
@@ -67,7 +73,7 @@ public class SetInitialValuesController implements Initializable {
 
 	public void saveAndContinue() {
 		if (oneWatchDurationInHours.getValue() == null || firstWatchStartHour.getValue() == null ||
-				watchesBetweenTwoWatches.getValue() == null) {
+				watchesBetweenTwoWatches.getValue() == null || firstWatchStartMinute.getValue() == null) {
 			errorLabel.setVisible(true);
 		} else {
 			saveInitialValues();
@@ -107,6 +113,8 @@ public class SetInitialValuesController implements Initializable {
 				String.valueOf(Integer.parseInt(firstWatchStartHour.getValue())));
 		DbManager.setProperty(Constants.KEY_WATCHES_BETWEEN_TWO_WATCHES,
 				String.valueOf(watchesBetweenTwoWatches.getValue()));
+		DbManager.setProperty(Constants.KEY_FIRST_WATCH_START_MINUTE,
+				String.valueOf(Integer.parseInt(firstWatchStartMinute.getValue())));
 		Settings.invalidateCache();
 
 		List<WatchValue> watchValues = IntStream

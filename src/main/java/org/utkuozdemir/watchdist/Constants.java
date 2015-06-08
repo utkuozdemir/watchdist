@@ -18,6 +18,7 @@ public class Constants {
 	public static final String KEY_LOCALE = "locale";
 	public static final String KEY_WATCH_DURATION_IN_HOURS = "one.watch.duration.in.hours";
 	public static final String KEY_FIRST_WATCH_START_HOUR = "first.watch.start.hour";
+	public static final String KEY_FIRST_WATCH_START_MINUTE = "first.watch.start.minute";
 	public static final String KEY_WATCHES_BETWEEN_TWO_WATCHES = "watches.between.two.watches";
 	public static final String KEY_MASTER_PASSWORD = "master.password";
 	public static final String KEY_APP_PASSWORD = "app.password";

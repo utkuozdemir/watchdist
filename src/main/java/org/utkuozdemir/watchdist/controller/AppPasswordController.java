@@ -46,9 +46,11 @@ public class AppPasswordController implements Initializable {
 
 			String oneWatchDuration = DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS);
 			String firstWatchStartHour = DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_HOUR);
+			String firstWatchStartMinute = DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_MINUTE);
 			String watchesBetweenTwoWatches = DbManager.getProperty(Constants.KEY_WATCHES_BETWEEN_TWO_WATCHES);
 
-			if (oneWatchDuration == null || firstWatchStartHour == null || watchesBetweenTwoWatches == null) {
+			if (oneWatchDuration == null || firstWatchStartHour == null || firstWatchStartMinute == null ||
+					watchesBetweenTwoWatches == null) {
 				WindowManager.showSetInitialValuesWindow();
 			} else {
 				String templatePath = DbManager.getProperty(Constants.KEY_EXCEL_TEMPLATE_PATH_KEY);

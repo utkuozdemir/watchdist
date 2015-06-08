@@ -159,7 +159,8 @@ public class ExcelExporter {
 								(((i[0] + 1) * Settings.getOneWatchDurationInHours()) +
 										Settings.getFirstWatchStartHour()) % 24);
 						i[0]++;
-						String hours = startTime + ":00 - " + endTime + ":00";
+						String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
+						String hours = startTime + ":" + minute + " - " + endTime + ":" + minute;
 						cell.setCellValue(hours);
 					} else {
 						cell.setCellValue("-");

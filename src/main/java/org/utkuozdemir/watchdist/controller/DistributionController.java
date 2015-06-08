@@ -94,7 +94,8 @@ public class DistributionController implements Initializable {
 					(((i) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
 			String endTime = String.format("%02d",
 					(((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
-			String hours = startTime + ":00 - " + endTime + ":00";
+			String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
+			String hours = startTime + ":" + minute + " - " + endTime + ":" + minute;
 			distributionRows[i] = new DistributionRow(hours, new Soldier[0]);
 			if (soldiers.length > 0) {
 				distributionRows[i].setSoldiers(soldiers[i]);
@@ -317,8 +318,9 @@ public class DistributionController implements Initializable {
 				String currentEndTime = String.format("%02d",
 						(((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
 
-				String previousHourName = previousStartTime + ":00 - " + currentStartTime + ":00";
-				String currentHourName = currentStartTime + ":00 - " + currentEndTime + ":00";
+				String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
+				String previousHourName = previousStartTime + ":" + minute + " - " + currentStartTime + ":" + minute;
+				String currentHourName = currentStartTime + ":" + minute + " - " + currentEndTime + ":" + minute;
 
 				String message = Messages.get(currentRowSoldiers.size() > 1 ?
 								"distribution.consequent.watches.multiple" :

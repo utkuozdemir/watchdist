@@ -43,8 +43,9 @@ public class EditWatchValuesController implements Initializable {
                     (((i) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
             String endTime = String.format("%02d",
                     (((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
-            return new SimpleStringProperty(startTime + ":00 - " + endTime + ":00");
-        });
+			String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
+			return new SimpleStringProperty(startTime + ":" + minute + " - " + endTime + ":" + minute);
+		});
 
         valueColumn.setCellFactory(c -> new TextFieldTableCell<>(DOUBLE_STRING_CONVERTER));
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));

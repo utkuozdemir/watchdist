@@ -9,6 +9,7 @@ public class Settings {
 	private static Optional<Integer> watchDurationInHours = Optional.empty();
 	private static Optional<Integer> minWatchesBetweenTwoWatches = Optional.empty();
 	private static Optional<Integer> firstWatchStartHour = Optional.empty();
+	private static Optional<Integer> firstWatchStartMinute = Optional.empty();
 
 	public static int getTotalWatchesInDay() {
 		return totalWatchesInDay
@@ -30,10 +31,16 @@ public class Settings {
 				.orElse(Integer.parseInt(DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_HOUR)));
 	}
 
+	public static int getFirstWatchStartMinute() {
+		return firstWatchStartMinute
+				.orElse(Integer.parseInt(DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_MINUTE)));
+	}
+
 	public static void invalidateCache() {
 		totalWatchesInDay = Optional.empty();
 		watchDurationInHours = Optional.empty();
 		minWatchesBetweenTwoWatches = Optional.empty();
 		firstWatchStartHour = Optional.empty();
+		firstWatchStartMinute = Optional.empty();
 	}
 }

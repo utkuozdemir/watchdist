@@ -141,9 +141,12 @@ public class MainController implements Initializable {
 			empty.setMaxWidth(60);
 			soldiersTable.getColumns().add(empty);
 			for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
-				String startTime = String.format("%02d", j * 2);
-				String endTime = String.format("%02d", (j + 1) * 2);
-				String columnName = weekdays.get(i) + " " + startTime + ":00 - " + endTime + ":00";
+				String startTime = String.format("%02d",
+						((j * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
+				String endTime = String.format("%02d",
+						(((j + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
+				String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
+				String columnName = weekdays.get(i) + " " + startTime + ":" + minute + " - " + endTime + ":" + minute;
 
 				TableColumn<SoldierFX, Boolean> column = new TableColumn<>();
 
