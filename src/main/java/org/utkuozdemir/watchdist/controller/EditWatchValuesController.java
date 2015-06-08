@@ -11,8 +11,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import org.utkuozdemir.watchdist.fx.WatchValueFX;
 import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.Settings;
+import org.utkuozdemir.watchdist.fx.WatchValueFX;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WatchValues;
 
@@ -38,8 +39,10 @@ public class EditWatchValuesController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         hoursColumn.setCellValueFactory(param -> {
             int i = param.getValue().hourProperty().get();
-            String startTime = String.format("%02d", i * 2);
-            String endTime = String.format("%02d", (i + 1) * 2);
+            String startTime = String.format("%02d",
+                    (((i) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
+            String endTime = String.format("%02d",
+                    (((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
             return new SimpleStringProperty(startTime + ":00 - " + endTime + ":00");
         });
 
@@ -55,7 +58,7 @@ public class EditWatchValuesController implements Initializable {
 
         valuesTable.setItems(items);
 
-        String dailyPoints = DbManager.getProperty(Constants.SERGEANT_DAILY_POINTS);
+        String dailyPoints = DbManager.getProperty(Constants.KEY_SERGEANT_DAILY_POINTS);
         sergeantDailyPoints.setText(dailyPoints);
 
         sergeantDailyPoints.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -70,7 +73,7 @@ public class EditWatchValuesController implements Initializable {
                 value = -1;
             }
             if (value > 0) {
-                DbManager.setProperty(Constants.SERGEANT_DAILY_POINTS, String.valueOf(value));
+                DbManager.setProperty(Constants.KEY_SERGEANT_DAILY_POINTS, String.valueOf(value));
             }
         });
     }

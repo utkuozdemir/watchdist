@@ -17,6 +17,7 @@ import javafx.stage.FileChooser;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.NullSoldier;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
@@ -37,7 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.utkuozdemir.watchdist.Constants.*;
+import static org.utkuozdemir.watchdist.Constants.DATE_FORMAT;
 
 @SuppressWarnings("unused")
 public class DistributionController implements Initializable {
@@ -55,7 +56,6 @@ public class DistributionController implements Initializable {
 	private Label dayName;
 
 	private Soldier[] selectedSoldiersBeforeEdit;
-
 
 	@SuppressWarnings("unused")
 	public void distribute() {
@@ -86,12 +86,14 @@ public class DistributionController implements Initializable {
 	}
 
 	private void loadDataToTable(Soldier[][] soldiers) {
-		DistributionRow[] distributionRows = new DistributionRow[TOTAL_WATCHES_IN_DAY];
+		DistributionRow[] distributionRows = new DistributionRow[Settings.getTotalWatchesInDay()];
 
 		distributionTable.getItems().clear();
-		for (int i = 0; i < TOTAL_WATCHES_IN_DAY; i++) {
-			String startTime = String.format("%02d", i * 2);
-			String endTime = String.format("%02d", ((i + 1) % TOTAL_WATCHES_IN_DAY) * 2);
+		for (int i = 0; i < Settings.getTotalWatchesInDay(); i++) {
+			String startTime = String.format("%02d",
+					(((i) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
+			String endTime = String.format("%02d",
+					(((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
 			String hours = startTime + ":00 - " + endTime + ":00";
 			distributionRows[i] = new DistributionRow(hours, new Soldier[0]);
 			if (soldiers.length > 0) {
@@ -119,7 +121,7 @@ public class DistributionController implements Initializable {
 				fileChooser.setTitle(Messages.get("distribution.save.distribution.as.excel.file"));
 				String fileName = currentDate.toString(DATE_FORMAT) + "-" +
 						Messages.get("distribution.excel.file.name.suffix");
-				fileChooser.setInitialFileName(fileName);
+				fileChooser.setInitialFileName(fileName + ".xls");
 
 				File file = fileChooser.showSaveDialog(distributionTable.getScene().getWindow());
 				if (file != null) {
@@ -169,7 +171,7 @@ public class DistributionController implements Initializable {
 				ObservableList<DistributionRow> rows = distributionTable.getItems();
 
 				Set<Watch> watchesToBeSaved = new HashSet<>();
-				for (int i = 0; i < TOTAL_WATCHES_IN_DAY; i++) {
+				for (int i = 0; i < Settings.getTotalWatchesInDay(); i++) {
 					Soldier[] soldiers = rows.get(i).getSoldiers();
 
 					List<WatchPoint> used = new ArrayList<>();
@@ -308,11 +310,12 @@ public class DistributionController implements Initializable {
 			if (!currentRowSoldiers.isEmpty()) {
 				perfect = false;
 				String previousStartTime = String.format("%02d",
-						((i + (TOTAL_WATCHES_IN_DAY - 1)) % TOTAL_WATCHES_IN_DAY) * 2);
+						(((i - 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
 				String currentStartTime = String.format("%02d",
-						((i + TOTAL_WATCHES_IN_DAY) % TOTAL_WATCHES_IN_DAY) * 2
+						(((i) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24
 				);
-				String currentEndTime = String.format("%02d", ((i + 1) % TOTAL_WATCHES_IN_DAY) * 2);
+				String currentEndTime = String.format("%02d",
+						(((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
 
 				String previousHourName = previousStartTime + ":00 - " + currentStartTime + ":00";
 				String currentHourName = currentStartTime + ":00 - " + currentEndTime + ":00";
@@ -323,7 +326,7 @@ public class DistributionController implements Initializable {
 						Joiner.on(", ").join(currentRowSoldiers),
 						previousHourName,
 						currentHourName,
-						(MIN_WATCHES_BETWEEN_TWO_WATCHES * WATCH_DURATION_IN_HOURS) + WATCH_DURATION_IN_HOURS
+						(Settings.getMinWatchesBetweenTwoWatches() * Settings.getOneWatchDurationInHours()) + Settings.getOneWatchDurationInHours()
 				);
 				approveMessage.append(message)
 						.append(System.lineSeparator())
@@ -537,7 +540,7 @@ public class DistributionController implements Initializable {
 
 			int soldierCount = WatchPointSoldierCalculator
 					.getTotalWatchPointSoldierCount(dupesRemovedSortedWatchPoints);
-			Soldier[][] soldiers = new Soldier[TOTAL_WATCHES_IN_DAY][soldierCount];
+			Soldier[][] soldiers = new Soldier[Settings.getTotalWatchesInDay()][soldierCount];
 			for (Watch watch : watches) {
 				for (TableColumn<DistributionRow, ?> column : distributionTable.getColumns()) {
 					String watchPointId = StringUtils.substringBefore(column.getId(), "-");

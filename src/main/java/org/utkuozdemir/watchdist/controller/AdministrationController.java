@@ -8,11 +8,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.utkuozdemir.watchdist.util.FileManager;
+import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.type.PasswordType;
-import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.util.DbManager;
+import org.utkuozdemir.watchdist.util.FileManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.awt.*;
@@ -31,7 +31,7 @@ public class AdministrationController {
 	@SuppressWarnings("unused")
 	public void editExcelTemplate() {
 		try {
-			String templatePath = DbManager.getProperty(Constants.EXCEL_TEMPLATE_PATH_KEY);
+			String templatePath = DbManager.getProperty(Constants.KEY_EXCEL_TEMPLATE_PATH_KEY);
 			if (templatePath == null) {
 				WindowManager.showSetExcelTemplatePathWindow(Messages.get("excel.template.path.not.set"));
 			} else {

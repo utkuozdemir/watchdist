@@ -1,27 +1,33 @@
 package org.utkuozdemir.watchdist.util;
 
-import com.google.common.collect.Collections2;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.Constants;
-import org.utkuozdemir.watchdist.domain.Soldier;
+import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Watch;
 import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.i18n.Messages;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ExcelExporter {
@@ -32,12 +38,101 @@ public class ExcelExporter {
 		checkNotNull(date);
 		checkNotNull(watches);
 
-		Set<WatchPoint> watchPoints = extractWatchPoints(watches);
 		try {
 			Workbook workbook = getWorkbookTemplate();
 			if (workbook == null) return;
-			Sheet sheet = workbook.getSheetAt(0);
 
+			createExtraSheets(watches, workbook);
+			List<Sheet> sheets = IntStream.range(0, workbook.getNumberOfSheets())
+					.mapToObj(workbook::getSheetAt).collect(Collectors.toList());
+
+			fillPointNameValues(sheets, watches);
+			fillHourValues(sheets);
+			fillTitleDateValue(date, sheets);
+			fillSoldierValues(sheets, watches);
+
+			FileOutputStream outputStream = new FileOutputStream(saveFile);
+			workbook.write(outputStream);
+			outputStream.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private static void fillPointNameValues(Collection<Sheet> sheets, Collection<Watch> watches) {
+		Stream<WatchPoint> sortedWatchPointsStream = watches.stream().map(Watch::getWatchPoint).distinct()
+				.sorted((wp1, wp2) -> wp1.getId().compareTo(wp2.getId()));
+		Queue<String> watchPointNamesQueue = new LinkedList<>();
+		sortedWatchPointsStream.forEach(wp -> IntStream.range(0,
+				wp.getRequiredSoldierCount()).forEach(i -> watchPointNamesQueue.offer(wp.getName())));
+		sheets.forEach(sheet -> sheet.forEach(row -> row.forEach(cell -> {
+			if (Constants.TEMPLATE_POINT_NAME.equals(StringUtils.trim(cell.getStringCellValue()))) {
+				cell.setCellValue(!watchPointNamesQueue.isEmpty() ? watchPointNamesQueue.poll() : "-");
+			}
+		})));
+	}
+
+	private static void fillSoldierValues(Collection<Sheet> sheets, Collection<Watch> watches) {
+		List<WatchPoint> orderedWatchPoints = watches.stream().map(Watch::getWatchPoint)
+				.sorted((o1, o2) -> o1.getId().compareTo(o2.getId())).distinct().collect(Collectors.toList());
+		int soldierCount = orderedWatchPoints.stream().mapToInt(WatchPoint::getRequiredSoldierCount).sum();
+
+		List<List<Cell>> soldierCells = new ArrayList<>();
+
+		Watch[][] watchesMatrix = new Watch[Settings.getTotalWatchesInDay()][soldierCount];
+		watches.forEach(w -> watchesMatrix[w.getHour()][
+						IntStream.range(0,
+								orderedWatchPoints.indexOf(w.getWatchPoint()))
+								.map(i -> orderedWatchPoints.get(i).getRequiredSoldierCount()).sum() +
+								w.getWatchPointSlot()] = w
+		);
+
+		Sheet firstSheet = sheets.iterator().next();
+		for (int i = 0; i < firstSheet.getPhysicalNumberOfRows(); i++) {
+			List<Cell> soldierCellsRow = new ArrayList<>();
+			final int finalI = i;
+			sheets.forEach(sheet -> {
+				Row row = sheet.getRow(finalI);
+				for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) {
+					Cell cell = row.getCell(j);
+					if (cell != null &&
+							Constants.TEMPLATE_SOLDIER_NAME.equals(StringUtils.trim(cell.getStringCellValue()))) {
+						soldierCellsRow.add(cell);
+					}
+				}
+			});
+			if (!soldierCellsRow.isEmpty()) soldierCells.add(soldierCellsRow);
+		}
+
+		for (int i = 0; i < watchesMatrix.length; i++) {
+			for (int j = 0; j < soldierCount; j++) {
+				Watch watch = watchesMatrix[i][j];
+				soldierCells.get(i).get(j).setCellValue(
+						watch != null ?
+								watch.getSoldier() != null ?
+										watch.getSoldier().getFullName() :
+										"" :
+								"");
+			}
+		}
+
+		soldierCells.stream().forEach(cells -> cells.forEach(cell -> {
+			if (Constants.TEMPLATE_SOLDIER_NAME.equals(StringUtils.trim(cell.getStringCellValue())))
+				cell.setCellValue("");
+		}));
+	}
+
+	private static void createExtraSheets(Collection<Watch> watches, Workbook workbook) {
+		int totalWatchPointSoldierCount = watches.stream()
+				.map(Watch::getWatchPoint).distinct().mapToInt(WatchPoint::getRequiredSoldierCount).sum();
+		int pageCount = (totalWatchPointSoldierCount / 5);
+		for (int i = 1; i < pageCount; i++) {
+			workbook.cloneSheet(0);
+		}
+	}
+
+	private static void fillTitleDateValue(LocalDate date, Collection<Sheet> sheets) {
+		sheets.forEach(sheet -> {
 			Cell titleCell = sheet.getRow(0).getCell(0);
 			String title = titleCell.getStringCellValue();
 
@@ -48,124 +143,35 @@ public class ExcelExporter {
 			String dateString = date.toString(Constants.DATE_FORMAT) + " " + dayName;
 
 			titleCell.setCellValue(title.replace(Constants.TEMPLATE_DAY_NAME, dateString));
-
-			CellStyle watchPointTitleStyle = sheet.getRow(5).getCell(1).getCellStyle();
-			int watchPointTitleColumnWidth = sheet.getColumnWidth(1);
-
-			CellStyle signatureTitleStyle = sheet.getRow(5).getCell(2).getCellStyle();
-			int signatureTitleWidth = sheet.getColumnWidth(2);
-
-			CellStyle tableCellStyle = sheet.getRow(6).getCell(1).getCellStyle();
-
-
-			int totalWatchPointSoldierCount = WatchPointSoldierCalculator.getTotalWatchPointSoldierCount(watchPoints);
-			int extraPageCount = (totalWatchPointSoldierCount / 5);
-
-			for (int i = 0; i < extraPageCount; i++) {
-				workbook.cloneSheet(0);
-			}
-
-			int pointCount = 0;
-			int column = 1;
-			int currentSheetNum = -1;
-			List<WatchPoint> watchPointList = new ArrayList<>();
-			for (WatchPoint point : watchPoints) {
-				for (int i = 0; i < point.getRequiredSoldierCount(); i++) {
-					pointCount++;
-
-					if ((pointCount - 1) % 5 == 0) {
-						currentSheetNum++;
-						column = 1;
-					}
-					sheet = workbook.getSheetAt(currentSheetNum);
-
-					sheet.setColumnWidth(column, watchPointTitleColumnWidth);
-					sheet.setColumnWidth(column + 1, signatureTitleWidth);
-
-					Row row = sheet.getRow(5);
-					Cell pointNameCell = row.getCell(column);
-					if (pointNameCell == null) pointNameCell = row.createCell(column);
-					pointNameCell.setCellValue(point.getName());
-					pointNameCell.setCellStyle(watchPointTitleStyle);
-					watchPointList.add(point);
-
-					Cell signatureCell = row.getCell(column + 1);
-					if (signatureCell == null) signatureCell = row.createCell(column + 1);
-
-					signatureCell.setCellStyle(signatureTitleStyle);
-
-					signatureCell.setCellValue(Messages.get("template.SIGNATURE"));
-					column += 2;
-				}
-			}
-
-			for (Watch watch : watches) {
-				WatchPoint watchPoint = watch.getWatchPoint();
-				int index = nthIndexOf(watchPointList, watchPoint, watch.getWatchPointSlot() + 1);
-
-				sheet = workbook.getSheetAt(index / 5);
-				index = index % 5;
-
-				int rowNum = 6 + watch.getHour();
-				int colNum = 1 + (2 * index);
-
-				Row row = sheet.getRow(rowNum);
-				Cell cell = row.getCell(colNum);
-				if (cell == null) cell = row.createCell(colNum);
-
-				Soldier soldier = watch.getSoldier();
-				if (soldier != null) {
-					cell.setCellValue(soldier.getFullName());
-				}
-			}
-
-			for (int i = 6; i < 18; i++) {
-				for (int j = 1; j < column; j++) {
-					Row row = sheet.getRow(i);
-					Cell cell = row.getCell(j);
-					if (cell == null) cell = row.createCell(j);
-					cell.setCellStyle(tableCellStyle);
-				}
-			}
-
-			if (pointCount % 5 < 5) {
-				sheet = workbook.getSheetAt(pointCount / 5);
-				for (int i = pointCount % 5; i < 5; i++) {
-					int emptyColNum = (i * 2) + 1;
-
-					Row titleRow = sheet.getRow(5);
-					titleRow.getCell(emptyColNum).setCellValue("-");
-					titleRow.getCell(emptyColNum + 1).setCellValue(Messages.get("template.SIGNATURE"));
-
-					for (int j = 6; j < 18; j++) {
-						Row row = sheet.getRow(j);
-						Cell emptyCell = row.getCell(emptyColNum);
-						emptyCell.setCellValue("x");
-					}
-				}
-			}
-
-			FileOutputStream outputStream = new FileOutputStream(saveFile);
-			workbook.write(outputStream);
-			outputStream.close();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		});
 	}
 
-	private static Set<WatchPoint> extractWatchPoints(Collection<Watch> watches) {
-		Collection<WatchPoint> points
-				= Collections2.transform(watches, input -> input != null ? input.getWatchPoint() : null);
-
-		Set<WatchPoint> watchPoints = new TreeSet<>(Comparators.WATCH_POINT_ID_ASC_COMPARATOR);
-		watchPoints.addAll(points);
-		watchPoints.remove(null);
-		return watchPoints;
+	private static void fillHourValues(Collection<Sheet> sheets) {
+		sheets.forEach(sheet -> {
+			final int[] i = {0};
+			sheet.forEach(row -> row.forEach(cell -> {
+				if (Constants.TEMPLATE_HOUR_NAME.equals(StringUtils.trim(cell.getStringCellValue()))) {
+					if (i[0] < Settings.getTotalWatchesInDay()) {
+						String startTime = String.format("%02d",
+								(((i[0]) * Settings.getOneWatchDurationInHours()) +
+										Settings.getFirstWatchStartHour()) % 24);
+						String endTime = String.format("%02d",
+								(((i[0] + 1) * Settings.getOneWatchDurationInHours()) +
+										Settings.getFirstWatchStartHour()) % 24);
+						i[0]++;
+						String hours = startTime + ":00 - " + endTime + ":00";
+						cell.setCellValue(hours);
+					} else {
+						cell.setCellValue("-");
+					}
+				}
+			}));
+		});
 	}
 
 	private static Workbook getWorkbookTemplate() {
 		try {
-			String templatePath = DbManager.getProperty(Constants.EXCEL_TEMPLATE_PATH_KEY);
+			String templatePath = DbManager.getProperty(Constants.KEY_EXCEL_TEMPLATE_PATH_KEY);
 			if (templatePath == null) {
 				WindowManager.showSetExcelTemplatePathWindow(Messages.get("excel.template.path.not.set"));
 			} else {
@@ -191,15 +197,4 @@ public class ExcelExporter {
 		}
 	}
 
-	private static <T> int nthIndexOf(List<T> list, T object, int n) {
-		checkArgument(n > 0, "n must be at least 1!");
-		int i = 0;
-		int index = 0;
-		for (T t : list) {
-			if (Objects.equals(object, t)) i++;
-			if (i == n) return index;
-			index++;
-		}
-		return -1;
-	}
 }

@@ -9,7 +9,7 @@
             fx:controller="org.utkuozdemir.watchdist.controller.EditWatchValuesController">
     <TableView fx:id="valuesTable" editable="true" layoutX="14.0" layoutY="34.0" prefHeight="342.0" prefWidth="210.0">
         <columns>
-            <TableColumn fx:id="hoursColumn" prefWidth="112.0" text="%hours"/>
+            <TableColumn fx:id="hoursColumn" prefWidth="112.0" text="%hours.between"/>
             <TableColumn fx:id="valueColumn" prefWidth="93.0" text="%value"/>
         </columns>
     </TableView>

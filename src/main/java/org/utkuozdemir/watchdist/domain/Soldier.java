@@ -5,7 +5,7 @@ import com.google.common.base.Objects;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.Settings;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,8 +44,8 @@ public class Soldier {
     }
 
 	public Soldier(String fullName, String duty, boolean available, boolean sergeant, int maxWatchesPerDay) {
-		if (maxWatchesPerDay < 1 || maxWatchesPerDay > Constants.TOTAL_WATCHES_IN_DAY)
-			throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
+        if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
+            throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
 
         this.fullName = fullName;
         this.duty = duty;
@@ -55,8 +55,8 @@ public class Soldier {
 
 		this.availabilities = new ArrayList<>();
 		for (int i = 0; i < 7; i++) {
-			for (int j = 0; j < Constants.TOTAL_WATCHES_IN_DAY; j++) {
-				Availability availability = new Availability(this, i, j);
+            for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
+                Availability availability = new Availability(this, i, j);
 				this.availabilities.add(availability);
             }
         }
@@ -137,8 +137,8 @@ public class Soldier {
 	}
 
 	public void setMaxWatchesPerDay(int maxWatchesPerDay) {
-		if (maxWatchesPerDay < 1 || maxWatchesPerDay > Constants.TOTAL_WATCHES_IN_DAY)
-			throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
+        if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
+            throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
 		this.maxWatchesPerDay = maxWatchesPerDay;
 	}
 

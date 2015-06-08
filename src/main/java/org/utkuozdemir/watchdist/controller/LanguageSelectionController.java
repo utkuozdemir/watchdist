@@ -32,7 +32,7 @@ public class LanguageSelectionController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		language.setItems(FXCollections.observableArrayList(Language.values()));
 
-		String locale = DbManager.getProperty(Constants.LOCALE_KEY);
+		String locale = DbManager.getProperty(Constants.KEY_LOCALE);
 		if (locale != null) {
 			Language l = Language.valueOf(locale);
 			Messages.setLocale(l.getLocale());
@@ -47,7 +47,7 @@ public class LanguageSelectionController implements Initializable {
 	}
 
 	public void saveAndContinue() {
-		DbManager.setProperty(Constants.LOCALE_KEY, language.getValue().name());
+		DbManager.setProperty(Constants.KEY_LOCALE, language.getValue().name());
 		Messages.setLocale(language.getValue().getLocale());
 
 		WindowManager.showInitializationInfo(App.isNewDbInitialized() ? App.getInitializedDbDirectory() : null);

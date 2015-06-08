@@ -68,6 +68,32 @@ public class WindowManager {
 
 	}
 
+	public static void showSetInitialValuesWindow() {
+		try {
+			if (alreadyOpened(SET_INITIAL_VALUES)) return;
+
+			URL resource = App.class.getClassLoader().getResource("view/set_initial_values.fxml");
+			checkNotNull(resource);
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
+			Stage stage = new Stage();
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setResizable(false);
+			stage.setTitle(Messages.get("set.initial.values"));
+			stage.setUserData(SET_INITIAL_VALUES);
+			stage.show();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+	}
+
 	public static void showSetExcelTemplatePathWindow(String infoMessage) {
 		try {
 			if (alreadyOpened(SET_EXCEL_TEMPLATE_PATH)) return;
@@ -254,7 +280,7 @@ public class WindowManager {
 		checkNotNull(language);
 		mainWindow.close();
 		Messages.setLocale(language.getLocale());
-		DbManager.setProperty(Constants.LOCALE_KEY, language.name());
+		DbManager.setProperty(Constants.KEY_LOCALE, language.name());
 		WindowManager.showMainWindow();
 	}
 
@@ -310,7 +336,7 @@ public class WindowManager {
 		}
 	}
 
-	public static void showWatchDistributionWindow(MainController mainController) {
+	public static void showWatchDistributionWindow() {
 		try {
 			if (alreadyOpened(WATCH_DISTRIBUTION)) return;
 
@@ -388,7 +414,7 @@ public class WindowManager {
 		}
 	}
 
-	public static void showAddNewSoldierWindow(MainController mainController) {
+	public static void showAddNewSoldierWindow() {
 		try {
 			if (alreadyOpened(ADD_NEW_SOLDIER)) return;
 

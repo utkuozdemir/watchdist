@@ -1,6 +1,7 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.collect.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -23,6 +24,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.fx.SoldierFX;
 import org.utkuozdemir.watchdist.i18n.Language;
@@ -42,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("unused")
 public class MainController implements Initializable {
@@ -114,7 +118,7 @@ public class MainController implements Initializable {
 	}
 
 	private void showAddNewSoldierWindow() {
-		WindowManager.showAddNewSoldierWindow(this);
+		WindowManager.showAddNewSoldierWindow();
 	}
 
 	private void initializeTable() {
@@ -136,7 +140,7 @@ public class MainController implements Initializable {
 			empty.setMinWidth(60);
 			empty.setMaxWidth(60);
 			soldiersTable.getColumns().add(empty);
-			for (int j = 0; j < Constants.TOTAL_WATCHES_IN_DAY; j++) {
+			for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
 				String startTime = String.format("%02d", j * 2);
 				String endTime = String.format("%02d", (j + 1) * 2);
 				String columnName = weekdays.get(i) + " " + startTime + ":00 - " + endTime + ":00";
@@ -192,12 +196,12 @@ public class MainController implements Initializable {
 		pointsColumn.setCellFactory(soldierDoubleTableColumn -> new TextFieldTableCell<>(Converters.DOUBLE_STRING_CONVERTER));
 		pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
 
-		maxWatchCountPerDayColumn.setText(Messages.get("max.watch.count.per.day", Constants.WATCH_DURATION_IN_HOURS));
+		maxWatchCountPerDayColumn.setText(Messages.get("max.watch.count.per.day", Settings.getOneWatchDurationInHours()));
 		maxWatchCountPerDayColumn.setCellFactory(column -> {
 			ComboBoxTableCell<SoldierFX, Integer> cell = new ComboBoxTableCell<>(Converters.DOUBLE_INTEGER_CONVERTER);
 			cell.getItems().setAll(FXCollections.observableArrayList(
-							ContiguousSet.create(Range.closed(1, Constants.TOTAL_WATCHES_IN_DAY), DiscreteDomain.integers()))
-			);
+					IntStream.rangeClosed(1, Settings.getTotalWatchesInDay()).boxed().collect(Collectors.toList())
+			));
 
 			return cell;
 		});
@@ -225,7 +229,7 @@ public class MainController implements Initializable {
 	}
 
 	public void openWatchDistributionScreen() {
-		WindowManager.showWatchDistributionWindow(this);
+		WindowManager.showWatchDistributionWindow();
 	}
 
 	@Override

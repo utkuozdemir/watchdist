@@ -1,23 +1,22 @@
 package org.utkuozdemir.watchdist.controller;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ContiguousSet;
-import com.google.common.collect.DiscreteDomain;
-import com.google.common.collect.Range;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Soldier;
-import org.utkuozdemir.watchdist.exception.ValidationException;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("unused")
 public class AddNewSoldierController implements Initializable {
@@ -39,8 +38,9 @@ public class AddNewSoldierController implements Initializable {
 	private ComboBox<Integer> maxWatchCountPerDay;
 
 	public void saveSoldier() {
-		try {
-			validateFields();
+		if (Strings.isNullOrEmpty(fullName.getText()) || Strings.isNullOrEmpty(duty.getText())) {
+			errorLabel.setVisible(true);
+		} else {
 			Soldier soldier
 					= new Soldier(fullName.getText(), duty.getText(), available.isSelected(),
 					sergeant.isSelected(), maxWatchCountPerDay.getValue()
@@ -49,21 +49,13 @@ public class AddNewSoldierController implements Initializable {
 			resetFields();
 			WindowManager.getMainController().refreshTableData();
 			WindowManager.getMainController().scrollToLastElementInTable();
-			fullName.requestFocus();
-		} catch (ValidationException e) {
-			errorLabel.setVisible(true);
 		}
 	}
 
-	private void validateFields() {
-		if (Strings.isNullOrEmpty(fullName.getText()) || Strings.isNullOrEmpty(duty.getText())) {
-			throw new ValidationException();
-		}
-	}
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		maxWatchCountPerDayLabel.setText(Messages.get("max.watch.count.per.day", Constants.WATCH_DURATION_IN_HOURS));
+		maxWatchCountPerDayLabel.setText(Messages.get("max.watch.count.per.day", Settings.getOneWatchDurationInHours()));
 
 		sergeant.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
@@ -73,7 +65,7 @@ public class AddNewSoldierController implements Initializable {
 		});
 
 		ObservableList<Integer> hours = FXCollections.observableArrayList(
-				ContiguousSet.create(Range.closed(1, Constants.TOTAL_WATCHES_IN_DAY + 1), DiscreteDomain.integers())
+				IntStream.rangeClosed(1, Settings.getTotalWatchesInDay()).boxed().collect(Collectors.toList())
 		);
 		maxWatchCountPerDay.setItems(hours);
 		resetFields();
@@ -84,7 +76,7 @@ public class AddNewSoldierController implements Initializable {
 		duty.clear();
 		sergeant.setSelected(false);
 		available.setSelected(true);
-		maxWatchCountPerDay.setValue(Constants.MAX_WATCHES_IN_A_DAY);
+		maxWatchCountPerDay.setValue(Constants.DEFAULT_MAX_WATCHES_IN_A_DAY);
 		errorLabel.setVisible(false);
 	}
 

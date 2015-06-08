@@ -1,6 +1,8 @@
 package org.utkuozdemir.watchdist.engine;
 
+import com.google.common.base.Preconditions;
 import org.joda.time.LocalDate;
+import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Availability;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
@@ -13,24 +15,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.utkuozdemir.watchdist.Constants.MIN_WATCHES_BETWEEN_TWO_WATCHES;
-import static org.utkuozdemir.watchdist.Constants.TOTAL_WATCHES_IN_DAY;
-
 public class DistributionEngine {
 	private static final int POINTS_EFFECT = 100;
 	private static final int AVAILABILITY_EFFECT = 200;
 
-	private static final int MAX_ASSIGN_IN_DAY_LIMIT = 4;
-
-
 	public static Soldier[][] distribute(LocalDate date, List<Soldier> soldiers, List<WatchPoint> watchPoints) {
 		int soldierCountForWatch = watchPoints.stream().mapToInt(WatchPoint::getRequiredSoldierCount).sum();
-		Soldier[][] result = new Soldier[TOTAL_WATCHES_IN_DAY][soldierCountForWatch];
+		Soldier[][] result = new Soldier[Settings.getTotalWatchesInDay()][soldierCountForWatch];
+
+		int maxAssignInDayLimit = 8 / Settings.getOneWatchDurationInHours();
 
 		int maxAssigns = 1;
 		boolean hasNull = true;
-		while (hasNull && maxAssigns <= MAX_ASSIGN_IN_DAY_LIMIT) {
+		while (hasNull && maxAssigns <= maxAssignInDayLimit) {
 			Random r = new Random();
 			Soldier[][] distribution = initDistributionMatrix(date, watchPoints);
 
@@ -38,7 +35,7 @@ public class DistributionEngine {
 			DbManager.findAllWatchValues()
 					.stream().sorted((o1, o2) -> (int) ((o2.getValue() - o1.getValue()) * 1000))
 					.forEach(watchValue -> {
-						int i = watchValue.getHour() + MIN_WATCHES_BETWEEN_TWO_WATCHES;
+						int i = watchValue.getHour() + Settings.getMinWatchesBetweenTwoWatches();
 						for (int j = 0; j < soldierCountForWatch; j++) {
 							Map<Soldier, Integer> map
 									= getSoldierTicketMapForIndex(date, distribution,
@@ -52,7 +49,7 @@ public class DistributionEngine {
 							Soldier pikachu = ticketList.isEmpty() ? null : ticketList.get(r.nextInt(ticketList.size()));
 
 							distribution[i][j] = pikachu;
-							result[i - MIN_WATCHES_BETWEEN_TWO_WATCHES][j] = pikachu;
+							result[i - Settings.getMinWatchesBetweenTwoWatches()][j] = pikachu;
 						}
 					});
 			hasNull = Arrays.stream(result).flatMap(Arrays::stream).anyMatch(s -> s == null);
@@ -63,11 +60,11 @@ public class DistributionEngine {
 
 	private static Soldier[][] initDistributionMatrix(LocalDate date, List<WatchPoint> watchPoints) {
 		int soldierCount = WatchPointSoldierCalculator.getTotalWatchPointSoldierCount(watchPoints);
-		Soldier[][] distribution = new Soldier[TOTAL_WATCHES_IN_DAY +
-				(2 * MIN_WATCHES_BETWEEN_TWO_WATCHES)][soldierCount];
+		Soldier[][] distribution = new Soldier[Settings.getTotalWatchesInDay() +
+				(2 * Settings.getMinWatchesBetweenTwoWatches())][soldierCount];
 		int lineNum = 0;
-		for (int i = TOTAL_WATCHES_IN_DAY - MIN_WATCHES_BETWEEN_TWO_WATCHES;
-			 i < TOTAL_WATCHES_IN_DAY; i++) {
+		for (int i = Settings.getTotalWatchesInDay() - Settings.getMinWatchesBetweenTwoWatches();
+			 i < Settings.getTotalWatchesInDay(); i++) {
 			List<Watch> watches = DbManager.findWatchesByDateAndHour(date.minusDays(1), i);
 			List<Soldier> watchSoldiers = watches.parallelStream().map(Watch::getSoldier).collect(Collectors.toList());
 			distribution[lineNum] = watchSoldiers.toArray(new Soldier[watchSoldiers.size()]);
@@ -79,8 +76,8 @@ public class DistributionEngine {
 	private static Map<Soldier, Integer> getSoldierTicketMapForIndex(LocalDate date, Soldier[][] distribution,
 																	 Index index, List<Soldier> soldiers,
 																	 int soldierCountForWatch, int maxAssigns) {
-		checkArgument(index.getI() >= MIN_WATCHES_BETWEEN_TWO_WATCHES,
-				"\"i\" should be bigger than " + MIN_WATCHES_BETWEEN_TWO_WATCHES);
+		Preconditions.checkArgument(index.getI() >= Settings.getMinWatchesBetweenTwoWatches(),
+				"\"i\" should be bigger than " + Settings.getMinWatchesBetweenTwoWatches());
 		Soldier[][] temp = new Soldier[distribution.length][soldierCountForWatch];
 		for (int i = 0; i < distribution.length; i++) {
 			System.arraycopy(distribution[i], 0, temp[i], 0, distribution[i].length);
@@ -99,7 +96,7 @@ public class DistributionEngine {
 							= s.getAvailabilities().stream()
 							.filter(availability -> availability.getDayNum() == dayNum).count();
 					int ticketCountFromAvailability = (int) (AVAILABILITY_EFFECT - (availabilityCountInDay - 1) *
-							(AVAILABILITY_EFFECT / (TOTAL_WATCHES_IN_DAY - 1)));
+							(AVAILABILITY_EFFECT / (Settings.getTotalWatchesInDay() - 1)));
 
 					// tickets from points (inverse proportion)
 					double scale = availables.stream().mapToDouble(Soldier::getPoints).sum();
@@ -120,10 +117,12 @@ public class DistributionEngine {
 														int soldierCountForWatch, int maxAssigns) {
 		Set<Soldier> unavailableSoldiers = new HashSet<>();
 		unavailableSoldiers.addAll(soldiers.stream().filter(Soldier::isSergeant).collect(Collectors.toSet()));
+		unavailableSoldiers.addAll(soldiers.stream().filter(s -> !s.isAvailable()).collect(Collectors.toSet()));
 
-		Soldier[][] withoutPast = new Soldier[TOTAL_WATCHES_IN_DAY][soldierCountForWatch];
-		for (int i = MIN_WATCHES_BETWEEN_TWO_WATCHES; i < TOTAL_WATCHES_IN_DAY + MIN_WATCHES_BETWEEN_TWO_WATCHES; i++) {
-			System.arraycopy(distribution[i], 0, withoutPast[i - MIN_WATCHES_BETWEEN_TWO_WATCHES],
+		Soldier[][] withoutPast = new Soldier[Settings.getTotalWatchesInDay()][soldierCountForWatch];
+		for (int i = Settings.getMinWatchesBetweenTwoWatches();
+			 i < Settings.getTotalWatchesInDay() + Settings.getMinWatchesBetweenTwoWatches(); i++) {
+			System.arraycopy(distribution[i], 0, withoutPast[i - Settings.getMinWatchesBetweenTwoWatches()],
 					0, soldierCountForWatch);
 		}
 
@@ -136,13 +135,13 @@ public class DistributionEngine {
 				.filter(s -> Collections.frequency(soldiersFlatMap, s) >= maxAssigns).collect(Collectors.toSet()));
 
 		IntStream.rangeClosed(
-				index.getI() - MIN_WATCHES_BETWEEN_TWO_WATCHES,
-				index.getI() + MIN_WATCHES_BETWEEN_TWO_WATCHES
+				index.getI() - Settings.getMinWatchesBetweenTwoWatches(),
+				index.getI() + Settings.getMinWatchesBetweenTwoWatches()
 		).forEach(num -> unavailableSoldiers.addAll(Arrays.asList(distribution[num])));
 
 		unavailableSoldiers.addAll(soldiers.stream().filter(
 				s -> !s.getAvailabilities().contains(new Availability(s, date.getDayOfWeek() - 1, index.getI()
-						- MIN_WATCHES_BETWEEN_TWO_WATCHES))).collect(Collectors.toSet()));
+						- Settings.getMinWatchesBetweenTwoWatches()))).collect(Collectors.toSet()));
 
 		Stream<Soldier> todaysFinishedStream = soldiers.stream()
 				.filter(s -> s != null)

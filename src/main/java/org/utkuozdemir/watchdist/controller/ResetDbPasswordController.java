@@ -52,7 +52,7 @@ public class ResetDbPasswordController {
 			if (approved) {
 				DbManager.close();
 				FileManager.resetDatabase();
-				DbManager.initialize(FileManager.getDatabasePath());
+				DbManager.setDbPath(FileManager.getDatabasePath());
 				DbManager.setProperty(PasswordType.APP_PASSWORD.getKey(), appPassword);
 				DbManager.setProperty(PasswordType.DB_RESET_PASSWORD.getKey(), dbResetPassword);
 				WindowManager.getMainController().refreshTableData();

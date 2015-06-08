@@ -5,10 +5,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.utkuozdemir.watchdist.util.FileManager;
-import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.util.DbManager;
+import org.utkuozdemir.watchdist.util.FileManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.io.File;
@@ -52,7 +52,7 @@ public class SetExcelTemplatePathController {
 		try {
 			if (path != null) {
 				Files.copy(FileManager.getCleanExcelTemplateInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-				DbManager.setProperty(Constants.EXCEL_TEMPLATE_PATH_KEY, path.toFile().getAbsolutePath());
+				DbManager.setProperty(Constants.KEY_EXCEL_TEMPLATE_PATH_KEY, path.toFile().getAbsolutePath());
 				WindowManager.showInfoAlert(
 						Messages.get("success"),
 						Messages.get("excel.template.path.set.success", path.toFile().getAbsolutePath())

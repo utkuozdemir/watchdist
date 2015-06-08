@@ -30,7 +30,7 @@
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
-    <Label fx:id="errorLabel" layoutX="14.0" layoutY="226.0" text="%addnewsoldier.fill.missing.fields" textFill="RED"
+    <Label fx:id="errorLabel" layoutX="14.0" layoutY="226.0" text="%fill.missing.fields" textFill="RED"
            visible="false" wrapText="true" AnchorPane.leftAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>

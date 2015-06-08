@@ -3,6 +3,7 @@ package org.utkuozdemir.watchdist.fx;
 import com.google.common.base.Objects;
 import com.google.common.collect.Collections2;
 import javafx.beans.property.*;
+import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Availability;
 import org.utkuozdemir.watchdist.util.Converters;
 import org.utkuozdemir.watchdist.util.DbManager;
@@ -10,7 +11,6 @@ import org.utkuozdemir.watchdist.util.DbManager;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.utkuozdemir.watchdist.Constants.TOTAL_WATCHES_IN_DAY;
 
 @SuppressWarnings("unused")
 public class SoldierFX {
@@ -48,14 +48,14 @@ public class SoldierFX {
 	}
 
 	private void refreshAvailabilitiesBooleansFromAvailabilities() {
-		availabilitiesBooleans = new SimpleBooleanProperty[7][TOTAL_WATCHES_IN_DAY];
+		availabilitiesBooleans = new SimpleBooleanProperty[7][Settings.getTotalWatchesInDay()];
 		for (SimpleObjectProperty<Availability> a : availabilities) {
 			Availability availability = a.get();
 			availabilitiesBooleans[availability.getDayNum()][availability.getHour()] = new SimpleBooleanProperty(true);
 		}
 
 		for (int i = 0; i < 7; i++) {
-			for (int j = 0; j < TOTAL_WATCHES_IN_DAY; j++) {
+			for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
 				if (availabilitiesBooleans[i][j] == null)
 					availabilitiesBooleans[i][j] = new SimpleBooleanProperty(false);
 			}
@@ -65,7 +65,7 @@ public class SoldierFX {
 	private void refreshAvailabilitiesFromAvailabilitiesBooleans() {
 		this.availabilities = new ArrayList<>();
 		for (int i = 0; i < 7; i++) {
-			for (int j = 0; j < TOTAL_WATCHES_IN_DAY; j++) {
+			for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
 				SimpleBooleanProperty abProperty = availabilitiesBooleans[i][j];
 				if (abProperty.get()) {
 					Availability availability = new Availability(Converters.FX_TO_SOLDIER.apply(this), i, j);
@@ -77,26 +77,26 @@ public class SoldierFX {
 
 	private void addListeners() {
 		this.fullName.addListener((observableValue, s, t1) -> {
-			DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 		});
 
 		this.duty.addListener((observableValue, s, t1) -> {
-			DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 		});
 
 		this.available.addListener((observableValue, aBoolean, t1) -> {
 			if (this.sergeantProperty().get()) this.availableProperty().set(false);
-			DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 		});
 
 		this.sergeant.addListener((observable, oldValue, newValue) -> {
 			if (newValue) SoldierFX.this.available.set(false);
-			DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 		});
 
 		for (SimpleObjectProperty<Availability> availability : availabilities) {
 			availability.addListener((observableValue, availability1, t1) -> {
-				DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+				DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 			});
 		}
 
@@ -104,22 +104,22 @@ public class SoldierFX {
 			if (t1.doubleValue() < 0) {
 				SoldierFX.this.points.set(number.doubleValue());
 			}
-			DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 		});
 
 		this.maxWatchesPerDay.addListener((observable, oldValue, newValue) -> {
-			if (newValue.intValue() < 1 || newValue.intValue() > TOTAL_WATCHES_IN_DAY) {
+			if (newValue.intValue() < 1 || newValue.intValue() > Settings.getTotalWatchesInDay()) {
 				SoldierFX.this.maxWatchesPerDay.set(oldValue.intValue());
 			}
-			DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 		});
 
 		for (int i = 0; i < 7; i++) {
-			for (int j = 0; j < TOTAL_WATCHES_IN_DAY; j++) {
+			for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
 				SimpleBooleanProperty property = availabilitiesBooleans[i][j];
 				property.addListener((observableValue, aBoolean, t1) -> {
 					refreshAvailabilitiesFromAvailabilitiesBooleans();
-					DbManager.updateSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+					DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 				});
 			}
 		}

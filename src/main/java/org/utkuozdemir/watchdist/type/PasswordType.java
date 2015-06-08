@@ -1,9 +1,11 @@
 package org.utkuozdemir.watchdist.type;
 
+import org.utkuozdemir.watchdist.Constants;
+
 public enum PasswordType {
-	MASTER_PASSWORD("master.password", null),
-	APP_PASSWORD("app.password", "old.and.new.app.passwords"),
-	DB_RESET_PASSWORD("db.reset.password", "old.and.new.db.reset.passwords");
+	MASTER_PASSWORD(Constants.KEY_MASTER_PASSWORD, null),
+	APP_PASSWORD(Constants.KEY_APP_PASSWORD, "old.and.new.app.passwords"),
+	DB_RESET_PASSWORD(Constants.KEY_DB_RESET_PASSWORD, "old.and.new.db.reset.passwords");
 
 	private final String key;
 	private final String messageKey;

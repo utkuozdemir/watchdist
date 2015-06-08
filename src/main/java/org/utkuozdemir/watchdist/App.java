@@ -8,11 +8,11 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.i18n.Language;
+import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.type.PasswordType;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.FileManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
-import org.utkuozdemir.watchdist.i18n.Messages;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,6 +29,24 @@ public class App extends Application {
 		launch(args);
 	}
 
+	public static boolean isNewDbInitialized() {
+		return newDbInitialized;
+	}
+
+	public static String getInitializedDbDirectory() {
+		return initializedDbDirectory;
+	}
+
+	private static boolean isValidLanguage(String language) {
+		try {
+			Language l = Language.valueOf(language);
+			return l != null;
+		} catch (IllegalArgumentException e) {
+			logger.info("Invalid language name: " + language);
+			return false;
+		}
+	}
+
 	@Override
 	public void start(Stage stage) throws Exception {
 		Thread.currentThread().setUncaughtExceptionHandler((t, e) -> takeErrorAction(e));
@@ -37,12 +55,12 @@ public class App extends Application {
 
 		initializeDb();
 
-		String language = DbManager.getProperty(Constants.LOCALE_KEY);
+		String language = DbManager.getProperty(Constants.KEY_LOCALE);
 		if (language == null) {
 			WindowManager.showLanguageSelectionWindow();
 		} else {
 			if (!isValidLanguage(language)) {
-				DbManager.setProperty(Constants.LOCALE_KEY, null);
+				DbManager.setProperty(Constants.KEY_LOCALE, null);
 				WindowManager.showLanguageSelectionWindow();
 			} else {
 				Messages.setLocale(Language.valueOf(language).getLocale());
@@ -75,7 +93,7 @@ public class App extends Application {
 				newDbInitialized = true;
 				App.initializedDbDirectory = dbDirectory.toString();
 			}
-			DbManager.initialize(dbPath);
+			DbManager.setDbPath(dbPath);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -85,23 +103,5 @@ public class App extends Application {
 		logger.error(e.getMessage(), e);
 
 		WindowManager.showErrorAlert(Messages.get("error"), Messages.get("error.message"));
-	}
-
-	public static boolean isNewDbInitialized() {
-		return newDbInitialized;
-	}
-
-	public static String getInitializedDbDirectory() {
-		return initializedDbDirectory;
-	}
-
-	private static boolean isValidLanguage(String language) {
-		try {
-			Language l = Language.valueOf(language);
-			return l != null;
-		} catch (IllegalArgumentException e) {
-			logger.info("Invalid language name: " + language);
-			return false;
-		}
 	}
 }
