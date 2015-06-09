@@ -2,8 +2,7 @@ package org.utkuozdemir.watchdist.domain;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import org.utkuozdemir.watchdist.Settings;
 
 @SuppressWarnings("unused")
 @DatabaseTable(tableName = "watch_value")
@@ -18,8 +17,8 @@ public class WatchValue {
     }
 
     public WatchValue(int hour, double value) {
-        checkArgument(hour >= 0 && hour <= 11);
-        checkArgument(value > 0);
+        if (hour < 0 || hour >= Settings.getTotalWatchesInDay()) throw new IllegalArgumentException();
+        if (value <= 0) throw new IllegalArgumentException();
         this.hour = hour;
         this.value = value;
     }
@@ -29,7 +28,7 @@ public class WatchValue {
     }
 
     public void setHour(int hour) {
-        checkArgument(hour >= 0 && hour <= 11);
+        if (hour < 0 || hour >= Settings.getTotalWatchesInDay()) throw new IllegalArgumentException();
         this.hour = hour;
     }
 
@@ -38,7 +37,7 @@ public class WatchValue {
     }
 
     public void setValue(double value) {
-        checkArgument(value > 0);
+        if (value <= 0) throw new IllegalArgumentException();
         this.value = value;
     }
 }

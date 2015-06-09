@@ -1,6 +1,5 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.base.Strings;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -58,7 +57,7 @@ public class LanguageSelectionController implements Initializable {
 	private void initializePasswordPrompt() {
 		String appPassword = DbManager.getProperty(APP_PASSWORD.getKey());
 		String dbResetPassword = DbManager.getProperty(DB_RESET_PASSWORD.getKey());
-		if (Strings.isNullOrEmpty(appPassword) || Strings.isNullOrEmpty(dbResetPassword)) {
+		if (appPassword == null || appPassword.isEmpty() || dbResetPassword == null || dbResetPassword.isEmpty()) {
 			WindowManager.showSetPasswordsWindow();
 		} else {
 			WindowManager.showAppPasswordWindow();

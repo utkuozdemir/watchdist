@@ -1,25 +1,26 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
-import org.utkuozdemir.watchdist.util.Converters;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
 import org.utkuozdemir.watchdist.i18n.Messages;
+import org.utkuozdemir.watchdist.util.Converters;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("unused")
 public class WatchPointsController implements Initializable {
@@ -69,6 +70,13 @@ public class WatchPointsController implements Initializable {
                     }
                 }));
 
+        requiredSoldierCountColumn
+                .setCellFactory(c -> {
+                    ComboBoxTableCell<WatchPointFX, Integer> cell = new ComboBoxTableCell<>();
+                    cell.getItems().setAll(IntStream.rangeClosed(1, 10).boxed().collect(Collectors.toList()));
+                    return cell;
+                });
+
         idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
         requiredSoldierCountColumn.setCellValueFactory(new PropertyValueFactory<>("requiredSoldierCount"));
@@ -78,8 +86,7 @@ public class WatchPointsController implements Initializable {
 
     public void removeSelectedWatchPoints() {
         ObservableList<WatchPointFX> selectedItems = watchPointsTable.getSelectionModel().getSelectedItems();
-        List<WatchPointFX> filtered = Lists.newCopyOnWriteArrayList(
-                Iterables.filter(selectedItems, input -> input != null));
+        List<WatchPointFX> filtered = selectedItems.stream().filter(wp -> wp != null).collect(Collectors.toList());
 
         if (!filtered.isEmpty()) {
 			boolean approved = WindowManager.showWarningConfirmationAlert(
@@ -90,8 +97,10 @@ public class WatchPointsController implements Initializable {
 			);
 
 			if (approved) {
-				DbManager.deleteWatchPoints(Lists.transform(filtered, Converters.FX_TO_WATCH_POINT));
-				refreshTableData();
+                DbManager.deleteWatchPoints(
+                        filtered.stream().map(Converters.FX_TO_WATCH_POINT).collect(Collectors.toList())
+                );
+                refreshTableData();
 				watchPointsTable.getSelectionModel().clearSelection();
             }
         }
@@ -99,8 +108,9 @@ public class WatchPointsController implements Initializable {
 
     public void refreshTableData() {
         List<WatchPointFX> watchPointFXes
-				= Lists.transform(DbManager.findAllActiveWatchPoints(), Converters.WATCH_POINT_TO_FX);
-		ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
+                = DbManager.findAllActiveWatchPoints().stream()
+                .map(Converters.WATCH_POINT_TO_FX).collect(Collectors.toList());
+        ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
 		watchPointsTable.setItems(items);
     }
 

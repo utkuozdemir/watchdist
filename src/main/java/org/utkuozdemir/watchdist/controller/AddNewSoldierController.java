@@ -1,6 +1,5 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.base.Strings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -38,7 +37,8 @@ public class AddNewSoldierController implements Initializable {
 	private ComboBox<Integer> maxWatchCountPerDay;
 
 	public void saveSoldier() {
-		if (Strings.isNullOrEmpty(fullName.getText()) || Strings.isNullOrEmpty(duty.getText())) {
+		if (fullName.getText() == null || fullName.getText().isEmpty() ||
+				duty.getText() == null || duty.getText().isEmpty()) {
 			errorLabel.setVisible(true);
 		} else {
 			Soldier soldier

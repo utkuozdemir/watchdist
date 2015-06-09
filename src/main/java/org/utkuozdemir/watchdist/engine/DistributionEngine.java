@@ -1,7 +1,5 @@
 package org.utkuozdemir.watchdist.engine;
 
-import com.google.common.base.Preconditions;
-import org.joda.time.LocalDate;
 import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Availability;
 import org.utkuozdemir.watchdist.domain.Soldier;
@@ -10,6 +8,7 @@ import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WatchPointSoldierCalculator;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -76,8 +75,9 @@ public class DistributionEngine {
 	private static Map<Soldier, Integer> getSoldierTicketMapForIndex(LocalDate date, Soldier[][] distribution,
 																	 Index index, List<Soldier> soldiers,
 																	 int soldierCountForWatch, int maxAssigns) {
-		Preconditions.checkArgument(index.getI() >= Settings.getMinWatchesBetweenTwoWatches(),
-				"\"i\" should be bigger than " + Settings.getMinWatchesBetweenTwoWatches());
+		if (index.getI() < Settings.getMinWatchesBetweenTwoWatches())
+			throw new IllegalArgumentException("\"i\" should be equal or higher than " + Settings
+					.getMinWatchesBetweenTwoWatches());
 		Soldier[][] temp = new Soldier[distribution.length][soldierCountForWatch];
 		for (int i = 0; i < distribution.length; i++) {
 			System.arraycopy(distribution[i], 0, temp[i], 0, distribution[i].length);
@@ -87,7 +87,7 @@ public class DistributionEngine {
 		Set<Soldier> unavailables
 				= getUnavailablesForIndex(date, distribution, index, soldiers, soldierCountForWatch, maxAssigns);
 
-		int dayNum = date.getDayOfWeek() - 1;
+		int dayNum = date.getDayOfWeek().getValue() - 1;
 		Set<Soldier> availables = soldiers.stream().filter(s -> !unavailables.contains(s)).collect
 				(Collectors.toSet());
 		Map<Soldier, Integer> availablesTicketMap = availables.stream().collect(Collectors.toMap(s -> s, s -> {
@@ -140,8 +140,8 @@ public class DistributionEngine {
 		).forEach(num -> unavailableSoldiers.addAll(Arrays.asList(distribution[num])));
 
 		unavailableSoldiers.addAll(soldiers.stream().filter(
-				s -> !s.getAvailabilities().contains(new Availability(s, date.getDayOfWeek() - 1, index.getI()
-						- Settings.getMinWatchesBetweenTwoWatches()))).collect(Collectors.toSet()));
+				s -> !s.getAvailabilities().contains(new Availability(s, date.getDayOfWeek().getValue() - 1,
+						index.getI() - Settings.getMinWatchesBetweenTwoWatches()))).collect(Collectors.toSet()));
 
 		Stream<Soldier> todaysFinishedStream = soldiers.stream()
 				.filter(s -> s != null)

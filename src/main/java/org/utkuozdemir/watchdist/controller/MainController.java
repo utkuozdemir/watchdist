@@ -1,7 +1,5 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -105,7 +103,8 @@ public class MainController implements Initializable {
 
 	public void refreshTableData() {
 		List<Soldier> allActiveSoldiers = DbManager.findAllActiveSoldiers();
-		List<SoldierFX> soldierFXes = Lists.transform(allActiveSoldiers, Converters.SOLDIER_TO_FX);
+		List<SoldierFX> soldierFXes = allActiveSoldiers.stream()
+				.map(Converters.SOLDIER_TO_FX).collect(Collectors.toList());
 		ObservableList<SoldierFX> data = FXCollections.observableArrayList(soldierFXes);
 		soldiersTable.setItems(data);
 	}
@@ -126,7 +125,7 @@ public class MainController implements Initializable {
 		soldiersTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
 		DateFormatSymbols symbols = new DateFormatSymbols(Messages.getLocale());
-		ArrayList<String> weekdays = Lists.newArrayList(symbols.getShortWeekdays());
+		List<String> weekdays = new ArrayList<>(Arrays.stream(symbols.getShortWeekdays()).collect(Collectors.toList()));
 
 		// remove empty string at the beginning
 		weekdays.remove(0);
@@ -248,10 +247,8 @@ public class MainController implements Initializable {
 
 	public void deleteSelectedSoldiers() {
 		ObservableList<SoldierFX> selectedItems = soldiersTable.getSelectionModel().getSelectedItems();
-		List<Soldier> soldiers = Lists.transform(selectedItems, Converters.FX_TO_SOLDIER);
-
-		List<SoldierFX> filtered = Lists.newCopyOnWriteArrayList(
-				Iterables.filter(selectedItems, soldier -> soldier != null));
+		List<Soldier> soldiers = selectedItems.stream().map(Converters.FX_TO_SOLDIER).collect(Collectors.toList());
+		List<SoldierFX> filtered = selectedItems.stream().filter(s -> s != null).collect(Collectors.toList());
 
 		if (!filtered.isEmpty()) {
 			boolean approved = WindowManager.showWarningConfirmationAlert(
@@ -277,7 +274,7 @@ public class MainController implements Initializable {
 	}
 
 	public void showAdministrationWindow() {
-		WindowManager.showAdministrationWindow(this);
+		WindowManager.showAdministrationWindow();
 	}
 
 	public void c() {

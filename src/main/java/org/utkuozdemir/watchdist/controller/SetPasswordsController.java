@@ -1,6 +1,5 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.base.Strings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -80,7 +79,8 @@ public class SetPasswordsController {
 	}
 
 	private boolean passwordsAreValid(PasswordField field1, PasswordField field2, Label errorLabel) {
-		if (Strings.isNullOrEmpty(field1.getText()) || Strings.isNullOrEmpty(field2.getText())) {
+		if (field1.getText() == null || field1.getText().isEmpty() ||
+				field2.getText() == null || field2.getText().isEmpty()) {
 			errorLabel.setVisible(true);
 			errorLabel.setText(Messages.get("please.enter.a.password"));
 			return false;

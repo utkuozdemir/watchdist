@@ -1,15 +1,14 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.base.Strings;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
-import org.utkuozdemir.watchdist.domain.WatchPoint;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -41,7 +40,7 @@ public class AddNewWatchPointController implements Initializable {
 
 	@SuppressWarnings("unused")
 	public void saveWatchPoint() {
-		if (Strings.isNullOrEmpty(watchPointName.getText())) {
+		if (watchPointName.getText() == null || watchPointName.getText().isEmpty()) {
 			errorLabel.setVisible(true);
 			return;
 		}

@@ -1,12 +1,10 @@
 package org.utkuozdemir.watchdist.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.Constants;
@@ -23,20 +21,20 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public class ExcelExporter {
 	private static final Logger logger = LoggerFactory.getLogger(ExcelExporter.class);
 
 	public static void export(File saveFile, LocalDate date, Collection<Watch> watches) {
-		checkNotNull(saveFile);
-		checkNotNull(date);
-		checkNotNull(watches);
+		if (saveFile == null) throw new NullPointerException();
+		if (date == null) throw new NullPointerException();
+		if (watches == null) throw new NullPointerException();
 
 		try {
 			Workbook workbook = getWorkbookTemplate();
@@ -66,7 +64,7 @@ public class ExcelExporter {
 		sortedWatchPointsStream.forEach(wp -> IntStream.range(0,
 				wp.getRequiredSoldierCount()).forEach(i -> watchPointNamesQueue.offer(wp.getName())));
 		sheets.forEach(sheet -> sheet.forEach(row -> row.forEach(cell -> {
-			if (Constants.TEMPLATE_POINT_NAME.equals(StringUtils.trim(cell.getStringCellValue()))) {
+			if (Constants.TEMPLATE_POINT_NAME.equals(cell.getStringCellValue())) {
 				cell.setCellValue(!watchPointNamesQueue.isEmpty() ? watchPointNamesQueue.poll() : "-");
 			}
 		})));
@@ -96,7 +94,7 @@ public class ExcelExporter {
 				for (int j = 0; j < row.getPhysicalNumberOfCells(); j++) {
 					Cell cell = row.getCell(j);
 					if (cell != null &&
-							Constants.TEMPLATE_SOLDIER_NAME.equals(StringUtils.trim(cell.getStringCellValue()))) {
+							Constants.TEMPLATE_SOLDIER_NAME.equals(cell.getStringCellValue())) {
 						soldierCellsRow.add(cell);
 					}
 				}
@@ -117,7 +115,7 @@ public class ExcelExporter {
 		}
 
 		soldierCells.stream().forEach(cells -> cells.forEach(cell -> {
-			if (Constants.TEMPLATE_SOLDIER_NAME.equals(StringUtils.trim(cell.getStringCellValue())))
+			if (Constants.TEMPLATE_SOLDIER_NAME.equals(cell.getStringCellValue()))
 				cell.setCellValue("");
 		}));
 	}
@@ -135,12 +133,13 @@ public class ExcelExporter {
 		sheets.forEach(sheet -> {
 			Cell titleCell = sheet.getRow(0).getCell(0);
 			String title = titleCell.getStringCellValue();
-
 			String dayName = new SimpleDateFormat(
 					"EEEE",
-					Messages.getLocale()).format(date.toDate()).toUpperCase(Messages.getLocale()
+					Messages.getLocale()).format(
+					Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant())
+			).toUpperCase(Messages.getLocale()
 			);
-			String dateString = date.toString(Constants.DATE_FORMAT) + " " + dayName;
+			String dateString = date.toString() + " " + dayName;
 
 			titleCell.setCellValue(title.replace(Constants.TEMPLATE_DAY_NAME, dateString));
 		});
@@ -150,7 +149,7 @@ public class ExcelExporter {
 		sheets.forEach(sheet -> {
 			final int[] i = {0};
 			sheet.forEach(row -> row.forEach(cell -> {
-				if (Constants.TEMPLATE_HOUR_NAME.equals(StringUtils.trim(cell.getStringCellValue()))) {
+				if (Constants.TEMPLATE_HOUR_NAME.equals(cell.getStringCellValue())) {
 					if (i[0] < Settings.getTotalWatchesInDay()) {
 						String startTime = String.format("%02d",
 								(((i[0]) * Settings.getOneWatchDurationInHours()) +

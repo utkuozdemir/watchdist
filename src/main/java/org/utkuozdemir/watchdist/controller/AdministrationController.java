@@ -19,6 +19,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
@@ -70,9 +71,8 @@ public class AdministrationController {
 		fileChooser.setTitle(Messages.get("backup.export.database"));
 
 		String fileName = databasePath.getFileName().toString();
-		String extension = com.google.common.io.Files.getFileExtension(fileName);
-		String nameWithoutExtension = com.google.common.io.Files.getNameWithoutExtension(fileName);
-		String finalName = nameWithoutExtension + "-" + org.joda.time.LocalDate.now().toString() + "." + extension;
+		String finalName = Constants.DB_NAME.split("\\.")[0] + "-"
+				+ LocalDate.now() + "." + Constants.DB_NAME.split("\\.")[1];
 
 		fileChooser.setInitialFileName(finalName);
 		File file = fileChooser.showSaveDialog(done.getScene().getWindow());

@@ -1,18 +1,18 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.base.Strings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
-import org.utkuozdemir.watchdist.type.PasswordType;
-import org.utkuozdemir.watchdist.util.WindowManager;
 import org.utkuozdemir.watchdist.i18n.Messages;
+import org.utkuozdemir.watchdist.type.PasswordType;
 import org.utkuozdemir.watchdist.util.DbManager;
+import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.util.Objects;
 
+@SuppressWarnings("unused")
 public class ChangePasswordController {
 	@FXML
 	private Label infoHeader;
@@ -50,7 +50,8 @@ public class ChangePasswordController {
 			return false;
 		}
 
-		if (Strings.isNullOrEmpty(newPassword1.getText()) || Strings.isNullOrEmpty(newPassword2.getText())) {
+		if (newPassword1.getText() == null || newPassword1.getText().isEmpty() ||
+				newPassword2.getText() == null || newPassword2.getText().isEmpty()) {
 			errorLabel.setVisible(true);
 			errorLabel.setText(Messages.get("please.enter.a.password"));
 			return false;

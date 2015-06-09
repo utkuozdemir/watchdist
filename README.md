@@ -8,7 +8,8 @@ and **ORMLite** for mapping
 objects to the 
 database. **Apache POI** is used to export table to Excel file.
   
-Other libraries used are Google's **guava**, **joda-time**, **slf4j** and **logback**.
+Other libraries used are Google's ~~guava~~ (replaced by Java 8's **Stream API**), ~~joda-time~~ 
+(replaced by Java 8's **Clock API**), **slf4j** and **logback**.
  
 Watch hours are currently fixed (as 1.0), however their values (score added to the soldier) can be edited.
 A soldier's availabe hours can be changed for a week, and a soldier can be marked as sergeant and this soldier will 

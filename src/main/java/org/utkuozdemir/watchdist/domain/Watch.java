@@ -2,9 +2,8 @@ package org.utkuozdemir.watchdist.domain;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.utkuozdemir.watchdist.Constants;
+
+import java.time.format.DateTimeFormatter;
 
 @SuppressWarnings("unused")
 @DatabaseTable(tableName = "watch")
@@ -44,8 +43,7 @@ public class Watch {
     }
 
     private void validateDate(String date) {
-        DateTimeFormatter formatter = DateTimeFormat.forPattern(Constants.DATE_FORMAT);
-        formatter.parseLocalDate(date);
+        DateTimeFormatter.ISO_LOCAL_DATE.parse(date);
     }
 
     public Integer getId() {

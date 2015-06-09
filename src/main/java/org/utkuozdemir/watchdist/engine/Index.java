@@ -1,6 +1,6 @@
 package org.utkuozdemir.watchdist.engine;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 class Index {
 	private final int i;
@@ -23,13 +23,13 @@ class Index {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		Index ındex = (Index) o;
-		return com.google.common.base.Objects.equal(i, ındex.i) &&
-				Objects.equal(j, ındex.j);
+		Index index = (Index) o;
+		return Objects.equals(i, index.i) &&
+				Objects.equals(j, index.j);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(i, j);
+		return Objects.hash(i, j);
 	}
 }

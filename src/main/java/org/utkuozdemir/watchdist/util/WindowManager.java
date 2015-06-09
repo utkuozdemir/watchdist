@@ -33,7 +33,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.utkuozdemir.watchdist.type.WindowType.*;
 
 public class WindowManager {
@@ -47,7 +46,7 @@ public class WindowManager {
 			if (alreadyOpened(LANGUAGE_SELECTION)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/language_selection.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -73,7 +72,7 @@ public class WindowManager {
 			if (alreadyOpened(SET_INITIAL_VALUES)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/set_initial_values.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -99,7 +98,7 @@ public class WindowManager {
 			if (alreadyOpened(SET_EXCEL_TEMPLATE_PATH)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/set_excel_template_path.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -140,7 +139,7 @@ public class WindowManager {
 			if (alreadyOpened(windowType)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/change_password.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -180,7 +179,7 @@ public class WindowManager {
 			if (alreadyOpened(SET_PASSWORDS)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/set_passwords.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -205,7 +204,7 @@ public class WindowManager {
 			if (alreadyOpened(APP_PASSWORD)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/app_password.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -230,7 +229,7 @@ public class WindowManager {
 			if (alreadyOpened(RESET_DB_PASSWORD)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/reset_db_password.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -256,7 +255,7 @@ public class WindowManager {
 
 			Stage stage = new Stage();
 			URL resource = App.class.getClassLoader().getResource("view/main.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource);
 			fxmlLoader.setResources(Messages.getBundle());
@@ -277,7 +276,7 @@ public class WindowManager {
 	}
 
 	public static void switchLanguage(Stage mainWindow, Language language) {
-		checkNotNull(language);
+		if (language == null) throw new NullPointerException("Language cannot be null!");
 		mainWindow.close();
 		Messages.setLocale(language.getLocale());
 		DbManager.setProperty(Constants.KEY_LOCALE, language.name());
@@ -289,7 +288,7 @@ public class WindowManager {
 			if (alreadyOpened(WATCH_POINTS)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/watch_points.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -310,13 +309,12 @@ public class WindowManager {
 		}
 	}
 
-	public static void showAdministrationWindow(MainController mainController) {
-		checkNotNull(mainController);
+	public static void showAdministrationWindow() {
 		try {
 			if (alreadyOpened(ADMINISTRATION)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/administration.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -341,7 +339,7 @@ public class WindowManager {
 			if (alreadyOpened(WATCH_DISTRIBUTION)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/distribution.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
@@ -365,7 +363,7 @@ public class WindowManager {
 			if (alreadyOpened(WATCH_VALUES)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/watch_values.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
 			Scene scene = new Scene(root);
@@ -389,7 +387,7 @@ public class WindowManager {
 			if (alreadyOpened(ADD_NEW_WATCH_POINT)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/add_new_watch_point.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();
@@ -419,7 +417,7 @@ public class WindowManager {
 			if (alreadyOpened(ADD_NEW_SOLDIER)) return;
 
 			URL resource = App.class.getClassLoader().getResource("view/add_new_soldier.fxml");
-			checkNotNull(resource);
+			if (resource == null) throw new NullPointerException("Resources is null!");
 
 			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
 			Parent root = fxmlLoader.load();

@@ -1,7 +1,6 @@
 package org.utkuozdemir.watchdist.domain;
 
 
-import com.google.common.base.Objects;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -9,6 +8,7 @@ import org.utkuozdemir.watchdist.Settings;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 @DatabaseTable(tableName = "soldier")
@@ -156,11 +156,11 @@ public class Soldier {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Soldier soldier = (Soldier) o;
-        return Objects.equal(id, soldier.id);
+        return Objects.equals(id, soldier.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 }

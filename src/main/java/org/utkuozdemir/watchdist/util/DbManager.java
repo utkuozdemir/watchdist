@@ -1,7 +1,5 @@
 package org.utkuozdemir.watchdist.util;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.jdbc.JdbcConnectionSource;
@@ -9,23 +7,23 @@ import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedDelete;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.support.ConnectionSource;
-import org.joda.time.LocalDate;
 import org.utkuozdemir.watchdist.Constants;
 import org.utkuozdemir.watchdist.domain.*;
 
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public class DbManager {
 	private static Path dbPath = null;
+
 	private static volatile DbManager INSTANCE;
+
 	private ConnectionSource connectionSource;
 	private TransactionManager transactionManager;
+
 	private Dao<Availability, Integer> availabilityDao;
 	private Dao<Soldier, Integer> soldierDao;
 	private Dao<Watch, Integer> watchDao;
@@ -148,7 +146,7 @@ public class DbManager {
 
 	public static Optional<WatchPoint> findWatchPointById(int id) {
 		try {
-			return Optional.fromNullable(getInstance().watchPointDao.queryForId(id));
+			return Optional.ofNullable(getInstance().watchPointDao.queryForId(id));
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -218,8 +216,10 @@ public class DbManager {
 
 				if (deleted == 0) {
 					List<Soldier> activeSergeants
-							= dbManager.soldierDao.queryForFieldValuesArgs(ImmutableMap.of("active", true,
-							"sergeant", true));
+							= dbManager.soldierDao.queryForFieldValuesArgs(
+							Arrays.stream(new Object[][]{{"active", true}, {"sergeant", true}})
+									.collect(Collectors.toMap(o -> String.valueOf(o[0]), o -> o[1]))
+					);
 					double sergeantPoints = Double.valueOf(getProperty(Constants.KEY_SERGEANT_DAILY_POINTS));
 					for (Soldier sergeant : activeSergeants) {
 						sergeant.setPoints(sergeant.getPoints() + sergeantPoints);
@@ -237,7 +237,7 @@ public class DbManager {
 	public static List<Watch> findWatchesByDate(LocalDate date) {
 		try {
 			return getInstance().watchDao.queryForFieldValues(
-					ImmutableMap.<String, Object>of("date", date.toString(Constants.DATE_FORMAT))
+					Collections.singletonMap("date", date.toString())
 			);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -247,8 +247,8 @@ public class DbManager {
 	public static List<Watch> findWatchesByDateAndHour(LocalDate date, int hour) {
 		try {
 			return getInstance().watchDao.queryForFieldValues(
-					ImmutableMap.<String, Object>of("date", date.toString(Constants.DATE_FORMAT),
-							"hour", hour)
+					Arrays.stream(new Object[][]{{"date", date.toString()}, {"hour", hour}})
+							.collect(Collectors.toMap(o -> String.valueOf(o[0]), o -> o[1]))
 			);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -264,9 +264,6 @@ public class DbManager {
 	}
 
 	public static int updateWatchValue(int hour, double value) {
-		checkArgument(hour >= 0 && hour <= 11, "Invalid hour!");
-		checkArgument(value > 0, "Invalid value!");
-
 		try {
 			return getInstance().watchValueDao.update(new WatchValue(hour, value));
 		} catch (SQLException e) {
@@ -309,19 +306,19 @@ public class DbManager {
 	}
 
 	public synchronized static void setDbPath(Path dbPath) {
-		checkNotNull(dbPath);
+		if (dbPath == null) throw new NullPointerException();
 		DbManager.dbPath = dbPath;
 		INSTANCE = null;
 	}
 
 	@SuppressWarnings("unchecked")
 	private int deleteWatchesByDate(final LocalDate date, final WatchRemovalMode mode) {
-		checkNotNull(date);
-		checkNotNull(mode);
+		if (date == null) throw new NullPointerException();
+		if (mode == null) throw new NullPointerException();
 		try {
 			return transactionManager.callInTransaction(() -> {
 				PreparedQuery<Watch> preparedQuery
-						= watchDao.queryBuilder().where().eq("date", date.toString(Constants.DATE_FORMAT)).prepare();
+						= watchDao.queryBuilder().where().eq("date", date.toString()).prepare();
 				List<Watch> watches = watchDao.query(preparedQuery);
 
 				if (mode == WatchRemovalMode.UNDO_POINTS) {
@@ -345,7 +342,7 @@ public class DbManager {
 
 				PreparedDelete<Watch> preparedDelete
 						= (PreparedDelete<Watch>) watchDao.deleteBuilder()
-						.where().eq("date", date.toString(Constants.DATE_FORMAT)).prepare();
+						.where().eq("date", date.toString()).prepare();
 				return watchDao.delete(preparedDelete);
 			});
 		} catch (Exception e) {

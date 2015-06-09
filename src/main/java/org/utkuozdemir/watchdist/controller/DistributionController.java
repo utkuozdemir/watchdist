@@ -1,8 +1,5 @@
 package org.utkuozdemir.watchdist.controller;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,9 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.NullSoldier;
 import org.utkuozdemir.watchdist.domain.Soldier;
@@ -33,12 +27,12 @@ import java.io.File;
 import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.utkuozdemir.watchdist.Constants.DATE_FORMAT;
 
 @SuppressWarnings("unused")
 public class DistributionController implements Initializable {
@@ -74,13 +68,13 @@ public class DistributionController implements Initializable {
 		Integer monthValue = getSelectedMonth();
 		Integer yearValue = year.getValue();
 		if (dayValue == null || monthValue == null || yearValue == null) return null;
-		return new LocalDate(yearValue, monthValue, dayValue);
+		return LocalDate.of(yearValue, monthValue, dayValue);
 	}
 
 	private void setCurrentDate(LocalDate date) {
 		year.setValue(date.getYear());
 		List<String> monthNames = Arrays.asList(new DateFormatSymbols(Messages.getLocale()).getMonths());
-		this.month.setValue(monthNames.get(date.getMonthOfYear() - 1));
+		this.month.setValue(monthNames.get(date.getMonthValue() - 1));
 		day.setValue(date.getDayOfMonth());
 		refreshDay();
 	}
@@ -120,7 +114,7 @@ public class DistributionController implements Initializable {
 						= new FileChooser.ExtensionFilter(Messages.get("distribution.excel.file") + " (*.xls)", "*.xls");
 				fileChooser.getExtensionFilters().add(extFilter);
 				fileChooser.setTitle(Messages.get("distribution.save.distribution.as.excel.file"));
-				String fileName = currentDate.toString(DATE_FORMAT) + "-" +
+				String fileName = currentDate.toString() + "-" +
 						Messages.get("distribution.excel.file.name.suffix");
 				fileChooser.setInitialFileName(fileName + ".xls");
 
@@ -161,8 +155,8 @@ public class DistributionController implements Initializable {
 				for (int i = 1; i < columns.size(); i++) {
 					TableColumn<DistributionRow, ?> column = columns.get(i);
 
-					String watchPointId = StringUtils.substringBefore(column.getId(), "-");
-//					String watchPointSlotId = StringUtils.substringAfter(column.getId(), "-");
+					String watchPointId = !column.getId().contains("-") ? column.getId() :
+							column.getId().substring(0, column.getId().indexOf("-"));
 
 					Optional<WatchPoint> watchPointOptional
 							= DbManager.findWatchPointById(Integer.parseInt(watchPointId));
@@ -183,7 +177,7 @@ public class DistributionController implements Initializable {
 
 						if (soldier instanceof NullSoldier) soldier = null;
 						Watch watch = new Watch(soldier, watchPoint, Collections.frequency(used, watchPoint),
-								currentDate.toString(DATE_FORMAT), i, WatchValues.get(i));
+								currentDate.toString(), i, WatchValues.get(i));
 						watchesToBeSaved.add(watch);
 
 						used.add(watchPoint);
@@ -325,7 +319,7 @@ public class DistributionController implements Initializable {
 				String message = Messages.get(currentRowSoldiers.size() > 1 ?
 								"distribution.consequent.watches.multiple" :
 								"distribution.consequent.watches",
-						Joiner.on(", ").join(currentRowSoldiers),
+						currentRowSoldiers.stream().map(String::valueOf).collect(Collectors.joining(", ")),
 						previousHourName,
 						currentHourName,
 						(Settings.getMinWatchesBetweenTwoWatches() * Settings.getOneWatchDurationInHours()) + Settings.getOneWatchDurationInHours()
@@ -381,10 +375,7 @@ public class DistributionController implements Initializable {
 		if (watches.isEmpty()) {
 			watchPoints = DbManager.findAllActiveWatchPoints();
 		} else {
-			watchPoints = Lists.transform(watches, input -> {
-				if (input == null) return null;
-				return input.getWatchPoint();
-			});
+			watchPoints = watches.stream().map(w -> w != null ? w.getWatchPoint() : null).collect(Collectors.toList());
 
 			watchPoints.removeAll(Collections.<WatchPoint>singleton(null));
 			Set<WatchPoint> dupesRemoved = new TreeSet<>(Comparators.WATCH_POINT_ID_ASC_COMPARATOR);
@@ -392,7 +383,8 @@ public class DistributionController implements Initializable {
 			watchPoints = new ArrayList<>(dupesRemoved);
 		}
 
-		List<WatchPointFX> watchPointFXes = Lists.transform(watchPoints, Converters.WATCH_POINT_TO_FX);
+		List<WatchPointFX> watchPointFXes =
+				watchPoints.stream().map(Converters.WATCH_POINT_TO_FX).collect(Collectors.toList());
 
 		final ObservableList<Soldier> soldiers
 				= FXCollections.observableArrayList(DbManager.findAllActiveSoldiersOrderedByFullName());
@@ -499,8 +491,7 @@ public class DistributionController implements Initializable {
 
 	private void refreshDay() {
 		Integer originalValue = day.getValue();
-		DateTime temp = new DateTime(year.getValue(), getSelectedMonth(), 1, 0, 0);
-		int lastDay = temp.dayOfMonth().getMaximumValue();
+		int lastDay = LocalDate.of(year.getValue(), getSelectedMonth(), 1).lengthOfMonth();
 		List<Integer> days = new ArrayList<>();
 		for (int i = 1; i <= lastDay; i++) {
 			days.add(i);
@@ -518,7 +509,9 @@ public class DistributionController implements Initializable {
 	private void refreshDayName() {
 		LocalDate watchDate = getCurrentDate();
 		if (watchDate != null) {
-			String dayName = new SimpleDateFormat("EEEE", Messages.getLocale()).format(watchDate.toDate());
+			String dayName = new SimpleDateFormat("EEEE", Messages.getLocale()).format(
+					Date.from(watchDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
+			);
 			this.dayName.setText(dayName);
 		}
 	}
@@ -533,7 +526,8 @@ public class DistributionController implements Initializable {
 			if (watches.isEmpty()) {
 				watchPoints = DbManager.findAllActiveWatchPoints();
 			} else {
-				watchPoints = Lists.transform(watches, input -> input == null ? null : input.getWatchPoint());
+				watchPoints = watches.stream()
+						.map(input -> input == null ? null : input.getWatchPoint()).collect(Collectors.toList());
 			}
 			watchPoints.removeAll(Collections.<WatchPoint>singleton(null));
 
@@ -545,8 +539,12 @@ public class DistributionController implements Initializable {
 			Soldier[][] soldiers = new Soldier[Settings.getTotalWatchesInDay()][soldierCount];
 			for (Watch watch : watches) {
 				for (TableColumn<DistributionRow, ?> column : distributionTable.getColumns()) {
-					String watchPointId = StringUtils.substringBefore(column.getId(), "-");
-					String watchPointSlot = StringUtils.substringAfter(column.getId(), "-");
+					String colId = column.getId();
+					String watchPointId = colId.contains("-") ?
+							colId.substring(0, colId.indexOf("-")) : colId;
+
+					String watchPointSlot = colId.contains("-") ?
+							colId.substring(colId.indexOf("-") + 1, colId.length()) : colId;
 
 					boolean isInteger = true;
 					try {

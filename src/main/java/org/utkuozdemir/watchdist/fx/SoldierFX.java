@@ -1,6 +1,5 @@
 package org.utkuozdemir.watchdist.fx;
 
-import com.google.common.base.Objects;
 import javafx.beans.property.*;
 import org.utkuozdemir.watchdist.Settings;
 import org.utkuozdemir.watchdist.domain.Availability;
@@ -9,6 +8,7 @@ import org.utkuozdemir.watchdist.util.DbManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -172,12 +172,12 @@ public class SoldierFX {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		SoldierFX soldierFX = (SoldierFX) o;
-		return Objects.equal(id, soldierFX.id);
+		return Objects.equals(id, soldierFX.id);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(id);
+		return Objects.hash(id);
 	}
 
 	@Override

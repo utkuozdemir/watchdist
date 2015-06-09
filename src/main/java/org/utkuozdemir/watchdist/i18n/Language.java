@@ -1,7 +1,5 @@
 package org.utkuozdemir.watchdist.i18n;
 
-import com.google.common.base.Preconditions;
-
 import java.util.Locale;
 import java.util.Objects;
 
@@ -17,7 +15,7 @@ public enum Language {
     }
 
     public static Language forLocale(Locale locale) {
-        Preconditions.checkNotNull(locale);
+        if (locale == null) throw new NullPointerException();
         for (Language language : values()) {
             if (Objects.equals(language.getLocale(), locale)) return language;
         }

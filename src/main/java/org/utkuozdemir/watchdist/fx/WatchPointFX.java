@@ -1,6 +1,5 @@
 package org.utkuozdemir.watchdist.fx;
 
-import com.google.common.base.Strings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -25,17 +24,13 @@ public class WatchPointFX {
 
     private void addListeners() {
         this.name.addListener((observableValue, s, t1) -> {
-            if (Strings.isNullOrEmpty(t1)) {
+            if (t1 == null || t1.isEmpty()) {
                 WatchPointFX.this.name.set(s);
             }
             DbManager.updateWatchPoint(Converters.FX_TO_WATCH_POINT.apply(WatchPointFX.this));
         });
 
         this.requiredSoldierCount.addListener((observableValue, number, t1) -> {
-            int value = t1.intValue();
-            if (value < 0) value = number.intValue();
-            else if (value > 10) value = 10;
-            WatchPointFX.this.requiredSoldierCount.set(value);
             DbManager.updateWatchPoint(Converters.FX_TO_WATCH_POINT.apply(WatchPointFX.this));
         });
     }

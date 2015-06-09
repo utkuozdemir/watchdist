@@ -1,8 +1,9 @@
 package org.utkuozdemir.watchdist.domain;
 
-import com.google.common.base.Objects;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
+import java.util.Objects;
 
 @SuppressWarnings("unused")
 @DatabaseTable(tableName = "watch_point")
@@ -72,11 +73,11 @@ public class WatchPoint {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         WatchPoint that = (WatchPoint) o;
-        return Objects.equal(id, that.id);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hash(id);
     }
 }

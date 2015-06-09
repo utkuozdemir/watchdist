@@ -54,9 +54,12 @@ public class SetInitialValuesController implements Initializable {
 			firstWatchStartHour.setValue(newValue != null ? String.format("%02d", 0) : null);
 		});
 
+		firstWatchStartHour.setItems(FXCollections.observableArrayList(String.format("%02d", 0)));
+		firstWatchStartHour.setValue(String.format("%02d", 0));
 		firstWatchStartMinute.setItems(FXCollections
 				.observableArrayList(IntStream.range(0, 60).mapToObj(i -> String.format("%02d", i)).collect
 						(Collectors.toList())));
+		firstWatchStartMinute.setValue("00");
 
 		String watchDurationInHours = DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS);
 		oneWatchDurationInHours.setValue(watchDurationInHours != null ? Integer.parseInt(watchDurationInHours) : null);

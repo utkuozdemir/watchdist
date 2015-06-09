@@ -1,6 +1,5 @@
 package org.utkuozdemir.watchdist.util;
 
-import com.google.common.base.Function;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +10,7 @@ import org.utkuozdemir.watchdist.fx.SoldierFX;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
 
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Converters {
