@@ -49,6 +49,7 @@ public class AddNewSoldierController implements Initializable {
 			resetFields();
 			WindowManager.getMainController().refreshTableData();
 			WindowManager.getMainController().scrollToLastElementInTable();
+			fullName.requestFocus();
 		}
 	}
 

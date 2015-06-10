@@ -82,8 +82,8 @@
                 <version>${javafx-maven-plugin.version}</version>
                 <configuration>
                     <mainClass>org.utkuozdemir.watchdist.App</mainClass>
-                    <vendor>UTKU OZDEMIR</vendor>
-                    <appName>NobetYonetim</appName>
+                    <vendor>Nobet</vendor>
+                    <appName>NobetYonetim-${project.version}</appName>
                 </configuration>
                 <executions>
                     <execution>
