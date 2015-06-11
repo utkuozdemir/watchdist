@@ -11,7 +11,7 @@ database. **Apache POI** is used to export table to Excel file.
 Other libraries used are Google's ~~guava~~ (replaced by Java 8's **Stream API**), ~~joda-time~~ 
 (replaced by Java 8's **Clock API**), **slf4j** and **logback**.
  
-Watch hours are currently fixed (as 1.0), however their values (score added to the soldier) can be edited.
+Watch hours and durations are ~~currently fixed~~ adjustable (as 1.0), and their values (score added to the soldier) can be edited.
 A soldier's availabe hours can be changed for a week, and a soldier can be marked as sergeant and this soldier will 
 have no watches but still be getting score every day.
 
