@@ -1,12 +1,11 @@
 package org.utkuozdemir.watchdist.engine;
 
-import org.utkuozdemir.watchdist.Settings;
+import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.domain.Availability;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
 import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.util.DbManager;
-import org.utkuozdemir.watchdist.util.WatchPointSoldierCalculator;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -58,7 +57,7 @@ public class DistributionEngine {
 	}
 
 	private static Soldier[][] initDistributionMatrix(LocalDate date, List<WatchPoint> watchPoints) {
-		int soldierCount = WatchPointSoldierCalculator.getTotalWatchPointSoldierCount(watchPoints);
+		int soldierCount = watchPoints.stream().mapToInt(WatchPoint::getRequiredSoldierCount).sum();
 		Soldier[][] distribution = new Soldier[Settings.getTotalWatchesInDay() +
 				(2 * Settings.getMinWatchesBetweenTwoWatches())][soldierCount];
 		int lineNum = 0;

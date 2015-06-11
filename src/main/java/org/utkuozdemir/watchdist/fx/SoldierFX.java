@@ -1,7 +1,7 @@
 package org.utkuozdemir.watchdist.fx;
 
 import javafx.beans.property.*;
-import org.utkuozdemir.watchdist.Settings;
+import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.domain.Availability;
 import org.utkuozdemir.watchdist.util.Converters;
 import org.utkuozdemir.watchdist.util.DbManager;

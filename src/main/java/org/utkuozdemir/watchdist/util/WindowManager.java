@@ -15,8 +15,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.utkuozdemir.watchdist.App;
-import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.app.App;
+import org.utkuozdemir.watchdist.app.AppContext;
+import org.utkuozdemir.watchdist.app.Constants;
 import org.utkuozdemir.watchdist.controller.ChangePasswordController;
 import org.utkuozdemir.watchdist.controller.MainController;
 import org.utkuozdemir.watchdist.controller.SetExcelTemplatePathController;
@@ -253,7 +254,7 @@ public class WindowManager {
 		try {
 			if (alreadyOpened(MAIN)) return;
 
-			Stage stage = new Stage();
+			Stage stage = AppContext.getInstance().getMainStage();
 			URL resource = App.class.getClassLoader().getResource("view/main.fxml");
 			if (resource == null) throw new NullPointerException("Resources is null!");
 

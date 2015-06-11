@@ -1,6 +1,6 @@
 package org.utkuozdemir.watchdist.type;
 
-import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.app.Constants;
 
 public enum PasswordType {
 	MASTER_PASSWORD(Constants.KEY_MASTER_PASSWORD, null),

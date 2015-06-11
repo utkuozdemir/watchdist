@@ -1,4 +1,4 @@
-package org.utkuozdemir.watchdist;
+package org.utkuozdemir.watchdist.app;
 
 import org.utkuozdemir.watchdist.util.DbManager;
 

@@ -4,7 +4,7 @@ package org.utkuozdemir.watchdist.domain;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
-import org.utkuozdemir.watchdist.Settings;
+import org.utkuozdemir.watchdist.app.Settings;
 
 import java.util.ArrayList;
 import java.util.Collection;

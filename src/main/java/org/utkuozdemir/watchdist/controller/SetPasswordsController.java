@@ -7,7 +7,7 @@ import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.app.Constants;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WindowManager;

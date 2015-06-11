@@ -1,6 +1,6 @@
 package org.utkuozdemir.watchdist.util;
 
-import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.app.Constants;
 
 import java.io.File;
 import java.io.IOException;

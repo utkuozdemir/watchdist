@@ -1,8 +1,6 @@
-package org.utkuozdemir.watchdist;
+package org.utkuozdemir.watchdist.app;
 
-import com.j256.ormlite.logger.LocalLog;
 import com.sun.javafx.runtime.VersionInfo;
-import javafx.application.Application;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,26 +15,30 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class App extends Application {
-	private static final Logger logger = LoggerFactory.getLogger(App.class);
+public class AppContext {
+	private static final Logger logger = LoggerFactory.getLogger(AppContext.class);
+	private static volatile AppContext INSTANCE;
+	private boolean newDbInitialized;
+	private String initializedDbDirectory;
 
-	private static boolean newDbInitialized = false;
-	private static String initializedDbDirectory;
+	private Stage mainStage;
 
-	public static void main(String[] args) {
-		System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "ERROR");
-		launch(args);
+	private AppContext() {
 	}
 
-	public static boolean isNewDbInitialized() {
-		return newDbInitialized;
+	public static AppContext getInstance() {
+		if (INSTANCE == null) {
+			synchronized (DbManager.class) {
+				//double checking Singleton instance
+				if (INSTANCE == null) {
+					INSTANCE = new AppContext();
+				}
+			}
+		}
+		return INSTANCE;
 	}
 
-	public static String getInitializedDbDirectory() {
-		return initializedDbDirectory;
-	}
-
-	private static boolean isValidLanguage(String language) {
+	private boolean isValidLanguage(String language) {
 		try {
 			Language l = Language.valueOf(language);
 			return l != null;
@@ -46,8 +48,8 @@ public class App extends Application {
 		}
 	}
 
-	@Override
-	public void start(Stage stage) throws Exception {
+	public void launch(Stage mainStage) throws Exception {
+		this.mainStage = mainStage;
 		Thread.currentThread().setUncaughtExceptionHandler((t, e) -> takeErrorAction(e));
 		logger.info("Using JAVAFX Version " + VersionInfo.getVersion());
 		logger.info("Using JAVAFX Runtime Version " + VersionInfo.getRuntimeVersion());
@@ -91,7 +93,7 @@ public class App extends Application {
 			if (!Files.exists(dbPath)) {
 				FileManager.resetDatabase();
 				newDbInitialized = true;
-				App.initializedDbDirectory = dbDirectory.toString();
+				initializedDbDirectory = dbDirectory.toString();
 			}
 			DbManager.setDbPath(dbPath);
 		} catch (Exception e) {
@@ -101,7 +103,18 @@ public class App extends Application {
 
 	private void takeErrorAction(Throwable e) {
 		logger.error(e.getMessage(), e);
-
 		WindowManager.showErrorAlert(Messages.get("error"), Messages.get("error.message"));
+	}
+
+	public boolean isNewDbInitialized() {
+		return newDbInitialized;
+	}
+
+	public String getInitializedDbDirectory() {
+		return initializedDbDirectory;
+	}
+
+	public Stage getMainStage() {
+		return mainStage;
 	}
 }

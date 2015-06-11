@@ -1,6 +1,6 @@
 package org.utkuozdemir.watchdist.util;
 
-import org.utkuozdemir.watchdist.Settings;
+import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.domain.WatchValue;
 
 import java.util.Map;

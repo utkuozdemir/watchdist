@@ -1,4 +1,4 @@
-package org.utkuozdemir.watchdist;
+package org.utkuozdemir.watchdist.app;
 
 public class Constants {
 	public static final int DEFAULT_MAX_WATCHES_IN_A_DAY = 4;

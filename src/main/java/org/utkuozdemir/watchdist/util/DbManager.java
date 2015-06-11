@@ -7,7 +7,7 @@ import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.stmt.PreparedDelete;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.support.ConnectionSource;
-import org.utkuozdemir.watchdist.Constants;
+import org.utkuozdemir.watchdist.app.Constants;
 import org.utkuozdemir.watchdist.domain.*;
 
 import java.nio.file.Path;

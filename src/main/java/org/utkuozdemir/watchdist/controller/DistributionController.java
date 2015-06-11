@@ -11,7 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
-import org.utkuozdemir.watchdist.Settings;
+import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.domain.NullSoldier;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
@@ -32,7 +32,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 @SuppressWarnings("unused")
 public class DistributionController implements Initializable {
@@ -237,99 +237,19 @@ public class DistributionController implements Initializable {
 			if (!perfect) break;
 		}
 
-		Comparator<Soldier> soldierComparator = (o1, o2) -> {
-			if (o1 == null && o2 == null) return 0;
-			if (o1 == null) return 1;
-			if (o2 == null) return -1;
-			return o1.getFullName().compareTo(o2.getFullName());
-		};
-
-//		Set<Soldier> firstRowSoldiers = new TreeSet<>(soldierComparator);
-//		firstRowSoldiers.addAll(Arrays.asList(rows.get(0).getSoldiers()));
-//
-//		Set<Soldier> secondRowSoldiers = new TreeSet<>(soldierComparator);
-//		secondRowSoldiers.addAll(Arrays.asList(rows.get(1).getSoldiers()));
-//
-//		//noinspection ConstantConditions
-//		List<Watch> previousDays22_24Watches = DbManager.findWatchesByDateAndHour(getCurrentDate().minusDays(1), 11);
-//		List<Soldier> previousDays22_24WatchesSoldiers
-//				= Lists.transform(previousDays22_24Watches, Watch::getSoldier);
-//		previousDays22_24WatchesSoldiers.removeAll(Collections.<Soldier>singleton(null));
-
-//		//noinspection ConstantConditions
-//		List<Watch> previousDays20_22watches = DbManager.findWatchesByDateAndHour(getCurrentDate().minusDays(1), 10);
-//		List<Soldier> previousDays20_22watchesSoldiers
-//				= Lists.transform(previousDays20_22watches, Watch::getSoldier);
-//		previousDays20_22watchesSoldiers.removeAll(Collections.<Soldier>singleton(null));
-//
-//		firstRowSoldiers.retainAll(previousDays22_24WatchesSoldiers);
-//		secondRowSoldiers.retainAll(pre)
-//		if (!firstRowSoldiers.isEmpty()) {
-//			perfect = false;
-//
-//			String message = Messages.get(firstRowSoldiers.size() > 1 ?
-//							"distribution.first.watch.after.yesterdays.last.multiple" :
-//							"distribution.first.watch.after.yesterdays.last",
-//					Joiner.on(", ").join(firstRowSoldiers));
-//
-//			approveMessage.append(message)
-//					.append(System.lineSeparator())
-//					.append(System.lineSeparator());
-//		}
-
-		for (int i = 0; i < rows.size(); i++) {
-			List<Soldier> previousFirstRowSoldiers;
-			List<Soldier> previousSecondRowSoldiers;
-			if (i == 0) {
-				previousFirstRowSoldiers = DbManager.findWatchesByDateAndHour(currentDate.minusDays(1), 11)
-						.stream().map(Watch::getSoldier).collect(Collectors.toList());
-				previousSecondRowSoldiers = DbManager.findWatchesByDateAndHour(currentDate.minusDays(1), 10)
-						.stream().map(Watch::getSoldier).collect(Collectors.toList());
-			} else if (i == 1) {
-				previousFirstRowSoldiers = Arrays.asList(rows.get(i - 1).getSoldiers());
-				previousSecondRowSoldiers = DbManager.findWatchesByDateAndHour(currentDate.minusDays(1), 11)
-						.stream().map(Watch::getSoldier).collect(Collectors.toList());
-			} else {
-				previousFirstRowSoldiers = Arrays.asList(rows.get(i - 1).getSoldiers());
-				previousSecondRowSoldiers = Arrays.asList(rows.get(i - 2).getSoldiers());
-			}
-
-
-			TreeSet<Soldier> currentRowSoldiers = new TreeSet<>(soldierComparator);
-			currentRowSoldiers.addAll(Arrays.asList(rows.get(i).getSoldiers()));
-			currentRowSoldiers.retainAll(
-					Stream.concat(previousFirstRowSoldiers.stream(), previousSecondRowSoldiers.stream())
-							.collect(Collectors.toList()));
-
-			currentRowSoldiers.remove(null);
-			if (!currentRowSoldiers.isEmpty()) {
-				perfect = false;
-				String previousStartTime = String.format("%02d",
-						(((i - 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
-				String currentStartTime = String.format("%02d",
-						(((i) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24
-				);
-				String currentEndTime = String.format("%02d",
-						(((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
-
-				String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
-				String previousHourName = previousStartTime + ":" + minute + " - " + currentStartTime + ":" + minute;
-				String currentHourName = currentStartTime + ":" + minute + " - " + currentEndTime + ":" + minute;
-
-				String message = Messages.get(currentRowSoldiers.size() > 1 ?
-								"distribution.consequent.watches.multiple" :
-								"distribution.consequent.watches",
-						currentRowSoldiers.stream().map(String::valueOf).collect(Collectors.joining(", ")),
-						previousHourName,
-						currentHourName,
-						(Settings.getMinWatchesBetweenTwoWatches() * Settings.getOneWatchDurationInHours()) + Settings.getOneWatchDurationInHours()
-				);
-				approveMessage.append(message)
-						.append(System.lineSeparator())
-						.append(System.lineSeparator());
-			}
+		Set<Soldier> collidedSoldiers = getCollidedSoldiers(currentDate, rows);
+		if (!collidedSoldiers.isEmpty()) {
+			perfect = false;
+			String message = Messages.get(collidedSoldiers.size() > 1 ?
+							"distribution.consequent.watches.multiple" :
+							"distribution.consequent.watches",
+					collidedSoldiers.stream().map(String::valueOf).collect(Collectors.joining(", ")),
+					(Settings.getMinWatchesBetweenTwoWatches() + 1) * Settings.getOneWatchDurationInHours()
+			);
+			approveMessage.append(message)
+					.append(System.lineSeparator())
+					.append(System.lineSeparator());
 		}
-
 
 		List<Watch> existingWatches = DbManager.findWatchesByDate(getCurrentDate());
 		if (!existingWatches.isEmpty()) {
@@ -343,6 +263,36 @@ public class DistributionController implements Initializable {
 
 		return perfect ? Messages.get("distribution.perfect.approval") :
 				approveMessage.append(Messages.get("distribution.imperfect.approval")).toString();
+	}
+
+	private Set<Soldier> getCollidedSoldiers(LocalDate currentDate, ObservableList<DistributionRow> rows) {
+		Comparator<Soldier> soldierComparator = (o1, o2) -> {
+			if (o1 == null && o2 == null) return 0;
+			if (o1 == null) return 1;
+			if (o2 == null) return -1;
+			return o1.getFullName().compareTo(o2.getFullName());
+		};
+		Set<Soldier> collidedSoldiers = new TreeSet<>(soldierComparator);
+		for (int i = 0; i < rows.size(); i++) {
+			List<Soldier> previousSoldiers
+					= IntStream.range(i - Settings.getMinWatchesBetweenTwoWatches(), i).boxed().flatMap(n -> {
+				if (n < 0) {
+					return DbManager.findWatchesByDateAndHour(currentDate.minusDays(1),
+							Settings.getTotalWatchesInDay() + n).stream()
+							.map(Watch::getSoldier);
+				} else {
+					Soldier[] soldiers = rows.get(n).getSoldiers();
+					return Arrays.stream(soldiers);
+				}
+			}).collect(Collectors.toList());
+
+			Set<Soldier> currentRowSoldiers = new HashSet<>();
+			currentRowSoldiers.addAll(Arrays.asList(rows.get(i).getSoldiers()));
+			currentRowSoldiers.retainAll(previousSoldiers);
+			currentRowSoldiers.remove(null);
+			collidedSoldiers.addAll(currentRowSoldiers);
+		}
+		return collidedSoldiers;
 	}
 
 	public Integer getSelectedMonth() {
@@ -534,8 +484,8 @@ public class DistributionController implements Initializable {
 			TreeSet<WatchPoint> dupesRemovedSortedWatchPoints = new TreeSet<>(Comparators.WATCH_POINT_ID_ASC_COMPARATOR);
 			dupesRemovedSortedWatchPoints.addAll(watchPoints);
 
-			int soldierCount = WatchPointSoldierCalculator
-					.getTotalWatchPointSoldierCount(dupesRemovedSortedWatchPoints);
+			int soldierCount = dupesRemovedSortedWatchPoints
+					.stream().mapToInt(WatchPoint::getRequiredSoldierCount).sum();
 			Soldier[][] soldiers = new Soldier[Settings.getTotalWatchesInDay()][soldierCount];
 			for (Watch watch : watches) {
 				for (TableColumn<DistributionRow, ?> column : distributionTable.getColumns()) {
