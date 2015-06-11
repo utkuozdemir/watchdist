@@ -176,6 +176,21 @@ public class DbManager {
 		}
 	}
 
+	public static int updateWatchPointRequiredSoldierCount(int watchPointId, int newRequiredSoldierCount) {
+		try {
+			DbManager dbManager = getInstance();
+			return dbManager.transactionManager.callInTransaction(() -> {
+				WatchPoint watchPoint = dbManager.watchPointDao.queryForId(watchPointId);
+				watchPoint.setActive(false);
+				dbManager.watchPointDao.update(watchPoint);
+				return dbManager.watchPointDao.createOrUpdate(
+						new WatchPoint(watchPoint.getName(), newRequiredSoldierCount)).getNumLinesChanged();
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static int deleteWatchPoints(final Collection<WatchPoint> watchPoints) {
 		try {
 			DbManager dbManager = getInstance();

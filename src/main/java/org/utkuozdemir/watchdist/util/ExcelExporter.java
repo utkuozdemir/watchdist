@@ -123,7 +123,7 @@ public class ExcelExporter {
 	private static void createExtraSheets(Collection<Watch> watches, Workbook workbook) {
 		int totalWatchPointSoldierCount = watches.stream()
 				.map(Watch::getWatchPoint).distinct().mapToInt(WatchPoint::getRequiredSoldierCount).sum();
-		int pageCount = (totalWatchPointSoldierCount / 5);
+		int pageCount = ((totalWatchPointSoldierCount - 1) / 5) + 1;
 		for (int i = 1; i < pageCount; i++) {
 			workbook.cloneSheet(0);
 		}

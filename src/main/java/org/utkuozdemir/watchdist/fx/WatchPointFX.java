@@ -31,8 +31,8 @@ public class WatchPointFX {
         });
 
         this.requiredSoldierCount.addListener((observableValue, number, t1) -> {
-            DbManager.updateWatchPoint(Converters.FX_TO_WATCH_POINT.apply(WatchPointFX.this));
-        });
+			DbManager.updateWatchPointRequiredSoldierCount(id.get(), requiredSoldierCount.get());
+		});
     }
 
     public SimpleIntegerProperty idProperty() {

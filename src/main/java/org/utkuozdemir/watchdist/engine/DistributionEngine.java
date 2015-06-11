@@ -78,20 +78,16 @@ public class DistributionEngine {
 		if (index.getI() < Settings.getMinWatchesBetweenTwoWatches())
 			throw new IllegalArgumentException("\"i\" should be equal or higher than " + Settings
 					.getMinWatchesBetweenTwoWatches());
-		Soldier[][] temp = new Soldier[distribution.length][soldierCountForWatch];
-		for (int i = 0; i < distribution.length; i++) {
-			System.arraycopy(distribution[i], 0, temp[i], 0, distribution[i].length);
-		}
+		Soldier[][] temp = cloneArray(distribution);
 		temp[index.getI()][index.getJ()] = null;
 
 		Set<Soldier> unavailables
 				= getUnavailablesForIndex(date, distribution, index, soldiers, soldierCountForWatch, maxAssigns);
 
 		int dayNum = date.getDayOfWeek().getValue() - 1;
-		Set<Soldier> availables = soldiers.stream().filter(s -> !unavailables.contains(s)).collect
-				(Collectors.toSet());
+		Set<Soldier> availables = soldiers.stream().filter(s -> !unavailables.contains(s)).collect(Collectors.toSet());
 		Map<Soldier, Integer> availablesTicketMap = availables.stream().collect(Collectors.toMap(s -> s, s -> {
-					// tickets from availability yimes (inverse proportion)
+					// tickets from availability times (inverse proportion)
 					long availabilityCountInDay
 							= s.getAvailabilities().stream()
 							.filter(availability -> availability.getDayNum() == dayNum).count();
@@ -166,5 +162,13 @@ public class DistributionEngine {
 		return shuffled;
 	}
 
+	@SuppressWarnings("unchecked")
+	private static Soldier[][] cloneArray(Soldier[][] source) {
+		Soldier[][] target = new Soldier[source.length][];
+		for (int i = 0; i < source.length; i++) {
+			target[i] = Arrays.copyOf(source[i], source[i].length);
+		}
+		return target;
+	}
 
 }
