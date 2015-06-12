@@ -19,7 +19,6 @@ import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.engine.DistributionEngine;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
 import org.utkuozdemir.watchdist.i18n.Messages;
-import org.utkuozdemir.watchdist.util.Comparators;
 import org.utkuozdemir.watchdist.util.*;
 
 import java.awt.*;
@@ -56,10 +55,10 @@ public class DistributionController implements Initializable {
 		LocalDate currentDate = getCurrentDate();
 		List<Watch> watches = DbManager.findWatchesByDate(currentDate);
 		List<WatchPoint> watchPoints = watches.isEmpty() ?
-				DbManager.findAllActiveWatchPoints() :
+				DbManager.findAllActiveWatchPointsOrdered() :
 				watches.stream().map(Watch::getWatchPoint).distinct().collect(Collectors.toList());
 		Soldier[][] soldiers = DistributionEngine
-				.distribute(getCurrentDate(), DbManager.findAllActiveSoldiers(), watchPoints);
+				.distribute(getCurrentDate(), DbManager.findAllActiveSoldiersOrdered(), watchPoints);
 		loadDataToTable(soldiers);
 	}
 
@@ -323,12 +322,12 @@ public class DistributionController implements Initializable {
 		LocalDate currentDate = getCurrentDate();
 		List<Watch> watches = DbManager.findWatchesByDate(currentDate != null ? currentDate : LocalDate.now());
 		if (watches.isEmpty()) {
-			watchPoints = DbManager.findAllActiveWatchPoints();
+			watchPoints = DbManager.findAllActiveWatchPointsOrdered();
 		} else {
 			watchPoints = watches.stream().map(w -> w != null ? w.getWatchPoint() : null).collect(Collectors.toList());
 
 			watchPoints.removeAll(Collections.<WatchPoint>singleton(null));
-			Set<WatchPoint> dupesRemoved = new TreeSet<>(Comparators.WATCH_POINT_ID_ASC_COMPARATOR);
+			Set<WatchPoint> dupesRemoved = new TreeSet<>((o1, o2) -> o1.getOrder() - o2.getOrder());
 			dupesRemoved.addAll(watchPoints);
 			watchPoints = new ArrayList<>(dupesRemoved);
 		}
@@ -474,14 +473,14 @@ public class DistributionController implements Initializable {
 
 			List<WatchPoint> watchPoints;
 			if (watches.isEmpty()) {
-				watchPoints = DbManager.findAllActiveWatchPoints();
+				watchPoints = DbManager.findAllActiveWatchPointsOrdered();
 			} else {
 				watchPoints = watches.stream()
 						.map(input -> input == null ? null : input.getWatchPoint()).collect(Collectors.toList());
 			}
 			watchPoints.removeAll(Collections.<WatchPoint>singleton(null));
 
-			TreeSet<WatchPoint> dupesRemovedSortedWatchPoints = new TreeSet<>(Comparators.WATCH_POINT_ID_ASC_COMPARATOR);
+			TreeSet<WatchPoint> dupesRemovedSortedWatchPoints = new TreeSet<>((o1, o2) -> o1.getOrder() - o2.getOrder());
 			dupesRemovedSortedWatchPoints.addAll(watchPoints);
 
 			int soldierCount = dupesRemovedSortedWatchPoints

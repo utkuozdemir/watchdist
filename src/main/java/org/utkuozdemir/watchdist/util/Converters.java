@@ -29,17 +29,19 @@ public class Converters {
 			= input -> {
 		if (input == null) return null;
 		return new WatchPoint(input.idProperty().get(), input.nameProperty().get(),
-				input.requiredSoldierCountProperty().get(), input.activeProperty().get());
+				input.requiredSoldierCountProperty().get(), input.activeProperty().get(), input.orderProperty().get());
 	};
 	public static final Function<WatchPoint, WatchPointFX> WATCH_POINT_TO_FX
 			= input -> {
 		if (input == null) return null;
-		return new WatchPointFX(input.getId(), input.getName(), input.getRequiredSoldierCount(), input.isActive());
+		return new WatchPointFX(input.getId(), input.getName(),
+				input.getRequiredSoldierCount(), input.isActive(), input.getOrder());
 	};
 	public static final Function<Soldier, SoldierFX> SOLDIER_TO_FX = s -> {
 		if (s == null) return null;
 		return new SoldierFX(s.getId(), s.getFullName(), s.getDuty(), s.isAvailable(),
-				s.getPoints(), s.isActive(), s.isSergeant(), s.getMaxWatchesPerDay(), s.getAvailabilities());
+				s.getPoints(), s.isActive(), s.isSergeant(), s.getMaxWatchesPerDay(), s.getOrder(),
+				s.getAvailabilities());
 	};
 	public static final Function<SoldierFX, Soldier> FX_TO_SOLDIER = sfx -> {
 		if (sfx == null) return null;
@@ -54,7 +56,7 @@ public class Converters {
 		return new Soldier(
 				sfx.idProperty().get(), sfx.fullNameProperty().get(), sfx.dutyProperty().get(),
 				sfx.availableProperty().get(), sfx.pointsProperty().get(), sfx.activeProperty().get(),
-				sfx.sergeantProperty().get(), sfx.maxWatchesPerDayProperty().get(),
+				sfx.sergeantProperty().get(), sfx.maxWatchesPerDayProperty().get(), sfx.orderProperty().get(),
 				availabilities
 		);
 	};

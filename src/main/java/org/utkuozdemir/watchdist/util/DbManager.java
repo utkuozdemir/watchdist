@@ -75,9 +75,12 @@ public class DbManager {
 		}
 	}
 
-	public static List<Soldier> findAllActiveSoldiers() {
+	public static List<Soldier> findAllActiveSoldiersOrdered() {
 		try {
-			return getInstance().soldierDao.queryForFieldValues(Collections.singletonMap("active", (Object) true));
+			DbManager dbManager = getInstance();
+			PreparedQuery<Soldier> query = dbManager.soldierDao
+					.queryBuilder().orderBy("order", true).where().eq("active", true).prepare();
+			return dbManager.soldierDao.query(query);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -152,9 +155,13 @@ public class DbManager {
 		}
 	}
 
-	public static List<WatchPoint> findAllActiveWatchPoints() {
+	public static List<WatchPoint> findAllActiveWatchPointsOrdered() {
 		try {
-			return getInstance().watchPointDao.queryForFieldValues(Collections.singletonMap("active", (Object) true));
+			DbManager dbManager = getInstance();
+			PreparedQuery<WatchPoint> query = dbManager.watchPointDao.queryBuilder()
+					.orderBy("order", true)
+					.where().eq("active", true).prepare();
+			return dbManager.watchPointDao.query(query);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -184,7 +191,8 @@ public class DbManager {
 				watchPoint.setActive(false);
 				dbManager.watchPointDao.update(watchPoint);
 				return dbManager.watchPointDao.createOrUpdate(
-						new WatchPoint(watchPoint.getName(), newRequiredSoldierCount)).getNumLinesChanged();
+						new WatchPoint(watchPoint.getName(), newRequiredSoldierCount, watchPoint.getOrder()))
+						.getNumLinesChanged();
 			});
 		} catch (SQLException e) {
 			throw new RuntimeException(e);

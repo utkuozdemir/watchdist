@@ -7,11 +7,11 @@
             minWidth="-Infinity"
             prefHeight="410.0" prefWidth="640.0" xmlns="http://javafx.com/javafx/null"
             fx:controller="org.utkuozdemir.watchdist.controller.WatchPointsController">
-    <TableView fx:id="watchPointsTable" editable="true" layoutX="14.0" layoutY="39.0" prefHeight="350.0"
-               prefWidth="420.0" AnchorPane.bottomAnchor="21.0" AnchorPane.leftAnchor="14.0"
+    <TableView fx:id="watchPointsTable" editable="true" layoutX="14.0" layoutY="39.0"
+               prefHeight="350.0" prefWidth="420.0" AnchorPane.bottomAnchor="21.0" AnchorPane.leftAnchor="14.0"
                AnchorPane.rightAnchor="206.0" AnchorPane.topAnchor="39.0">
         <columns>
-            <TableColumn fx:id="idColumn" prefWidth="46.0" text="ID"/>
+            <TableColumn fx:id="orderColumn" prefWidth="40.0" text="%order"/>
             <TableColumn fx:id="nameColumn" prefWidth="180.0" text="%watchpoints.name"/>
             <TableColumn fx:id="requiredSoldierCountColumn" prefWidth="150.0" text="%required.soldier.count"/>
         </columns>
@@ -29,9 +29,8 @@
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
-    <Button fx:id="removeSelectedWatchPointsButton" style="-fx-base: #F78181;" layoutX="474.0" layoutY="82.0"
-            mnemonicParsing="false"
-            onAction="#removeSelectedWatchPoints" prefHeight="30.0" prefWidth="180.0"
+    <Button fx:id="removeSelectedWatchPointsButton" layoutX="474.0" layoutY="82.0" mnemonicParsing="false"
+            onAction="#removeSelectedWatchPoints" prefHeight="30.0" prefWidth="180.0" style="-fx-base: #F78181;"
             text="%watchpoints.remove.selected.watch.points" AnchorPane.rightAnchor="16.0" AnchorPane.topAnchor="82.0">
         <font>
             <Font name="System Bold" size="12.0"/>

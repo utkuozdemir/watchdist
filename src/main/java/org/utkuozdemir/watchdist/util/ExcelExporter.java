@@ -59,7 +59,7 @@ public class ExcelExporter {
 
 	private static void fillPointNameValues(Collection<Sheet> sheets, Collection<Watch> watches) {
 		Stream<WatchPoint> sortedWatchPointsStream = watches.stream().map(Watch::getWatchPoint).distinct()
-				.sorted((wp1, wp2) -> wp1.getId().compareTo(wp2.getId()));
+				.sorted((wp1, wp2) -> wp1.getOrder() - wp2.getOrder());
 		Queue<String> watchPointNamesQueue = new LinkedList<>();
 		sortedWatchPointsStream.forEach(wp -> IntStream.range(0,
 				wp.getRequiredSoldierCount()).forEach(i -> watchPointNamesQueue.offer(wp.getName())));

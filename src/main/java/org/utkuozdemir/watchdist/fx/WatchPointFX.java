@@ -12,12 +12,14 @@ public class WatchPointFX {
     private final SimpleStringProperty name;
     private final SimpleIntegerProperty requiredSoldierCount;
     private final SimpleBooleanProperty active;
+    private final SimpleIntegerProperty order;
 
-    public WatchPointFX(int id, String name, int requiredSoldierCount, boolean active) {
+    public WatchPointFX(int id, String name, int requiredSoldierCount, boolean active, int order) {
         this.id = new SimpleIntegerProperty(id);
         this.name = new SimpleStringProperty(name);
         this.requiredSoldierCount = new SimpleIntegerProperty(requiredSoldierCount);
         this.active = new SimpleBooleanProperty(active);
+        this.order = new SimpleIntegerProperty(order);
 
         addListeners();
     }
@@ -33,6 +35,10 @@ public class WatchPointFX {
         this.requiredSoldierCount.addListener((observableValue, number, t1) -> {
 			DbManager.updateWatchPointRequiredSoldierCount(id.get(), requiredSoldierCount.get());
 		});
+
+        this.order.addListener((observable, oldValue, newValue) -> {
+            DbManager.updateWatchPoint(Converters.FX_TO_WATCH_POINT.apply(WatchPointFX.this));
+        });
     }
 
     public SimpleIntegerProperty idProperty() {
@@ -49,5 +55,9 @@ public class WatchPointFX {
 
     public SimpleBooleanProperty activeProperty() {
         return active;
+    }
+
+    public SimpleIntegerProperty orderProperty() {
+        return order;
     }
 }

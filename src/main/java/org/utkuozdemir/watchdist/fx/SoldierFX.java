@@ -23,12 +23,13 @@ public class SoldierFX {
 	private final SimpleBooleanProperty active;
 	private final SimpleBooleanProperty sergeant;
 	private final SimpleIntegerProperty maxWatchesPerDay;
+	private final SimpleIntegerProperty order;
 
 	private Collection<SimpleObjectProperty<Availability>> availabilities;
 	private SimpleBooleanProperty[][] availabilitiesBooleans;
 
-	public SoldierFX(int id, String fullName, String duty,
-					 boolean available, double points, boolean active, boolean sergeant, int maxWatchesPerDay,
+	public SoldierFX(int id, String fullName, String duty, boolean available, double points,
+					 boolean active, boolean sergeant, int maxWatchesPerDay, int order,
 					 Collection<Availability> availabilities) {
 
 
@@ -40,6 +41,7 @@ public class SoldierFX {
 		this.active = new SimpleBooleanProperty(active);
 		this.sergeant = new SimpleBooleanProperty(sergeant);
 		this.maxWatchesPerDay = new SimpleIntegerProperty(maxWatchesPerDay);
+		this.order = new SimpleIntegerProperty(order);
 
 		this.availabilities = availabilities.stream()
 				.map((Function<Availability, SimpleObjectProperty<Availability>>) SimpleObjectProperty::new)
@@ -116,6 +118,10 @@ public class SoldierFX {
 			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
 		});
 
+		this.order.addListener((observable, oldValue, newValue) -> {
+			DbManager.saveSoldier(Converters.FX_TO_SOLDIER.apply(SoldierFX.this));
+		});
+
 		for (int i = 0; i < 7; i++) {
 			for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
 				SimpleBooleanProperty property = availabilitiesBooleans[i][j];
@@ -157,6 +163,10 @@ public class SoldierFX {
 
 	public SimpleIntegerProperty maxWatchesPerDayProperty() {
 		return maxWatchesPerDay;
+	}
+
+	public SimpleIntegerProperty orderProperty() {
+		return order;
 	}
 
 	public Collection<SimpleObjectProperty<Availability>> availabilitiesProperties() {

@@ -43,7 +43,8 @@ public class AddNewSoldierController implements Initializable {
 		} else {
 			Soldier soldier
 					= new Soldier(fullName.getText(), duty.getText(), available.isSelected(),
-					sergeant.isSelected(), maxWatchCountPerDay.getValue()
+					sergeant.isSelected(), maxWatchCountPerDay.getValue(),
+					WindowManager.getMainController().getTableItemsSize() + 1
 			);
 			DbManager.createSoldier(soldier);
 			resetFields();

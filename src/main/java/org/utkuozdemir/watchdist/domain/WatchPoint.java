@@ -14,26 +14,30 @@ public class WatchPoint {
     @DatabaseField(columnName = "name")
     private String name;
 
-
     @DatabaseField(columnName = "required_soldier_count")
     private int requiredSoldierCount = 1;
 
     @DatabaseField(columnName = "active")
     private boolean active = true;
 
+    @DatabaseField(columnName = "order")
+    private int order;
+
     WatchPoint() {
     }
 
-    public WatchPoint(String name, int requiredSoldierCount) {
+    public WatchPoint(String name, int requiredSoldierCount, int order) {
         this.name = name;
         this.requiredSoldierCount = requiredSoldierCount;
+        this.order = order;
     }
 
-    public WatchPoint(Integer id, String name, int requiredSoldierCount, boolean active) {
+    public WatchPoint(Integer id, String name, int requiredSoldierCount, boolean active, int order) {
         this.id = id;
         this.name = name;
         this.requiredSoldierCount = requiredSoldierCount;
         this.active = active;
+        this.order = order;
     }
 
     public Integer getId() {
@@ -66,6 +70,14 @@ public class WatchPoint {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     @Override

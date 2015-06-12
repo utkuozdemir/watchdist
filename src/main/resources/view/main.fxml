@@ -11,7 +11,7 @@
                AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="226.0"
                AnchorPane.topAnchor="32.0">
         <columns>
-            <TableColumn fx:id="idColumn" prefWidth="62.0" text="%id"/>
+            <TableColumn fx:id="orderColumn" prefWidth="62.0" text="%order"/>
             <TableColumn fx:id="fullNameColumn" prefWidth="144.0" text="%full.name"/>
             <TableColumn fx:id="dutyColumn" prefWidth="156.0" text="%duty"/>
             <TableColumn fx:id="sergeantColumn" prefWidth="78.0" text="%sergeant"/>

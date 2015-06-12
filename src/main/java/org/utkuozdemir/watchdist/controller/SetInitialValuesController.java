@@ -65,7 +65,7 @@ public class SetInitialValuesController implements Initializable {
 		oneWatchDurationInHours.setValue(watchDurationInHours != null ? Integer.parseInt(watchDurationInHours) : null);
 
 		List<Integer> watchesBetweenTwoWatchesValues = new ArrayList<>();
-		watchesBetweenTwoWatchesValues.addAll(IntStream.range(1, 8)
+		watchesBetweenTwoWatchesValues.addAll(IntStream.rangeClosed(1, 8)
 				.boxed().collect(Collectors.toList()));
 		watchesBetweenTwoWatches
 				.setItems(FXCollections.observableArrayList(watchesBetweenTwoWatchesValues));

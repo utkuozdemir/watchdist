@@ -37,14 +37,17 @@ public class Soldier {
 	@DatabaseField(columnName = "max_watches_per_day")
 	private int maxWatchesPerDay;
 
+	@DatabaseField(columnName = "order")
+	private int order;
+
     @ForeignCollectionField(eager = true)
     private Collection<Availability> availabilities;
 
     Soldier() {
     }
 
-	public Soldier(String fullName, String duty, boolean available, boolean sergeant, int maxWatchesPerDay) {
-        if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
+	public Soldier(String fullName, String duty, boolean available, boolean sergeant, int maxWatchesPerDay, int order) {
+		if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
             throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
 
         this.fullName = fullName;
@@ -52,6 +55,7 @@ public class Soldier {
         this.available = available;
         this.sergeant = sergeant;
 		this.maxWatchesPerDay = maxWatchesPerDay;
+		this.order = order;
 
 		this.availabilities = new ArrayList<>();
 		for (int i = 0; i < 7; i++) {
@@ -63,7 +67,7 @@ public class Soldier {
     }
 
     public Soldier(Integer id, String fullName, String duty, boolean available,
-				   double points, boolean active, boolean sergeant, int maxWatchesPerDay,
+				   double points, boolean active, boolean sergeant, int maxWatchesPerDay, int order,
 				   Collection<Availability> availabilities) {
 		this.id = id;
 		this.fullName = fullName;
@@ -73,6 +77,7 @@ public class Soldier {
         this.active = active;
         this.sergeant = sergeant;
 		this.maxWatchesPerDay = maxWatchesPerDay;
+		this.order = order;
 		this.availabilities = availabilities;
 	}
 
@@ -140,6 +145,14 @@ public class Soldier {
         if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
             throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
 		this.maxWatchesPerDay = maxWatchesPerDay;
+	}
+
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 
 	public Collection<Availability> getAvailabilities() {

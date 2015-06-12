@@ -1,6 +1,10 @@
 package org.utkuozdemir.watchdist.app;
 
+import javafx.scene.input.DataFormat;
+
 public class Constants {
+	public static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
+
 	public static final int DEFAULT_MAX_WATCHES_IN_A_DAY = 4;
 
 	public static final String DB_NAME = "nobet_veritabani.db";

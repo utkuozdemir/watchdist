@@ -14,6 +14,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -21,7 +24,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.utkuozdemir.watchdist.app.Constants;
 import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.fx.SoldierFX;
@@ -45,17 +47,18 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.utkuozdemir.watchdist.app.Constants.*;
+
 @SuppressWarnings("unused")
 public class MainController implements Initializable {
 	private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
 	@FXML
 	private AnchorPane pane;
-
 	@FXML
 	private TableView<SoldierFX> soldiersTable;
 	@FXML
-	private TableColumn<SoldierFX, Integer> idColumn;
+	private TableColumn<SoldierFX, Integer> orderColumn;
 	@FXML
 	private TableColumn<SoldierFX, String> fullNameColumn;
 	@FXML
@@ -86,10 +89,10 @@ public class MainController implements Initializable {
 
 	public MainController() {
 		try {
-			iv = new ImageView(new Image(new ByteArrayInputStream(new BASE64Decoder().decodeBuffer(Constants.H))));
+			iv = new ImageView(new Image(new ByteArrayInputStream(new BASE64Decoder().decodeBuffer(H))));
 			iv.setOnMouseClicked(event -> {
 				try {
-					String m = new String(java.util.Base64.getDecoder().decode(Constants.L),
+					String m = new String(java.util.Base64.getDecoder().decode(L),
 							StandardCharsets.UTF_8.name());
 					WindowManager.showInfoAlert(m, m);
 				} catch (UnsupportedEncodingException ignored) {
@@ -102,7 +105,7 @@ public class MainController implements Initializable {
 	}
 
 	public void refreshTableData() {
-		List<Soldier> allActiveSoldiers = DbManager.findAllActiveSoldiers();
+		List<Soldier> allActiveSoldiers = DbManager.findAllActiveSoldiersOrdered();
 		List<SoldierFX> soldierFXes = allActiveSoldiers.stream()
 				.map(Converters.SOLDIER_TO_FX).collect(Collectors.toList());
 		ObservableList<SoldierFX> data = FXCollections.observableArrayList(soldierFXes);
@@ -123,6 +126,7 @@ public class MainController implements Initializable {
 	private void initializeTable() {
 		soldiersTable.setPlaceholder(new Label(Messages.get("main.no.soldiers")));
 		soldiersTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+		soldiersTable.setRowFactory(param -> buildDraggableTableRow());
 
 		DateFormatSymbols symbols = new DateFormatSymbols(Messages.getLocale());
 		List<String> weekdays = new ArrayList<>(Arrays.stream(symbols.getShortWeekdays()).collect(Collectors.toList()));
@@ -171,7 +175,7 @@ public class MainController implements Initializable {
 		}
 
 
-		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		orderColumn.setCellValueFactory(new PropertyValueFactory<>("order"));
 
 		fullNameColumn.setCellFactory(soldierStringTableColumn -> new TextFieldTableCell<>(Converters.STRING_STRING_CONVERTER));
 		fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
@@ -209,6 +213,65 @@ public class MainController implements Initializable {
 		});
 		makeHeaderWrappable(maxWatchCountPerDayColumn);
 		maxWatchCountPerDayColumn.setCellValueFactory(new PropertyValueFactory<>("maxWatchesPerDay"));
+	}
+
+	private TableRow<SoldierFX> buildDraggableTableRow() {
+		TableRow<SoldierFX> row = new TableRow<>();
+		row.itemProperty().addListener((observable, oldValue, newValue) ->
+				row.setTooltip(new Tooltip(newValue != null ? newValue.fullNameProperty().get() : "")));
+
+		row.setOnDragDetected(event -> {
+			if (!row.isEmpty()) {
+				Integer index = row.getIndex();
+				Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+				db.setDragView(row.snapshot(null, null));
+				IntStream.range(0, soldiersTable.getItems().size())
+						.filter(i -> i != index).forEach(i -> soldiersTable.getSelectionModel().clearSelection(i));
+				ClipboardContent cc = new ClipboardContent();
+				cc.put(SERIALIZED_MIME_TYPE, index);
+				db.setContent(cc);
+				event.consume();
+			}
+		});
+
+		row.setOnDragOver(event -> {
+			Dragboard db = event.getDragboard();
+			if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+				if (row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
+					event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+					event.consume();
+				}
+			}
+		});
+
+		row.setOnDragDropped(event -> {
+			Dragboard db = event.getDragboard();
+			if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+				int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+				SoldierFX dragged = soldiersTable.getItems().remove(draggedIndex);
+
+				int dropIndex;
+				if (row.isEmpty()) {
+					dropIndex = soldiersTable.getItems().size();
+				} else {
+					dropIndex = row.getIndex();
+				}
+
+				soldiersTable.getItems().add(dropIndex, dragged);
+
+				event.setDropCompleted(true);
+				soldiersTable.getSelectionModel().clearSelection();
+				soldiersTable.getSelectionModel().select(dropIndex);
+				saveOrders();
+				event.consume();
+			}
+		});
+		return row;
+	}
+
+	public void saveOrders() {
+		IntStream.range(0, soldiersTable.getItems().size()).forEach(i ->
+				soldiersTable.getItems().get(i).orderProperty().set(i + 1));
 	}
 
 	private void makeHeaderWrappable(TableColumn col) {
@@ -299,5 +362,9 @@ public class MainController implements Initializable {
 
 	public void showAboutInfo() {
 		WindowManager.showInfoAlert(Messages.get("about"), Messages.get("about.text"));
+	}
+
+	public int getTableItemsSize() {
+		return soldiersTable.getItems().size();
 	}
 }

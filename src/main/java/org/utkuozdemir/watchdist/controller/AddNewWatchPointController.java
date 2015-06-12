@@ -45,7 +45,8 @@ public class AddNewWatchPointController implements Initializable {
 			return;
 		}
 
-		WatchPoint watchPoint = new WatchPoint(watchPointName.getText(), requiredSoldierCount.getValue());
+		WatchPoint watchPoint = new WatchPoint(watchPointName.getText(),
+				requiredSoldierCount.getValue(), WindowManager.getWatchPointsController().getTableItemsSize() + 1);
 		DbManager.createWatchPoint(watchPoint);
 
 		resetFields();
