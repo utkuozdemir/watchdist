@@ -2,6 +2,8 @@ package org.utkuozdemir.watchdist.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -35,21 +37,24 @@ public class AddNewSoldierController implements Initializable {
 	private Label maxWatchCountPerDayLabel;
 	@FXML
 	private ComboBox<Integer> maxWatchCountPerDay;
+	@FXML
+	private ProgressIndicator progressIndicator;
+
+	private Service<Integer> saveSoldierService;
+
+	private Soldier soldierToSave;
 
 	public void saveSoldier() {
 		if (fullName.getText() == null || fullName.getText().isEmpty() ||
 				duty.getText() == null || duty.getText().isEmpty()) {
 			errorLabel.setVisible(true);
 		} else {
-			Soldier soldier
-					= new Soldier(fullName.getText(), duty.getText(), available.isSelected(),
+			soldierToSave = new Soldier(fullName.getText(), duty.getText(), available.isSelected(),
 					sergeant.isSelected(), maxWatchCountPerDay.getValue(),
 					WindowManager.getMainController().getTableItemsSize() + 1
 			);
-			DbManager.createSoldier(soldier);
+			saveSoldierService.restart();
 			resetFields();
-			WindowManager.getMainController().refreshTableData();
-			WindowManager.getMainController().scrollToLastElementInTable();
 			fullName.requestFocus();
 		}
 	}
@@ -57,6 +62,23 @@ public class AddNewSoldierController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		saveSoldierService = new Service<Integer>() {
+			@Override
+			protected Task<Integer> createTask() {
+				return new Task<Integer>() {
+					@Override
+					protected Integer call() throws Exception {
+						return DbManager.saveSoldier(soldierToSave);
+					}
+				};
+			}
+		};
+		saveSoldierService.setOnSucceeded(event -> {
+			WindowManager.getMainController().refreshTableData();
+			WindowManager.getMainController().scrollToLastElementInTable();
+		});
+		progressIndicator.visibleProperty().bind(saveSoldierService.runningProperty());
+
 		maxWatchCountPerDayLabel.setText(Messages.get("max.watch.count.per.day", Settings.getOneWatchDurationInHours()));
 
 		sergeant.selectedProperty().addListener((observable, oldValue, newValue) -> {

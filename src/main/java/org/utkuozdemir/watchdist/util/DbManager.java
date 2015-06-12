@@ -86,21 +86,6 @@ public class DbManager {
 		}
 	}
 
-	public static int createSoldier(final Soldier soldier) {
-		try {
-			DbManager dbManager = getInstance();
-			return dbManager.transactionManager.callInTransaction(() -> {
-				int count = dbManager.soldierDao.create(soldier);
-				for (Availability availability : soldier.getAvailabilities()) {
-					dbManager.availabilityDao.create(availability);
-				}
-				return count;
-			});
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	@SuppressWarnings("unchecked")
 	public static int saveSoldier(final Soldier soldier) {
 		try {

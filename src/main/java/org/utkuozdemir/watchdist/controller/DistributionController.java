@@ -3,6 +3,8 @@ package org.utkuozdemir.watchdist.controller;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -47,19 +49,30 @@ public class DistributionController implements Initializable {
 	private ComboBox<Integer> year;
 	@FXML
 	private Label dayName;
+	@FXML
+	private ProgressIndicator progressIndicator;
+	@FXML
+	private Button distribute;
+	@FXML
+	private Button exportToExcel;
+	@FXML
+	private Button approve;
+	@FXML
+	private Button today;
+	@FXML
+	private Button previousDay;
+	@FXML
+	private Button nextDay;
 
 	private Soldier[] selectedSoldiersBeforeEdit;
+	private Service<Soldier[][]> distributionService;
 
 	@SuppressWarnings("unused")
 	public void distribute() {
-		LocalDate currentDate = getCurrentDate();
-		List<Watch> watches = DbManager.findWatchesByDate(currentDate);
-		List<WatchPoint> watchPoints = watches.isEmpty() ?
-				DbManager.findAllActiveWatchPointsOrdered() :
-				watches.stream().map(Watch::getWatchPoint).distinct().collect(Collectors.toList());
-		Soldier[][] soldiers = DistributionEngine
-				.distribute(getCurrentDate(), DbManager.findAllActiveSoldiersOrdered(), watchPoints);
-		loadDataToTable(soldiers);
+		distributionTable.getScene().getWindow().setOnCloseRequest(event -> {
+			if (distributionService.isRunning()) event.consume();
+		});
+		distributionService.restart();
 	}
 
 	private LocalDate getCurrentDate() {
@@ -302,12 +315,39 @@ public class DistributionController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		initializeDistributionService();
+
 		distributionTable.setPlaceholder(new Label(Messages.get("distribution.no.data.in.table")));
 		hoursColumn.setCellValueFactory(new PropertyValueFactory<>("hours"));
 
 		refreshTableColumns();
 
 		initDateFields();
+	}
+
+	private void initializeDistributionService() {
+		distributionService = new Service<Soldier[][]>() {
+			@Override
+			protected Task<Soldier[][]> createTask() {
+				return new Task<Soldier[][]>() {
+					@Override
+					protected Soldier[][] call() throws Exception {
+						List<Watch> watches = DbManager.findWatchesByDate(getCurrentDate());
+						List<WatchPoint> watchPoints = watches.isEmpty() ?
+								DbManager.findAllActiveWatchPointsOrdered() :
+								watches.stream().map(Watch::getWatchPoint).distinct().collect(Collectors.toList());
+						return DistributionEngine
+								.distribute(getCurrentDate(), DbManager.findAllActiveSoldiersOrdered(), watchPoints);
+					}
+				};
+			}
+		};
+		distributionService.setOnSucceeded(event -> loadDataToTable(distributionService.getValue()));
+
+		progressIndicator.visibleProperty().bind(distributionService.runningProperty());
+		Arrays.asList(distribute, exportToExcel, approve, today, previousDay, nextDay, day, month, year)
+				.forEach(control -> control.disableProperty().bind(distributionService.runningProperty()));
+		distributionTable.editableProperty().bind(distributionService.runningProperty().not());
 	}
 
 	@SuppressWarnings("unchecked")

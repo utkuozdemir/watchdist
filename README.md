@@ -2,14 +2,16 @@
 WatchDist is a watch hours (a.k.a. guard duty) distribution application that runs on desktop and can be used in 
 military or police bases to create a fair distribution of watch duties.
  
-The project uses **Apache Maven** as build tool, **Java 8** and **JavaFX 8** as UI library, **SQLite** to store the 
+The project uses [**Maven**](https://maven.apache.org/) as build tool, [**Java 8**](http://www.oracle.com/technetwork/java/javase/overview/java8-2100321.html) 
+and [**JavaFX 8**](https://docs.oracle.com/javase/8/javafx/api/toc.htm) as UI library, [**SQLite**](https://www.sqlite.org/
+) to store the 
 data 
-and **ORMLite** for mapping 
+and [**ORMLite**](http://ormlite.com/) for mapping 
 objects to the 
-database. **Apache POI** is used to export table to Excel file.
+database. [**Apache POI**](https://poi.apache.org/) is used to export table to Excel file.
   
-Other libraries used are Google's ~~guava~~ (replaced by Java 8's **Stream API**), ~~joda-time~~ 
-(replaced by Java 8's **Clock API**), **slf4j** and **logback**.
+Other libraries used are [**ControlsFX**](http://fxexperience.com/controlsfx/), Google's ~~guava~~ (replaced by Java 8's [**Stream API**](https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html)), ~~joda-time~~ 
+(replaced by Java 8's [**Clock API**](https://docs.oracle.com/javase/8/docs/api/java/time/Clock.html)), [**slf4j**](http://www.slf4j.org/) and [**logback**](http://logback.qos.ch/).
  
 Watch hours and durations are ~~currently fixed~~ adjustable (as 1.0), and their values (score added to the soldier) can be edited.
 A soldier's availabe hours can be changed for a week, and a soldier can be marked as sergeant and this soldier will 
@@ -21,7 +23,7 @@ template.
 ## Build
 The project uses maven as build tool and [Javafx Maven Plugin](https://github.com/javafx-maven-plugin) to create 
 runnable JARs/executables.  
-Maven should be using **JDK 8** to be able to build the project. 
+Maven should be using [**JDK 8**](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) to be able to build the project. 
 
 To create native installers, in the project root directory, execute the maven goal
 

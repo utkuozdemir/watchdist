@@ -30,8 +30,8 @@
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
-    <Label fx:id="errorLabel" layoutX="14.0" layoutY="226.0" text="%fill.missing.fields" textFill="RED"
-           visible="false" wrapText="true" AnchorPane.leftAnchor="14.0">
+    <Label fx:id="errorLabel" layoutX="14.0" layoutY="226.0" text="%fill.missing.fields" textFill="RED" visible="false"
+           wrapText="true" AnchorPane.leftAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
@@ -50,4 +50,6 @@
     </Label>
     <ComboBox fx:id="maxWatchCountPerDay" layoutX="14.0" layoutY="196.0" prefWidth="150.0"
               AnchorPane.leftAnchor="14.0"/>
+    <ProgressIndicator fx:id="progressIndicator" layoutX="182.0" layoutY="121.0" prefHeight="45.0" prefWidth="45.0"
+                       visible="false" AnchorPane.rightAnchor="14.0"/>
 </AnchorPane>

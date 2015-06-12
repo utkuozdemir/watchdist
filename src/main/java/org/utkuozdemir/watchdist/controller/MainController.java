@@ -2,6 +2,9 @@ package org.utkuozdemir.watchdist.controller;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -14,14 +17,14 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.util.Duration;
+import org.controlsfx.control.Notifications;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.app.Settings;
@@ -40,10 +43,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormatSymbols;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -71,7 +71,6 @@ public class MainController implements Initializable {
 	private TableColumn<SoldierFX, Boolean> sergeantColumn;
 	@FXML
 	private TableColumn<SoldierFX, Integer> maxWatchCountPerDayColumn;
-
 	@FXML
 	private Button addNewSoldierButton;
 	@FXML
@@ -82,10 +81,19 @@ public class MainController implements Initializable {
 	private Button watchDistributionScreenButton;
 	@FXML
 	private ComboBox<Language> language;
+	@FXML
+	private TextField filter;
+	@FXML
+	private ProgressIndicator progressIndicator;
+
+	private ObservableList<SoldierFX> masterTableData = FXCollections.observableArrayList();
 
 	private int cc = 0;
 	private long ts = 0;
 	private ImageView iv;
+
+	private Timer searchTimer;
+	private Service<List<SoldierFX>> refreshTableDataService;
 
 	public MainController() {
 		try {
@@ -104,12 +112,9 @@ public class MainController implements Initializable {
 		}
 	}
 
+
 	public void refreshTableData() {
-		List<Soldier> allActiveSoldiers = DbManager.findAllActiveSoldiersOrdered();
-		List<SoldierFX> soldierFXes = allActiveSoldiers.stream()
-				.map(Converters.SOLDIER_TO_FX).collect(Collectors.toList());
-		ObservableList<SoldierFX> data = FXCollections.observableArrayList(soldierFXes);
-		soldiersTable.setItems(data);
+		refreshTableDataService.restart();
 	}
 
 	public void scrollToLastElementInTable() {
@@ -217,11 +222,20 @@ public class MainController implements Initializable {
 
 	private TableRow<SoldierFX> buildDraggableTableRow() {
 		TableRow<SoldierFX> row = new TableRow<>();
-		row.itemProperty().addListener((observable, oldValue, newValue) ->
-				row.setTooltip(new Tooltip(newValue != null ? newValue.fullNameProperty().get() : "")));
+		row.itemProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null) {
+				row.setTooltip(new Tooltip(newValue.fullNameProperty().get()));
+			}
+		});
 
 		row.setOnDragDetected(event -> {
-			if (!row.isEmpty()) {
+			boolean unfiltered = filter.getText() == null || "".equals(filter.getText().trim());
+			if (!unfiltered) {
+				Notifications.create().hideCloseButton()
+						.position(Pos.CENTER)
+						.text(Messages.get("clear.filter.before.ordering"))
+						.hideAfter(new Duration(2000)).showWarning();
+			} else if (!row.isEmpty()) {
 				Integer index = row.getIndex();
 				Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
 				db.setDragView(row.snapshot(null, null));
@@ -299,13 +313,62 @@ public class MainController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		initializeRefreshTableDataService();
+
 		language.setItems(FXCollections.observableArrayList(Arrays.asList(Language.values())));
 		language.setValue(Language.forLocale(Messages.getLocale()));
 		language.valueProperty().addListener((observableValue, language1, t1) -> {
 			WindowManager.switchLanguage(((Stage) language.getScene().getWindow()), t1);
 		});
+
+		filter.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (searchTimer != null) searchTimer.cancel();
+			searchTimer = new Timer();
+			searchTimer.schedule(new TimerTask() {
+				@Override
+				public void run() {
+					soldiersTable.setItems(
+							FXCollections.observableArrayList(filterSoldiers(masterTableData, newValue))
+					);
+				}
+			}, 500);
+		});
+
 		initializeTable();
 		refreshTableData();
+	}
+
+	private void initializeRefreshTableDataService() {
+		refreshTableDataService = new Service<List<SoldierFX>>() {
+			@Override
+			protected Task<List<SoldierFX>> createTask() {
+				return new Task<List<SoldierFX>>() {
+					@Override
+					protected List<SoldierFX> call() throws Exception {
+						List<Soldier> soldiers = DbManager.findAllActiveSoldiersOrdered();
+						List<SoldierFX> soldierFXes = soldiers.stream()
+								.map(Converters.SOLDIER_TO_FX).collect(Collectors.toList());
+						masterTableData.setAll(soldierFXes);
+						return filterSoldiers(soldierFXes, filter.getText());
+					}
+				};
+			}
+		};
+		refreshTableDataService.setOnSucceeded(event ->
+				soldiersTable.setItems(FXCollections.observableArrayList(refreshTableDataService.getValue())));
+		progressIndicator.visibleProperty().bind(refreshTableDataService.runningProperty());
+	}
+
+	private List<SoldierFX> filterSoldiers(List<SoldierFX> list, String text) {
+		return list.stream().filter(sfx -> {
+			if (text == null || "".equals(text.trim())) {
+				return true;
+			} else {
+				String data = (sfx.fullNameProperty().get() + " " + sfx.dutyProperty().get())
+						.toLowerCase(Messages.getLocale());
+				return (data.matches("(.*\\s+)?" + text.toLowerCase(Messages.getLocale()) + ".*"));
+			}
+		}).collect(Collectors.toList());
 	}
 
 	public void deleteSelectedSoldiers() {
@@ -349,10 +412,10 @@ public class MainController implements Initializable {
 					if (!pane.getChildren().contains(iv)) pane.getChildren().add(iv);
 					double w = iv.getImage().getWidth();
 					double h = iv.getImage().getHeight();
-					AnchorPane.setBottomAnchor(iv, (pane.getHeight() - h)/2);
+					AnchorPane.setBottomAnchor(iv, (pane.getHeight() - h) / 2);
 					AnchorPane.setLeftAnchor(iv, (pane.getWidth() - h) / 2);
 					AnchorPane.setTopAnchor(iv, (pane.getHeight() - h) / 2);
-					AnchorPane.setRightAnchor(iv, (pane.getWidth() - w)/2);
+					AnchorPane.setRightAnchor(iv, (pane.getWidth() - w) / 2);
 					cc = 0;
 				}
 			}
@@ -366,5 +429,15 @@ public class MainController implements Initializable {
 
 	public int getTableItemsSize() {
 		return soldiersTable.getItems().size();
+	}
+
+	public void filterTable(ActionEvent event) {
+		System.out.println("assdf");
+	}
+
+	public void soldiersTableKeyPress(KeyEvent event) {
+		if (event.getCode() == KeyCode.DELETE) {
+			deleteSelectedSoldiers();
+		}
 	}
 }
