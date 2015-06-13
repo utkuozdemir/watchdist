@@ -63,6 +63,10 @@ public class DistributionController implements Initializable {
 	private Button previousDay;
 	@FXML
 	private Button nextDay;
+	@FXML
+	private Label notes;
+	@FXML
+	private Button addOrEditNotes;
 
 	private Soldier[] selectedSoldiersBeforeEdit;
 	private Service<Soldier[][]> distributionService;
@@ -315,6 +319,9 @@ public class DistributionController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		notes.setText(DbManager.getNote(getCurrentDate()));
+
+
 		initializeDistributionService();
 
 		distributionTable.setPlaceholder(new Label(Messages.get("distribution.no.data.in.table")));
@@ -345,7 +352,7 @@ public class DistributionController implements Initializable {
 		distributionService.setOnSucceeded(event -> loadDataToTable(distributionService.getValue()));
 
 		progressIndicator.visibleProperty().bind(distributionService.runningProperty());
-		Arrays.asList(distribute, exportToExcel, approve, today, previousDay, nextDay, day, month, year)
+		Arrays.asList(addOrEditNotes, distribute, exportToExcel, approve, today, previousDay, nextDay, day, month, year)
 				.forEach(control -> control.disableProperty().bind(distributionService.runningProperty()));
 		distributionTable.editableProperty().bind(distributionService.runningProperty().not());
 	}
@@ -456,18 +463,21 @@ public class DistributionController implements Initializable {
 			if (day.getValue() != null && month.getValue() != null) {
 				refreshDay();
 				refreshData();
+				refreshNote();
 			}
 		});
 		month.valueProperty().addListener((observableValue, s, t1) -> {
 			if (day.getValue() != null && year.getValue() != null) {
 				refreshDay();
 				refreshData();
+				refreshNote();
 			}
 		});
 		day.valueProperty().addListener((observableValue, integer, t1) -> {
 			if (month.getValue() != null && year.getValue() != null) {
 				refreshDayName();
 				refreshData();
+				refreshNote();
 			}
 		});
 
@@ -502,6 +512,14 @@ public class DistributionController implements Initializable {
 					Date.from(watchDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
 			);
 			this.dayName.setText(dayName);
+		}
+	}
+
+	public void refreshNote() {
+		LocalDate date = getCurrentDate();
+		if (date != null) {
+			String note = DbManager.getNote(date);
+			notes.setText((note == null || "".equals(note.trim())) ? Messages.get("no.notes") : note);
 		}
 	}
 
@@ -555,5 +573,9 @@ public class DistributionController implements Initializable {
 			}
 			loadDataToTable(soldiers);
 		}
+	}
+
+	public void addOrEditNotes() {
+		//todo
 	}
 }

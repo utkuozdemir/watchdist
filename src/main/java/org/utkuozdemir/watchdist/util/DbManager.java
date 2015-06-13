@@ -30,6 +30,7 @@ public class DbManager {
 	private Dao<WatchPoint, Integer> watchPointDao;
 	private Dao<WatchValue, Integer> watchValueDao;
 	private Dao<Property, String> propertyDao;
+	private Dao<Notes, String> notesDao;
 
 	private DbManager() {
 		try {
@@ -41,6 +42,7 @@ public class DbManager {
 			watchPointDao = DaoManager.createDao(connectionSource, WatchPoint.class);
 			watchValueDao = DaoManager.createDao(connectionSource, WatchValue.class);
 			propertyDao = DaoManager.createDao(connectionSource, Property.class);
+			notesDao = DaoManager.createDao(connectionSource, Notes.class);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -310,7 +312,23 @@ public class DbManager {
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
+	}
 
+	public static int saveNote(LocalDate date, String notes) {
+		try {
+			return getInstance().notesDao.createOrUpdate(new Notes(date, notes)).getNumLinesChanged();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static String getNote(LocalDate date) {
+		try {
+			Notes notes = getInstance().notesDao.queryForId(date.toString());
+			return notes != null ? notes.getNotes() : "";
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public synchronized static void setDbPath(Path dbPath) {

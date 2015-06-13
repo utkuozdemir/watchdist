@@ -35,10 +35,8 @@ import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.util.Converters;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
-import sun.misc.BASE64Decoder;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -96,20 +94,17 @@ public class MainController implements Initializable {
 	private Service<List<SoldierFX>> refreshTableDataService;
 
 	public MainController() {
-		try {
-			iv = new ImageView(new Image(new ByteArrayInputStream(new BASE64Decoder().decodeBuffer(H))));
-			iv.setOnMouseClicked(event -> {
-				try {
-					String m = new String(java.util.Base64.getDecoder().decode(L),
-							StandardCharsets.UTF_8.name());
-					WindowManager.showInfoAlert(m, m);
-				} catch (UnsupportedEncodingException ignored) {
-				} finally {
-					pane.getChildren().remove(iv);
-				}
-			});
-		} catch (IOException ignored) {
-		}
+		iv = new ImageView(new Image(new ByteArrayInputStream(Base64.getDecoder().decode(H))));
+		iv.setOnMouseClicked(event -> {
+			try {
+				String m = new String(java.util.Base64.getDecoder().decode(L),
+						StandardCharsets.UTF_8.name());
+				WindowManager.showInfoAlert(m, m);
+			} catch (UnsupportedEncodingException ignored) {
+			} finally {
+				pane.getChildren().remove(iv);
+			}
+		});
 	}
 
 
@@ -132,6 +127,22 @@ public class MainController implements Initializable {
 		soldiersTable.setPlaceholder(new Label(Messages.get("main.no.soldiers")));
 		soldiersTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		soldiersTable.setRowFactory(param -> buildDraggableTableRow());
+
+		MenuItem selectAllDaysAndHours = new MenuItem(Messages.get("select.all.days.and.hours"));
+		MenuItem deselectAllDaysAndHours = new MenuItem(Messages.get("deselect.all.days.and.hours"));
+		selectAllDaysAndHours.setOnAction(event ->
+				soldiersTable.getSelectionModel().getSelectedItems().stream().forEach(soldierFX -> {
+					Arrays.stream(soldierFX.availabilitiesBooleansProperties())
+							.flatMap(Arrays::stream).forEach(simpleBooleanProperty -> simpleBooleanProperty.set(true));
+				}));
+		deselectAllDaysAndHours.setOnAction(event ->
+				soldiersTable.getSelectionModel().getSelectedItems().stream().forEach(soldierFX -> {
+					Arrays.stream(soldierFX.availabilitiesBooleansProperties())
+							.flatMap(Arrays::stream).forEach(simpleBooleanProperty -> simpleBooleanProperty.set(false));
+				}));
+
+
+		soldiersTable.setContextMenu(new ContextMenu(selectAllDaysAndHours, deselectAllDaysAndHours));
 
 		DateFormatSymbols symbols = new DateFormatSymbols(Messages.getLocale());
 		List<String> weekdays = new ArrayList<>(Arrays.stream(symbols.getShortWeekdays()).collect(Collectors.toList()));
@@ -157,6 +168,7 @@ public class MainController implements Initializable {
 				String columnName = weekdays.get(i) + " " + startTime + ":" + minute + " - " + endTime + ":" + minute;
 
 				TableColumn<SoldierFX, Boolean> column = new TableColumn<>();
+				column.setMaxWidth(30);
 
 				VBox columnNameBox = new VBox();
 				columnNameBox.getChildren().add(new Label(columnName));

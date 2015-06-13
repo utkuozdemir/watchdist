@@ -4,8 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity"
-            prefHeight="551.0" prefWidth="830.0" xmlns="http://javafx.com/javafx/null"
+            minWidth="-Infinity" prefHeight="700.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/null"
             fx:controller="org.utkuozdemir.watchdist.controller.DistributionController">
     <Label layoutX="13.0" layoutY="70.0" text="%distribution.distribution.table" AnchorPane.leftAnchor="13.0">
         <font>
@@ -13,10 +12,10 @@
         </font>
     </Label>
     <TableView fx:id="distributionTable" editable="true" layoutX="14.0" layoutY="64.0" prefHeight="443.0"
-               prefWidth="592.0" AnchorPane.bottomAnchor="16.0" AnchorPane.leftAnchor="14.0"
+               prefWidth="592.0" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="14.0"
                AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="92.0">
         <columns>
-            <TableColumn fx:id="hoursColumn" prefWidth="80.99998474121094" text="%hours.between"/>
+            <TableColumn fx:id="hoursColumn" prefWidth="80.0" text="%hours.between"/>
         </columns>
     </TableView>
     <Label layoutX="13.0" layoutY="14.0" text="%distribution.watch.date" AnchorPane.leftAnchor="13.0"
@@ -41,7 +40,7 @@
     </Button>
     <Button fx:id="approve" defaultButton="true" layoutX="616.0" layoutY="406.0" mnemonicParsing="false"
             onAction="#approveDistribution" prefHeight="58.0" prefWidth="200.0" text="%APPROVE"
-            AnchorPane.bottomAnchor="16.0" AnchorPane.rightAnchor="14.0">
+            AnchorPane.bottomAnchor="130.0" AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="24.0"/>
         </font>
@@ -79,12 +78,27 @@
         </font>
     </Button>
     <Button fx:id="nextDay" layoutX="431.0" layoutY="33.0" mnemonicParsing="false" onAction="#jumpToNextDay"
-            prefHeight="30.0"
-            prefWidth="95.0" text="%distribution.next.day" AnchorPane.leftAnchor="431.0" AnchorPane.topAnchor="33.0">
+            prefHeight="30.0" prefWidth="95.0" text="%distribution.next.day" AnchorPane.leftAnchor="431.0"
+            AnchorPane.topAnchor="33.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
     <ProgressIndicator fx:id="progressIndicator" layoutX="690.0" layoutY="276.0" visible="false"
                        AnchorPane.rightAnchor="88.0" AnchorPane.topAnchor="276.0"/>
+    <Label fx:id="notes" layoutX="14.0" layoutY="577.0" prefHeight="89.0" prefWidth="662.0" text="-" wrapText="true"
+           AnchorPane.bottomAnchor="14.0">
+        <font>
+            <Font name="System Bold Italic" size="13.0"/>
+        </font>
+    </Label>
+    <Label layoutX="13.0" layoutY="579.0" text="%notes.for.day" AnchorPane.bottomAnchor="104.0"
+           AnchorPane.leftAnchor="14.0"/>
+    <Button fx:id="addOrEditNotes" layoutX="686.0" layoutY="642.0" mnemonicParsing="false" onAction="#addOrEditNotes"
+            prefHeight="30.0" prefWidth="200.0" text="%add.edit.notes" AnchorPane.bottomAnchor="14.0"
+            AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
 </AnchorPane>
