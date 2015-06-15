@@ -390,6 +390,9 @@ public class MainController implements Initializable {
 		};
 		refreshTableDataService.setOnSucceeded(event ->
 				soldiersTable.getItems().setAll(refreshTableDataService.getValue()));
+		refreshTableDataService.setOnFailed(event -> {
+			throw new RuntimeException(event.getSource().getException());
+		});
 
 		progressIndicator.visibleProperty().bind(refreshTableDataService.runningProperty());
 		soldiersTable.editableProperty().bind(refreshTableDataService.runningProperty().not());

@@ -347,6 +347,9 @@ public class DistributionController implements Initializable {
 			}
 		};
 		distributionService.setOnSucceeded(event -> loadDataToTable(distributionService.getValue()));
+		distributionService.setOnFailed(event -> {
+			throw new RuntimeException(event.getSource().getException());
+		});
 
 		progressIndicator.visibleProperty().bind(distributionService.runningProperty());
 		Arrays.asList(addOrEditNotes, distribute, exportToExcel, approve, today, previousDay, nextDay, day, month, year)

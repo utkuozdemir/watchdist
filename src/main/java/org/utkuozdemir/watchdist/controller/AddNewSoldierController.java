@@ -78,6 +78,10 @@ public class AddNewSoldierController implements Initializable {
 			WindowManager.getMainController().refreshTableData();
 			WindowManager.getMainController().scrollToLastElementInTable();
 		});
+		saveSoldierService.setOnFailed(event -> {
+			throw new RuntimeException(event.getSource().getException());
+		});
+
 		progressIndicator.visibleProperty().bind(saveSoldierService.runningProperty());
 
 		maxWatchCountPerDayLabel.setText(Messages.get("max.watch.count.per.day", Settings.getOneWatchDurationInHours()));
