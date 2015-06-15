@@ -8,11 +8,10 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
+import org.utkuozdemir.watchdist.fx.FxWrapper;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.util.Converters;
@@ -144,7 +143,7 @@ public class WatchPointsController implements Initializable {
 		return row;
 	}
 
-	public void removeSelectedWatchPoints() {
+	public void deleteSelectedWatchPoints() {
 		ObservableList<WatchPointFX> selectedItems = watchPointsTable.getSelectionModel().getSelectedItems();
         List<WatchPointFX> filtered = selectedItems.stream().filter(wp -> wp != null).collect(Collectors.toList());
 
@@ -158,8 +157,8 @@ public class WatchPointsController implements Initializable {
 
 			if (approved) {
                 DbManager.deleteWatchPoints(
-                        filtered.stream().map(Converters.FX_TO_WATCH_POINT).collect(Collectors.toList())
-                );
+						filtered.stream().map(FxWrapper::getEntity).collect(Collectors.toList())
+				);
                 refreshTableData();
 				watchPointsTable.getSelectionModel().clearSelection();
             }
@@ -169,8 +168,8 @@ public class WatchPointsController implements Initializable {
     public void refreshTableData() {
         List<WatchPointFX> watchPointFXes
 				= DbManager.findAllActiveWatchPointsOrdered().stream()
-				.map(Converters.WATCH_POINT_TO_FX).collect(Collectors.toList());
-        ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
+				.map(WatchPointFX::new).collect(Collectors.toList());
+		ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
 		watchPointsTable.setItems(items);
     }
 
@@ -194,4 +193,9 @@ public class WatchPointsController implements Initializable {
         ((Stage) addWatchPointButton.getScene().getWindow()).close();
     }
 
+	public void watchPointsTableKeyPress(KeyEvent event) {
+		if (event.getCode() == KeyCode.DELETE) {
+			deleteSelectedWatchPoints();
+		}
+	}
 }

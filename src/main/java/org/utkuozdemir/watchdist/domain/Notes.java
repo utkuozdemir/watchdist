@@ -6,13 +6,13 @@ import com.j256.ormlite.table.DatabaseTable;
 import java.time.LocalDate;
 
 @SuppressWarnings("unused")
-@DatabaseTable(tableName = "notes.for.day")
+@DatabaseTable(tableName = "notes")
 public class Notes {
 
 	@DatabaseField(id = true, columnName = "date")
 	private String date;
 
-	@DatabaseField(columnName = "notes.for.day")
+	@DatabaseField(columnName = "notes")
 	private String notes;
 
 	Notes() {

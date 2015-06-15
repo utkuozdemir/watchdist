@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.util.DbManager;
+import org.utkuozdemir.watchdist.util.SaveMode;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.net.URL;
@@ -46,8 +47,9 @@ public class AddNewWatchPointController implements Initializable {
 		}
 
 		WatchPoint watchPoint = new WatchPoint(watchPointName.getText(),
-				requiredSoldierCount.getValue(), WindowManager.getWatchPointsController().getTableItemsSize() + 1);
-		DbManager.createWatchPoint(watchPoint);
+				requiredSoldierCount.getValue(), true,
+				WindowManager.getWatchPointsController().getTableItemsSize() + 1);
+		DbManager.saveWatchPoint(watchPoint, SaveMode.INSERT_OR_UPDATE);
 
 		resetFields();
 		WindowManager.getWatchPointsController().refreshTableData();

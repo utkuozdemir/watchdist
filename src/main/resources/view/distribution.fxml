@@ -12,7 +12,7 @@
         </font>
     </Label>
     <TableView fx:id="distributionTable" editable="true" layoutX="14.0" layoutY="64.0" prefHeight="443.0"
-               prefWidth="592.0" AnchorPane.bottomAnchor="130.0" AnchorPane.leftAnchor="14.0"
+               prefWidth="592.0" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="14.0"
                AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="92.0">
         <columns>
             <TableColumn fx:id="hoursColumn" prefWidth="80.0" text="%hours.between"/>
@@ -40,7 +40,7 @@
     </Button>
     <Button fx:id="approve" defaultButton="true" layoutX="616.0" layoutY="406.0" mnemonicParsing="false"
             onAction="#approveDistribution" prefHeight="58.0" prefWidth="200.0" text="%APPROVE"
-            AnchorPane.bottomAnchor="130.0" AnchorPane.rightAnchor="14.0">
+            AnchorPane.bottomAnchor="180.0" AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="24.0"/>
         </font>
@@ -86,14 +86,12 @@
     </Button>
     <ProgressIndicator fx:id="progressIndicator" layoutX="690.0" layoutY="276.0" visible="false"
                        AnchorPane.rightAnchor="88.0" AnchorPane.topAnchor="276.0"/>
-    <Label fx:id="notes" layoutX="14.0" layoutY="577.0" prefHeight="89.0" prefWidth="662.0" text="-" wrapText="true"
-           AnchorPane.bottomAnchor="14.0">
+    <Label layoutX="14.0" layoutY="527.0" text="%notes.for.day" AnchorPane.bottomAnchor="158.0"
+           AnchorPane.leftAnchor="14.0">
         <font>
-            <Font name="System Bold Italic" size="13.0"/>
+            <Font name="System Bold" size="12.0"/>
         </font>
     </Label>
-    <Label layoutX="13.0" layoutY="579.0" text="%notes.for.day" AnchorPane.bottomAnchor="104.0"
-           AnchorPane.leftAnchor="14.0"/>
     <Button fx:id="addOrEditNotes" layoutX="686.0" layoutY="642.0" mnemonicParsing="false" onAction="#addOrEditNotes"
             prefHeight="30.0" prefWidth="200.0" text="%add.edit.notes" AnchorPane.bottomAnchor="14.0"
             AnchorPane.rightAnchor="14.0">
@@ -101,4 +99,16 @@
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
+    <ScrollPane layoutX="16.0" layoutY="596.0" prefHeight="142.0" prefWidth="662.0" AnchorPane.bottomAnchor="14.0"
+                AnchorPane.leftAnchor="14.0">
+        <content>
+            <Label fx:id="notes" text="-" wrapText="true">
+                <font>
+                    <Font name="System Bold Italic" size="13.0"/>
+                </font>
+            </Label>
+        </content>
+    </ScrollPane>
+    <Label alignment="TOP_LEFT" layoutX="686.0" layoutY="544.0" prefHeight="97.0" prefWidth="200.0" text="%notes.info"
+           wrapText="true" AnchorPane.bottomAnchor="60.0" AnchorPane.rightAnchor="14.0"/>
 </AnchorPane>

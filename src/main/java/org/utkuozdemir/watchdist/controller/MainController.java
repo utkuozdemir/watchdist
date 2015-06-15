@@ -4,7 +4,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -68,6 +67,8 @@ public class MainController implements Initializable {
 	@FXML
 	private TableColumn<SoldierFX, Boolean> sergeantColumn;
 	@FXML
+	private TableColumn<SoldierFX, Boolean> fixedWatchColumn;
+	@FXML
 	private TableColumn<SoldierFX, Integer> maxWatchCountPerDayColumn;
 	@FXML
 	private Button addNewSoldierButton;
@@ -128,21 +129,38 @@ public class MainController implements Initializable {
 		soldiersTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		soldiersTable.setRowFactory(param -> buildDraggableTableRow());
 
+		MenuItem refresh = new MenuItem(Messages.get("refresh"));
 		MenuItem selectAllDaysAndHours = new MenuItem(Messages.get("select.all.days.and.hours"));
 		MenuItem deselectAllDaysAndHours = new MenuItem(Messages.get("deselect.all.days.and.hours"));
-		selectAllDaysAndHours.setOnAction(event ->
-				soldiersTable.getSelectionModel().getSelectedItems().stream().forEach(soldierFX -> {
-					Arrays.stream(soldierFX.availabilitiesBooleansProperties())
-							.flatMap(Arrays::stream).forEach(simpleBooleanProperty -> simpleBooleanProperty.set(true));
-				}));
-		deselectAllDaysAndHours.setOnAction(event ->
-				soldiersTable.getSelectionModel().getSelectedItems().stream().forEach(soldierFX -> {
-					Arrays.stream(soldierFX.availabilitiesBooleansProperties())
-							.flatMap(Arrays::stream).forEach(simpleBooleanProperty -> simpleBooleanProperty.set(false));
-				}));
+		refresh.setOnAction(event -> refreshTableData());
 
+		selectAllDaysAndHours.setOnAction(event -> {
+			soldiersTable.getSelectionModel().getSelectedItems().stream()
+					.forEach(soldierFX -> {
+						soldierFX.setImplicitCommit(false);
+						Arrays.stream(soldierFX.availabilitiesProperties())
+								.flatMap(Arrays::stream)
+								.forEach(simpleBooleanProperty -> simpleBooleanProperty.set(true));
+						soldierFX.setImplicitCommit(true);
+						soldierFX.commit();
 
-		soldiersTable.setContextMenu(new ContextMenu(selectAllDaysAndHours, deselectAllDaysAndHours));
+					});
+			refreshTableData();
+		});
+
+		deselectAllDaysAndHours.setOnAction(event -> {
+			soldiersTable.getSelectionModel().getSelectedItems().stream().forEach(soldierFX -> {
+				soldierFX.setImplicitCommit(false);
+				Arrays.stream(soldierFX.availabilitiesProperties())
+						.flatMap(Arrays::stream)
+						.forEach(simpleBooleanProperty -> simpleBooleanProperty.set(false));
+				soldierFX.setImplicitCommit(true);
+				soldierFX.commit();
+			});
+			refreshTableData();
+		});
+
+		soldiersTable.setContextMenu(new ContextMenu(refresh, selectAllDaysAndHours, deselectAllDaysAndHours));
 
 		DateFormatSymbols symbols = new DateFormatSymbols(Messages.getLocale());
 		List<String> weekdays = new ArrayList<>(Arrays.stream(symbols.getShortWeekdays()).collect(Collectors.toList()));
@@ -182,11 +200,7 @@ public class MainController implements Initializable {
 
 				final int finalI = i;
 				final int finalJ = j;
-				column.setCellValueFactory(
-						soldierBooleanCellDataFeatures -> {
-							SoldierFX soldierFX = soldierBooleanCellDataFeatures.getValue();
-							return soldierFX.availabilitiesBooleansProperties()[finalI][finalJ];
-						});
+				column.setCellValueFactory(value -> value.getValue().availabilitiesProperties()[finalI][finalJ]);
 				soldiersTable.getColumns().add(column);
 			}
 		}
@@ -194,10 +208,10 @@ public class MainController implements Initializable {
 
 		orderColumn.setCellValueFactory(new PropertyValueFactory<>("order"));
 
-		fullNameColumn.setCellFactory(soldierStringTableColumn -> new TextFieldTableCell<>(Converters.STRING_STRING_CONVERTER));
+		fullNameColumn.setCellFactory(col -> new TextFieldTableCell<>(Converters.STRING_STRING_CONVERTER));
 		fullNameColumn.setCellValueFactory(new PropertyValueFactory<>("fullName"));
 
-		dutyColumn.setCellFactory(soldierStringTableColumn -> new TextFieldTableCell<>(Converters.STRING_STRING_CONVERTER));
+		dutyColumn.setCellFactory(col -> new TextFieldTableCell<>(Converters.STRING_STRING_CONVERTER));
 		dutyColumn.setCellValueFactory(new PropertyValueFactory<>("duty"));
 
 		availableColumn.setCellFactory(p -> {
@@ -205,8 +219,7 @@ public class MainController implements Initializable {
 			cell.setAlignment(Pos.CENTER);
 			return cell;
 		});
-		availableColumn.setCellValueFactory(
-				soldierBooleanCellDataFeatures -> soldierBooleanCellDataFeatures.getValue().availableProperty());
+		availableColumn.setCellValueFactory(value -> value.getValue().availableProperty());
 
 		sergeantColumn.setCellFactory(p -> {
 			CheckBoxTableCell<SoldierFX, Boolean> cell = new CheckBoxTableCell<>();
@@ -216,10 +229,20 @@ public class MainController implements Initializable {
 
 		sergeantColumn.setCellValueFactory(s -> s.getValue().sergeantProperty());
 
-		pointsColumn.setCellFactory(soldierDoubleTableColumn -> new TextFieldTableCell<>(Converters.DOUBLE_STRING_CONVERTER));
+		fixedWatchColumn.setCellFactory(p -> {
+			CheckBoxTableCell<SoldierFX, Boolean> cell = new CheckBoxTableCell<>();
+			cell.setAlignment(Pos.CENTER);
+			return cell;
+		});
+
+		fixedWatchColumn.setCellValueFactory(s -> s.getValue().fixedWatchProperty());
+
+		pointsColumn.setCellFactory(soldierDoubleTableColumn ->
+				new TextFieldTableCell<>(Converters.DOUBLE_STRING_CONVERTER));
 		pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
 
-		maxWatchCountPerDayColumn.setText(Messages.get("max.watch.count.per.day", Settings.getOneWatchDurationInHours()));
+		maxWatchCountPerDayColumn.setText(Messages.get("max.watch.count.per.day",
+				Settings.getOneWatchDurationInHours()));
 		maxWatchCountPerDayColumn.setCellFactory(column -> {
 			ComboBoxTableCell<SoldierFX, Integer> cell = new ComboBoxTableCell<>(Converters.DOUBLE_INTEGER_CONVERTER);
 			cell.getItems().setAll(FXCollections.observableArrayList(
@@ -327,7 +350,8 @@ public class MainController implements Initializable {
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		initializeRefreshTableDataService();
 
-		language.setItems(FXCollections.observableArrayList(Arrays.asList(Language.values())));
+		language.getItems().setAll(Arrays.asList(Language.values()));
+
 		language.setValue(Language.forLocale(Messages.getLocale()));
 		language.valueProperty().addListener((observableValue, language1, t1) -> {
 			WindowManager.switchLanguage(((Stage) language.getScene().getWindow()), t1);
@@ -339,9 +363,7 @@ public class MainController implements Initializable {
 			searchTimer.schedule(new TimerTask() {
 				@Override
 				public void run() {
-					soldiersTable.setItems(
-							FXCollections.observableArrayList(filterSoldiers(masterTableData, newValue))
-					);
+					soldiersTable.getItems().setAll(filterSoldiers(masterTableData, newValue));
 				}
 			}, 500);
 		});
@@ -359,7 +381,7 @@ public class MainController implements Initializable {
 					protected List<SoldierFX> call() throws Exception {
 						List<Soldier> soldiers = DbManager.findAllActiveSoldiersOrdered();
 						List<SoldierFX> soldierFXes = soldiers.stream()
-								.map(Converters.SOLDIER_TO_FX).collect(Collectors.toList());
+								.map(SoldierFX::new).collect(Collectors.toList());
 						masterTableData.setAll(soldierFXes);
 						return filterSoldiers(soldierFXes, filter.getText());
 					}
@@ -367,8 +389,10 @@ public class MainController implements Initializable {
 			}
 		};
 		refreshTableDataService.setOnSucceeded(event ->
-				soldiersTable.setItems(FXCollections.observableArrayList(refreshTableDataService.getValue())));
+				soldiersTable.getItems().setAll(refreshTableDataService.getValue()));
+
 		progressIndicator.visibleProperty().bind(refreshTableDataService.runningProperty());
+		soldiersTable.editableProperty().bind(refreshTableDataService.runningProperty().not());
 	}
 
 	private List<SoldierFX> filterSoldiers(List<SoldierFX> list, String text) {
@@ -385,7 +409,7 @@ public class MainController implements Initializable {
 
 	public void deleteSelectedSoldiers() {
 		ObservableList<SoldierFX> selectedItems = soldiersTable.getSelectionModel().getSelectedItems();
-		List<Soldier> soldiers = selectedItems.stream().map(Converters.FX_TO_SOLDIER).collect(Collectors.toList());
+		List<Soldier> soldiers = selectedItems.stream().map(SoldierFX::getEntity).collect(Collectors.toList());
 		List<SoldierFX> filtered = selectedItems.stream().filter(s -> s != null).collect(Collectors.toList());
 
 		if (!filtered.isEmpty()) {
@@ -441,10 +465,6 @@ public class MainController implements Initializable {
 
 	public int getTableItemsSize() {
 		return soldiersTable.getItems().size();
-	}
-
-	public void filterTable(ActionEvent event) {
-		System.out.println("assdf");
 	}
 
 	public void soldiersTableKeyPress(KeyEvent event) {

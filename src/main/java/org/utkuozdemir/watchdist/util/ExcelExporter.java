@@ -44,9 +44,10 @@ public class ExcelExporter {
 			List<Sheet> sheets = IntStream.range(0, workbook.getNumberOfSheets())
 					.mapToObj(workbook::getSheetAt).collect(Collectors.toList());
 
+			fillTitleDateValue(date, sheets);
+			fillNotesValues(date, sheets);
 			fillPointNameValues(sheets, watches);
 			fillHourValues(sheets);
-			fillTitleDateValue(date, sheets);
 			fillSoldierValues(sheets, watches);
 
 			FileOutputStream outputStream = new FileOutputStream(saveFile);
@@ -143,6 +144,16 @@ public class ExcelExporter {
 
 			titleCell.setCellValue(title.replace(Constants.TEMPLATE_DAY_NAME, dateString));
 		});
+	}
+
+	private static void fillNotesValues(LocalDate date, Collection<Sheet> sheets) {
+		String note = DbManager.getNote(date);
+		sheets.forEach(sheet -> sheet.forEach(row -> row.forEach(cell -> {
+			if (cell.getCellType() == Cell.CELL_TYPE_STRING &&
+					Constants.TEMPLATE_NOTES_NAME.equals(cell.getStringCellValue())) {
+				cell.setCellValue(note);
+			}
+		})));
 	}
 
 	private static void fillHourValues(Collection<Sheet> sheets) {

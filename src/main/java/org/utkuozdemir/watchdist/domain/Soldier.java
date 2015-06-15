@@ -40,13 +40,17 @@ public class Soldier {
 	@DatabaseField(columnName = "order")
 	private int order;
 
+	@DatabaseField(columnName = "fixed_watch")
+	private boolean fixedWatch;
+
     @ForeignCollectionField(eager = true)
     private Collection<Availability> availabilities;
 
     Soldier() {
     }
 
-	public Soldier(String fullName, String duty, boolean available, boolean sergeant, int maxWatchesPerDay, int order) {
+	public Soldier(String fullName, String duty, boolean available, boolean sergeant,
+				   int maxWatchesPerDay, int order, boolean fixedWatch) {
 		if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
             throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
 
@@ -56,6 +60,7 @@ public class Soldier {
         this.sergeant = sergeant;
 		this.maxWatchesPerDay = maxWatchesPerDay;
 		this.order = order;
+		this.fixedWatch = fixedWatch;
 
 		this.availabilities = new ArrayList<>();
 		for (int i = 0; i < 7; i++) {
@@ -66,23 +71,8 @@ public class Soldier {
         }
     }
 
-    public Soldier(Integer id, String fullName, String duty, boolean available,
-				   double points, boolean active, boolean sergeant, int maxWatchesPerDay, int order,
-				   Collection<Availability> availabilities) {
-		this.id = id;
-		this.fullName = fullName;
-        this.duty = duty;
-        this.available = available;
-        this.points = points;
-        this.active = active;
-        this.sergeant = sergeant;
-		this.maxWatchesPerDay = maxWatchesPerDay;
-		this.order = order;
-		this.availabilities = availabilities;
-	}
-
-    public Integer getId() {
-        return id;
+	public Integer getId() {
+		return id;
     }
 
     public void setId(Integer id) {
@@ -155,8 +145,20 @@ public class Soldier {
 		this.order = order;
 	}
 
+	public boolean isFixedWatch() {
+		return fixedWatch;
+	}
+
+	public void setFixedWatch(boolean fixedWatch) {
+		this.fixedWatch = fixedWatch;
+	}
+
 	public Collection<Availability> getAvailabilities() {
 		return availabilities;
+	}
+
+	public void setAvailabilities(Collection<Availability> availabilities) {
+		this.availabilities = availabilities;
 	}
 
     @Override

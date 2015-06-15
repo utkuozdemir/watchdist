@@ -154,33 +154,23 @@ public class DbManager {
 		}
 	}
 
-	public static int createWatchPoint(WatchPoint watchPoint) {
-		try {
-			return getInstance().watchPointDao.create(watchPoint);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static int updateWatchPoint(WatchPoint watchPoint) {
-		try {
-			return getInstance().watchPointDao.update(watchPoint);
-		} catch (SQLException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static int updateWatchPointRequiredSoldierCount(int watchPointId, int newRequiredSoldierCount) {
+	public static int saveWatchPoint(WatchPoint watchPoint, SaveMode mode) {
 		try {
 			DbManager dbManager = getInstance();
-			return dbManager.transactionManager.callInTransaction(() -> {
-				WatchPoint watchPoint = dbManager.watchPointDao.queryForId(watchPointId);
-				watchPoint.setActive(false);
-				dbManager.watchPointDao.update(watchPoint);
-				return dbManager.watchPointDao.createOrUpdate(
-						new WatchPoint(watchPoint.getName(), newRequiredSoldierCount, watchPoint.getOrder()))
-						.getNumLinesChanged();
-			});
+			switch (mode) {
+				case INSERT_OR_UPDATE: {
+					return dbManager.watchPointDao.createOrUpdate(watchPoint).getNumLinesChanged();
+				}
+				case REMOVE_OLD_CREATE_NEW: {
+					WatchPoint existing = dbManager.watchPointDao.queryForId(watchPoint.getId());
+					existing.setActive(false);
+					dbManager.watchPointDao.createOrUpdate(existing);
+					watchPoint.setId(null);
+					return dbManager.watchPointDao.createOrUpdate(watchPoint).getNumLinesChanged();
+				}
+				default:
+					throw new IllegalArgumentException("Invalid save mode: " + mode);
+			}
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}

@@ -319,9 +319,6 @@ public class DistributionController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
-		notes.setText(DbManager.getNote(getCurrentDate()));
-
-
 		initializeDistributionService();
 
 		distributionTable.setPlaceholder(new Label(Messages.get("distribution.no.data.in.table")));
@@ -343,7 +340,7 @@ public class DistributionController implements Initializable {
 						List<WatchPoint> watchPoints = watches.isEmpty() ?
 								DbManager.findAllActiveWatchPointsOrdered() :
 								watches.stream().map(Watch::getWatchPoint).distinct().collect(Collectors.toList());
-						return DistributionEngine
+						return DistributionEngine.getInstance()
 								.distribute(getCurrentDate(), DbManager.findAllActiveSoldiersOrdered(), watchPoints);
 					}
 				};
@@ -380,7 +377,7 @@ public class DistributionController implements Initializable {
 		}
 
 		List<WatchPointFX> watchPointFXes =
-				watchPoints.stream().map(Converters.WATCH_POINT_TO_FX).collect(Collectors.toList());
+				watchPoints.stream().map(WatchPointFX::new).collect(Collectors.toList());
 
 		final ObservableList<Soldier> soldiers
 				= FXCollections.observableArrayList(DbManager.findAllActiveSoldiersOrderedByFullName());
@@ -576,6 +573,8 @@ public class DistributionController implements Initializable {
 	}
 
 	public void addOrEditNotes() {
-		//todo
+		if (getCurrentDate() != null) {
+			WindowManager.showNotesWindow(this, getCurrentDate());
+		}
 	}
 }

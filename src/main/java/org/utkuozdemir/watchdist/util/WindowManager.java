@@ -18,10 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.app.App;
 import org.utkuozdemir.watchdist.app.AppContext;
 import org.utkuozdemir.watchdist.app.Constants;
-import org.utkuozdemir.watchdist.controller.ChangePasswordController;
-import org.utkuozdemir.watchdist.controller.MainController;
-import org.utkuozdemir.watchdist.controller.SetExcelTemplatePathController;
-import org.utkuozdemir.watchdist.controller.WatchPointsController;
+import org.utkuozdemir.watchdist.controller.*;
 import org.utkuozdemir.watchdist.i18n.Language;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.type.PasswordType;
@@ -32,6 +29,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 import static org.utkuozdemir.watchdist.type.WindowType.*;
@@ -305,6 +304,36 @@ public class WindowManager {
 			stage.setUserData(WATCH_POINTS);
 
 			watchPointsController = fxmlLoader.getController();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static void showNotesWindow(DistributionController distributionController, LocalDate date) {
+		if (date == null) throw new NullPointerException("Date should not be null!");
+		try {
+			if (alreadyOpened(NOTES)) return;
+
+			URL resource = App.class.getClassLoader().getResource("view/notes.fxml");
+			if (resource == null) throw new NullPointerException("Resources is null!");
+
+			FXMLLoader fxmlLoader = new FXMLLoader(resource, Messages.getBundle());
+			Parent root = fxmlLoader.load();
+
+			NotesController controller = fxmlLoader.getController();
+			controller.initData(distributionController, date);
+
+			Scene scene = new Scene(root);
+			URL cssResource = WindowManager.class.getClassLoader().getResource("css/main.css");
+			if (cssResource != null) scene.getStylesheets().add(cssResource.toExternalForm());
+			Stage stage = new Stage();
+			stage.setOnCloseRequest(event -> controller.closeAttempt());
+			stage.initModality(Modality.APPLICATION_MODAL);
+			stage.getIcons().add(new Image(WindowManager.class.getClassLoader().getResourceAsStream("icon.png")));
+			stage.setScene(scene);
+			stage.setTitle(Messages.get("notes.of.day", date.format(DateTimeFormatter.ofPattern("dd EEEE yyyy"))));
+			stage.show();
+			stage.setUserData(NOTES);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

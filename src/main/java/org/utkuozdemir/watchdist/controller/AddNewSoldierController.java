@@ -51,7 +51,8 @@ public class AddNewSoldierController implements Initializable {
 		} else {
 			soldierToSave = new Soldier(fullName.getText(), duty.getText(), available.isSelected(),
 					sergeant.isSelected(), maxWatchCountPerDay.getValue(),
-					WindowManager.getMainController().getTableItemsSize() + 1
+					WindowManager.getMainController().getTableItemsSize() + 1,
+					false
 			);
 			saveSoldierService.restart();
 			resetFields();

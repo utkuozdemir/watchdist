@@ -16,6 +16,7 @@ public class Constants {
 	public static final String TEMPLATE_HOUR_NAME = "%SAAT%";
 	public static final String TEMPLATE_SOLDIER_NAME = "%ASKER%";
 	public static final String TEMPLATE_POINT_NAME = "%NOKTA%";
+	public static final String TEMPLATE_NOTES_NAME = "%NOTLAR%";
 
 	public static final String KEY_SERGEANT_DAILY_POINTS = "sergeant.daily.points";
 	public static final String KEY_EXCEL_TEMPLATE_PATH_KEY = "excel.template.path";

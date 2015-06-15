@@ -6,3 +6,13 @@
     /*noinspection CssInvalidFunction*/
     -fx-prompt-text-fill: derive(-fx-control-inner-background,-30%);
 }
+
+.text-area {
+    /*noinspection CssInvalidFunction*/
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+}
+
+.text-area:focused {
+    /*noinspection CssInvalidFunction*/
+    -fx-prompt-text-fill: derive(-fx-control-inner-background, -30%);
+}
