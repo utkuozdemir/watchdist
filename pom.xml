@@ -101,7 +101,7 @@
                 <configuration>
                     <mainClass>org.utkuozdemir.watchdist.app.App</mainClass>
                     <vendor>Nobet</vendor>
-                    <appName>NobetYonetim-${project.version}</appName>
+                    <appName>NobetYonetim</appName>
                 </configuration>
                 <executions>
                     <execution>
