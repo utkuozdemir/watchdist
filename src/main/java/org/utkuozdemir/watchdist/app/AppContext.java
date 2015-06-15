@@ -1,5 +1,6 @@
 package org.utkuozdemir.watchdist.app;
 
+import com.sun.javafx.application.PlatformImpl;
 import com.sun.javafx.runtime.VersionInfo;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -49,6 +50,17 @@ public class AppContext {
 	}
 
 	public void launch(Stage mainStage) throws Exception {
+		PlatformImpl.addListener(new PlatformImpl.FinishListener() {
+			@Override
+			public void idle(boolean implicitExit) {
+			}
+
+			@Override
+			public void exitCalled() {
+				DbManager.close();
+			}
+		});
+
 		this.mainStage = mainStage;
 		Thread.currentThread().setUncaughtExceptionHandler((t, e) -> takeErrorAction(e));
 		logger.info("Using JAVAFX Version " + VersionInfo.getVersion());
