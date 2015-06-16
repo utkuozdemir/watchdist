@@ -1,14 +1,17 @@
 package org.utkuozdemir.watchdist.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.utkuozdemir.watchdist.app.Constants;
+import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.i18n.Messages;
 import org.utkuozdemir.watchdist.type.PasswordType;
 import org.utkuozdemir.watchdist.util.DbManager;
@@ -18,18 +21,19 @@ import org.utkuozdemir.watchdist.util.WindowManager;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.*;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.ResourceBundle;
 
-@SuppressWarnings("unused")
-public class AdministrationController {
+public class AdministrationController implements Initializable {
 	private static final Logger logger = LoggerFactory.getLogger(AdministrationController.class);
+	@FXML private Spinner<Integer> watchesBetweenTwoWatches;
+	@FXML private Label durationLabel;
 
 	@FXML
 	private Button done;
 
-	@SuppressWarnings("unused")
 	public void editExcelTemplate() {
 		try {
 			String templatePath = DbManager.getProperty(Constants.KEY_EXCEL_TEMPLATE_PATH_KEY);
@@ -52,14 +56,11 @@ public class AdministrationController {
 					);
 				}
 			}
-
-
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public void exportDatabase() {
 		Path databasePath = FileManager.getDatabasePath();
 
@@ -70,7 +71,6 @@ public class AdministrationController {
 		fileChooser.getExtensionFilters().add(extFilter);
 		fileChooser.setTitle(Messages.get("backup.export.database"));
 
-		String fileName = databasePath.getFileName().toString();
 		String finalName = Constants.DB_NAME.split("\\.")[0] + "-"
 				+ LocalDate.now() + "." + Constants.DB_NAME.split("\\.")[1];
 
@@ -88,36 +88,17 @@ public class AdministrationController {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public void resetExcelTemplate() {
 		WindowManager.showSetExcelTemplatePathWindow(Messages.get("excel.template.path.not.set"));
 	}
 
-	@SuppressWarnings("unused")
 	public void resetDatabase() {
 		WindowManager.showResetDbPasswordWindow();
 
 	}
 
-	@SuppressWarnings("unused")
 	public void closeWindow() {
 		((Stage) done.getScene().getWindow()).close();
-	}
-
-	private boolean showResetExcelTemplateConfirmationDialog() {
-		Alert alert = new Alert(Alert.AlertType.WARNING);
-		alert.setTitle(Messages.get("reset.excel.template"));
-		alert.setHeaderText(Messages.get("confirmation"));
-		alert.setContentText(Messages.get("reset.excel.template.confirmation"));
-
-		ButtonType resetButtonType = new ButtonType(Messages.get("reset.excel.template"));
-		ButtonType cancelButtonType = new ButtonType(Messages.get("cancel"));
-
-		alert.getButtonTypes().setAll(resetButtonType, cancelButtonType);
-		alert.getDialogPane().lookupButton(resetButtonType).setStyle("-fx-base: #F78181;");
-
-		Optional<ButtonType> buttonType = alert.showAndWait();
-		return buttonType.isPresent() && buttonType.get() == resetButtonType;
 	}
 
 	public void changeAppPassword() {
@@ -126,5 +107,18 @@ public class AdministrationController {
 
 	public void changeDbResetPassword() {
 		WindowManager.showChangePasswordWindow(PasswordType.DB_RESET_PASSWORD);
+	}
+
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		durationLabel.setText(Messages.get("duration.between.two.watches", Settings.getOneWatchDurationInHours()));
+		watchesBetweenTwoWatches.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(
+				0, 8, Settings.getMinWatchesBetweenTwoWatches()
+		));
+		watchesBetweenTwoWatches.valueProperty()
+				.addListener((observable, oldValue, newValue) -> {
+					DbManager.setProperty(Constants.KEY_WATCHES_BETWEEN_TWO_WATCHES, String.valueOf(newValue));
+					Settings.invalidateCache();
+				});
 	}
 }

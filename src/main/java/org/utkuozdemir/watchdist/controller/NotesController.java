@@ -26,7 +26,7 @@ public class NotesController {
 	public void initData(DistributionController distributionController, LocalDate date) {
 		this.distributionController = distributionController;
 		this.date = date;
-		title.setText(Messages.get("notes.of.day", date.format(DateTimeFormatter.ofPattern("dd EEEE yyyy"))));
+		title.setText(Messages.get("notes.of.day", date.format(DateTimeFormatter.ofPattern("dd MMMM yyyy"))));
 		String note = DbManager.getNote(date);
 		originalNote = note;
 		notes.setText(note);

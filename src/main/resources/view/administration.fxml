@@ -5,7 +5,7 @@
 <?import javafx.scene.text.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity"
-            prefHeight="310.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/null"
+            prefHeight="343.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/null"
             fx:controller="org.utkuozdemir.watchdist.controller.AdministrationController">
     <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#editExcelTemplate" prefHeight="30.0"
             prefWidth="269.0" text="%edit.excel.template" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0"
@@ -15,8 +15,7 @@
         </font>
     </Button>
     <Button layoutX="14.0" layoutY="57.0" mnemonicParsing="false" onAction="#exportDatabase" prefHeight="30.0"
-            prefWidth="269.0" text="%backup.export.database" AnchorPane.leftAnchor="14.0"
-            AnchorPane.rightAnchor="14.0">
+            prefWidth="269.0" text="%backup.export.database" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
@@ -43,17 +42,19 @@
         </font>
     </Button>
     <Button layoutX="14.0" layoutY="185.0" mnemonicParsing="false" onAction="#changeAppPassword" prefHeight="30.0"
-            prefWidth="125.0" text="%change.app.password" AnchorPane.leftAnchor="14.0"
+            prefWidth="125.0" text="%change.app.password" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </Button>
+    <Button layoutX="14.0" layoutY="225.0" mnemonicParsing="false" onAction="#changeDbResetPassword" prefHeight="30.0"
+            prefWidth="125.0" text="%change.db.reset.password" AnchorPane.leftAnchor="14.0"
             AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
-    <Button layoutX="14.0" layoutY="225.0" mnemonicParsing="false" onAction="#changeDbResetPassword"
-            prefHeight="30.0" prefWidth="125.0" text="%change.db.reset.password" AnchorPane.leftAnchor="14.0"
-            AnchorPane.rightAnchor="14.0">
-        <font>
-            <Font name="System Bold" size="12.0"/>
-        </font>
-    </Button>
+    <Spinner fx:id="watchesBetweenTwoWatches" layoutX="152.0" layoutY="266.0" prefHeight="23.0" prefWidth="80.0"
+             AnchorPane.rightAnchor="14.0"/>
+    <Label fx:id="durationLabel" layoutX="14.0" layoutY="270.0" text="-" AnchorPane.leftAnchor="14.0"/>
 </AnchorPane>
