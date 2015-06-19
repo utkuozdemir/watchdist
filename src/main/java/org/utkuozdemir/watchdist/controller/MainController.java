@@ -264,22 +264,32 @@ public class MainController implements Initializable {
 		});
 
 		row.setOnDragDetected(event -> {
-			boolean unfiltered = filter.getText() == null || "".equals(filter.getText().trim());
-			if (!unfiltered) {
+			ObservableList<TableColumn<SoldierFX, ?>> sortOrder = soldiersTable.getSortOrder();
+			boolean sortedByOrder = sortOrder.size() == 1 && sortOrder.get(0) == orderColumn &&
+					orderColumn.getSortType() == TableColumn.SortType.ASCENDING;
+			if (!sortedByOrder) {
 				Notifications.create().hideCloseButton()
 						.position(Pos.CENTER)
-						.text(Messages.get("clear.filter.before.ordering"))
+						.text(Messages.get("order.by.order.col.before.ordering", orderColumn.getText()))
 						.hideAfter(new Duration(2000)).showWarning();
-			} else if (!row.isEmpty()) {
-				Integer index = row.getIndex();
-				Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-				db.setDragView(row.snapshot(null, null));
-				IntStream.range(0, soldiersTable.getItems().size())
-						.filter(i -> i != index).forEach(i -> soldiersTable.getSelectionModel().clearSelection(i));
-				ClipboardContent cc = new ClipboardContent();
-				cc.put(SERIALIZED_MIME_TYPE, index);
-				db.setContent(cc);
-				event.consume();
+			} else {
+				boolean unfiltered = filter.getText() == null || "".equals(filter.getText().trim());
+				if (!unfiltered) {
+					Notifications.create().hideCloseButton()
+							.position(Pos.CENTER)
+							.text(Messages.get("clear.filter.before.ordering"))
+							.hideAfter(new Duration(2000)).showWarning();
+				} else if (!row.isEmpty()) {
+					Integer index = row.getIndex();
+					Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+					db.setDragView(row.snapshot(null, null));
+					IntStream.range(0, soldiersTable.getItems().size())
+							.filter(i -> i != index).forEach(i -> soldiersTable.getSelectionModel().clearSelection(i));
+					ClipboardContent cc = new ClipboardContent();
+					cc.put(SERIALIZED_MIME_TYPE, index);
+					db.setContent(cc);
+					event.consume();
+				}
 			}
 		});
 
@@ -348,6 +358,9 @@ public class MainController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		soldiersTable.getSortOrder().setAll(Collections.singletonList(orderColumn));
+		orderColumn.setSortType(TableColumn.SortType.ASCENDING);
+
 		initializeRefreshTableDataService();
 
 		language.getItems().setAll(Arrays.asList(Language.values()));

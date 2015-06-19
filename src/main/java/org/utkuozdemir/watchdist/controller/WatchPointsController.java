@@ -4,13 +4,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
+import org.controlsfx.control.Notifications;
 import org.utkuozdemir.watchdist.fx.FxWrapper;
 import org.utkuozdemir.watchdist.fx.WatchPointFX;
 import org.utkuozdemir.watchdist.i18n.Messages;
@@ -19,6 +22,7 @@ import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.WindowManager;
 
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -40,20 +44,20 @@ public class WatchPointsController implements Initializable {
 	@FXML
 	private Button addWatchPointButton;
 	@FXML
-    private Button removeSelectedWatchPointsButton;
+	private Button removeSelectedWatchPointsButton;
 
-    public void addWatchPoint() {
-        showAddNewWatchPointWindow();
-    }
+	public void addWatchPoint() {
+		showAddNewWatchPointWindow();
+	}
 
-    private void showAddNewWatchPointWindow() {
-        WindowManager.showAddNewWatchPointWindow();
-    }
+	private void showAddNewWatchPointWindow() {
+		WindowManager.showAddNewWatchPointWindow();
+	}
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        watchPointsTable.setPlaceholder(new Label(Messages.get("watchpoints.no.watch.points")));
-        watchPointsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+	@Override
+	public void initialize(URL url, ResourceBundle resourceBundle) {
+		watchPointsTable.setPlaceholder(new Label(Messages.get("watchpoints.no.watch.points")));
+		watchPointsTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 		watchPointsTable.setRowFactory(wpfx -> buildDraggableTableRow());
 
 		orderColumn.prefWidthProperty().bind(watchPointsTable.widthProperty().multiply(0.15));
@@ -62,49 +66,62 @@ public class WatchPointsController implements Initializable {
 
 		nameColumn.setCellFactory(watchPointStringTableColumn -> new TextFieldTableCell<>(Converters.STRING_STRING_CONVERTER));
 		requiredSoldierCountColumn
-                .setCellFactory(watchPointIntegerTableColumn -> new TextFieldTableCell<>(new StringConverter<Integer>() {
-                    @Override
-                    public String toString(Integer integer) {
-                        return Integer.toString(integer);
-                    }
+				.setCellFactory(watchPointIntegerTableColumn -> new TextFieldTableCell<>(new StringConverter<Integer>() {
+					@Override
+					public String toString(Integer integer) {
+						return Integer.toString(integer);
+					}
 
-                    @Override
-                    public Integer fromString(String s) {
-                        try {
-                            return Integer.parseInt(s);
-                        } catch (NumberFormatException e) {
-                            return -1;
-                        }
-                    }
-                }));
-        requiredSoldierCountColumn
-                .setCellFactory(c -> {
-                    ComboBoxTableCell<WatchPointFX, Integer> cell = new ComboBoxTableCell<>();
-                    cell.getItems().setAll(IntStream.rangeClosed(1, 10).boxed().collect(Collectors.toList()));
-                    return cell;
-                });
+					@Override
+					public Integer fromString(String s) {
+						try {
+							return Integer.parseInt(s);
+						} catch (NumberFormatException e) {
+							return -1;
+						}
+					}
+				}));
+		requiredSoldierCountColumn
+				.setCellFactory(c -> {
+					ComboBoxTableCell<WatchPointFX, Integer> cell = new ComboBoxTableCell<>();
+					cell.getItems().setAll(IntStream.rangeClosed(1, 10).boxed().collect(Collectors.toList()));
+					return cell;
+				});
 
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-        requiredSoldierCountColumn.setCellValueFactory(new PropertyValueFactory<>("requiredSoldierCount"));
+		nameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		requiredSoldierCountColumn.setCellValueFactory(new PropertyValueFactory<>("requiredSoldierCount"));
 		orderColumn.setCellValueFactory(new PropertyValueFactory<>("order"));
 
-        refreshTableData();
-    }
+		refreshTableData();
+
+		watchPointsTable.getSortOrder().setAll(Collections.singletonList(orderColumn));
+		orderColumn.setSortType(TableColumn.SortType.ASCENDING);
+	}
 
 	private TableRow<WatchPointFX> buildDraggableTableRow() {
 		TableRow<WatchPointFX> row = new TableRow<>();
 
 		row.setOnDragDetected(event -> {
-			if (!row.isEmpty()) {
-				Integer index = row.getIndex();
-				Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-				db.setDragView(row.snapshot(null, null));
-				IntStream.range(0, watchPointsTable.getItems().size())
-						.filter(i -> i != index).forEach(i -> watchPointsTable.getSelectionModel().clearSelection(i));
-				ClipboardContent cc = new ClipboardContent();
-				cc.put(SERIALIZED_MIME_TYPE, index);
-				db.setContent(cc);
-				event.consume();
+			ObservableList<TableColumn<WatchPointFX, ?>> sortOrder = watchPointsTable.getSortOrder();
+			boolean sortedByOrder = sortOrder.size() == 1 && sortOrder.get(0) == orderColumn &&
+					orderColumn.getSortType() == TableColumn.SortType.ASCENDING;
+			if (!sortedByOrder) {
+				Notifications.create().hideCloseButton()
+						.position(Pos.CENTER)
+						.text(Messages.get("order.by.order.col.before.ordering", orderColumn.getText()))
+						.hideAfter(new Duration(2000)).showWarning();
+			} else {
+				if (!row.isEmpty()) {
+					Integer index = row.getIndex();
+					Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+					db.setDragView(row.snapshot(null, null));
+					IntStream.range(0, watchPointsTable.getItems().size())
+							.filter(i -> i != index).forEach(i -> watchPointsTable.getSelectionModel().clearSelection(i));
+					ClipboardContent cc = new ClipboardContent();
+					cc.put(SERIALIZED_MIME_TYPE, index);
+					db.setContent(cc);
+					event.consume();
+				}
 			}
 		});
 
@@ -145,9 +162,9 @@ public class WatchPointsController implements Initializable {
 
 	public void deleteSelectedWatchPoints() {
 		ObservableList<WatchPointFX> selectedItems = watchPointsTable.getSelectionModel().getSelectedItems();
-        List<WatchPointFX> filtered = selectedItems.stream().filter(wp -> wp != null).collect(Collectors.toList());
+		List<WatchPointFX> filtered = selectedItems.stream().filter(wp -> wp != null).collect(Collectors.toList());
 
-        if (!filtered.isEmpty()) {
+		if (!filtered.isEmpty()) {
 			boolean approved = WindowManager.showWarningConfirmationAlert(
 					Messages.get("watchpoints.watch.point.removal.approval"),
 					Messages.get("watchpoints.watch.point.removal.approval.message", filtered.size()),
@@ -156,22 +173,22 @@ public class WatchPointsController implements Initializable {
 			);
 
 			if (approved) {
-                DbManager.deleteWatchPoints(
+				DbManager.deleteWatchPoints(
 						filtered.stream().map(FxWrapper::getEntity).collect(Collectors.toList())
 				);
-                refreshTableData();
+				refreshTableData();
 				watchPointsTable.getSelectionModel().clearSelection();
-            }
-        }
-    }
+			}
+		}
+	}
 
-    public void refreshTableData() {
-        List<WatchPointFX> watchPointFXes
+	public void refreshTableData() {
+		List<WatchPointFX> watchPointFXes
 				= DbManager.findAllActiveWatchPointsOrdered().stream()
 				.map(WatchPointFX::new).collect(Collectors.toList());
 		ObservableList<WatchPointFX> items = FXCollections.observableArrayList(watchPointFXes);
 		watchPointsTable.setItems(items);
-    }
+	}
 
 	public void saveOrders() {
 		IntStream.range(0, watchPointsTable.getItems().size()).forEach(i ->
@@ -189,9 +206,9 @@ public class WatchPointsController implements Initializable {
 		return watchPointsTable.getItems().size();
 	}
 
-    public void closeWindow() {
-        ((Stage) addWatchPointButton.getScene().getWindow()).close();
-    }
+	public void closeWindow() {
+		((Stage) addWatchPointButton.getScene().getWindow()).close();
+	}
 
 	public void watchPointsTableKeyPress(KeyEvent event) {
 		if (event.getCode() == KeyCode.DELETE) {

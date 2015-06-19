@@ -15,7 +15,7 @@
                prefWidth="592.0" AnchorPane.bottomAnchor="180.0" AnchorPane.leftAnchor="14.0"
                AnchorPane.rightAnchor="224.0" AnchorPane.topAnchor="92.0">
         <columns>
-            <TableColumn fx:id="hoursColumn" prefWidth="80.0" text="%hours.between"/>
+            <TableColumn fx:id="hoursColumn" prefWidth="80.0" resizable="false" text="%hours.between"/>
         </columns>
     </TableView>
     <Label layoutX="13.0" layoutY="14.0" text="%distribution.watch.date" AnchorPane.leftAnchor="13.0"
@@ -63,9 +63,9 @@
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
-    <Label alignment="TOP_LEFT" layoutX="616.0" layoutY="184.0" prefHeight="78.0" prefWidth="200.0"
+    <Label alignment="TOP_LEFT" layoutX="686.0" layoutY="210.0" prefHeight="78.0" prefWidth="200.0"
            text="%distribution.click.soldier.to.change" textAlignment="CENTER" wrapText="true"
-           AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="184.0">
+           AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="210.0">
         <font>
             <Font size="12.0"/>
         </font>
@@ -111,4 +111,11 @@
     </ScrollPane>
     <Label alignment="TOP_LEFT" layoutX="686.0" layoutY="544.0" prefHeight="97.0" prefWidth="200.0" text="%notes.info"
            wrapText="true" AnchorPane.bottomAnchor="60.0" AnchorPane.rightAnchor="14.0"/>
+    <CheckBox fx:id="showColors" layoutX="686.0" layoutY="178.0" mnemonicParsing="false" prefHeight="16.0"
+              prefWidth="200.0" selected="true" text="%show.colorful" AnchorPane.rightAnchor="14.0"
+              AnchorPane.topAnchor="178.0">
+        <font>
+            <Font name="System Bold" size="12.0"/>
+        </font>
+    </CheckBox>
 </AnchorPane>

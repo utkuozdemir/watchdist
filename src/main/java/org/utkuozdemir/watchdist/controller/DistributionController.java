@@ -26,12 +26,14 @@ import org.utkuozdemir.watchdist.util.*;
 import java.awt.*;
 import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -67,6 +69,8 @@ public class DistributionController implements Initializable {
 	private Label notes;
 	@FXML
 	private Button addOrEditNotes;
+	@FXML
+	private CheckBox showColors;
 
 	private Soldier[] selectedSoldiersBeforeEdit;
 	private Service<Soldier[][]> distributionService;
@@ -135,6 +139,22 @@ public class DistributionController implements Initializable {
 				fileChooser.setInitialFileName(fileName + ".xls");
 
 				File file = fileChooser.showSaveDialog(distributionTable.getScene().getWindow());
+				if (file == null) {
+					try {
+						String path = Paths.get(FileManager.class.getProtectionDomain()
+								.getCodeSource().getLocation().toURI()).getParent().toAbsolutePath()
+								+ File.separator + "Excel" + File.separator + fileName + ".xls";
+						boolean confirmed = WindowManager
+								.showConfirmationAlert(Messages.get("confirmation"),
+										Messages.get("file.could.not.be.selected", path),
+										Messages.get("save.and.continue"), Messages.get("dont.save"));
+						if (confirmed) {
+							file = Paths.get(path).toFile();
+						}
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
 				if (file != null) {
 					try {
 						if (!file.getName().endsWith(".xls")) file = new File(file.getPath() + ".xls");
@@ -319,13 +339,15 @@ public class DistributionController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
+		showColors.selectedProperty().addListener((observable, oldValue, newValue) -> refreshCellColors());
+
 		initializeDistributionService();
 
 		distributionTable.setPlaceholder(new Label(Messages.get("distribution.no.data.in.table")));
 		hoursColumn.setCellValueFactory(new PropertyValueFactory<>("hours"));
+		hoursColumn.setStyle("-fx-alignment: CENTER;");
 
 		refreshTableColumns();
-
 		initDateFields();
 	}
 
@@ -386,6 +408,7 @@ public class DistributionController implements Initializable {
 				= FXCollections.observableArrayList(DbManager.findAllActiveSoldiersOrderedByFullName());
 
 		int num = 0;
+		int count = watchPointFXes.stream().mapToInt(value -> value.requiredSoldierCountProperty().get()).sum();
 		for (WatchPointFX watchPointFX : watchPointFXes) {
 			for (int i = 0; i < watchPointFX.requiredSoldierCountProperty().get(); i++) {
 				String columnName
@@ -393,6 +416,10 @@ public class DistributionController implements Initializable {
 						watchPointFX.nameProperty().get() + " - " + (i + 1) : watchPointFX.nameProperty().get();
 				TableColumn<DistributionRow, Soldier> column = new TableColumn<>(columnName);
 				column.setMinWidth(90);
+				column.setStyle("-fx-alignment: CENTER;");
+				column.prefWidthProperty().bind(distributionTable.widthProperty().subtract(
+						hoursColumn.widthProperty()
+				).multiply((0.99 / count)));
 
 				final int finalNum = num;
 				column.setCellValueFactory(distributionRowSoldierCellDataFeatures -> {
@@ -403,7 +430,14 @@ public class DistributionController implements Initializable {
 				});
 
 				column.setCellFactory(distributionRowSoldierTableColumn -> {
-					final ComboBoxTableCell<DistributionRow, Soldier> cell = new ComboBoxTableCell<>();
+					final ComboBoxTableCell<DistributionRow, Soldier> cell = new ComboBoxTableCell<DistributionRow, Soldier> () {
+						@Override
+						public void updateItem(Soldier item, boolean empty) {
+							super.updateItem(item, empty);
+							refreshCellColors();
+						}
+					};
+
 					cell.editingProperty().addListener((observableValue, aBoolean, t1) -> {
 						if (t1) {
 							TableRow<DistributionRow> tableRow = cell.getTableRow();
@@ -411,8 +445,6 @@ public class DistributionController implements Initializable {
 							selectedSoldiersBeforeEdit = Arrays.copyOf(distributionRow.getSoldiers(), distributionRow.getSoldiers().length);
 						}
 					});
-
-
 					cell.itemProperty().addListener((observableValue, soldier, t1) -> {
 						ComboBoxTableCell<DistributionRow, Soldier> cellBean
 								= (ComboBoxTableCell<DistributionRow, Soldier>) ((SimpleObjectProperty) observableValue)
@@ -441,6 +473,8 @@ public class DistributionController implements Initializable {
 							}
 						}
 					});
+
+
 					cell.getItems().add(new NullSoldier());
 					cell.getItems().addAll(soldiers);
 					return cell;
@@ -572,6 +606,55 @@ public class DistributionController implements Initializable {
 				}
 			}
 			loadDataToTable(soldiers);
+		}
+	}
+
+	public void refreshCellColors() {
+		if (showColors.selectedProperty().get()) {
+
+			List<Soldier> soldiers =
+					distributionTable.getItems().stream()
+							.flatMap(r -> Arrays.stream(r.getSoldiers()))
+							.filter(s -> s != null)
+							.collect(Collectors.toList());
+
+			Integer maxOccurrence = soldiers.stream()
+					.reduce(BinaryOperator.maxBy((o1, o2) -> Collections.frequency(soldiers, o1) -
+							Collections.frequency(soldiers, o2)))
+					.map(s -> Collections.frequency(soldiers, s)).orElse(0);
+			Integer minOccurrence = soldiers.stream()
+					.reduce(BinaryOperator.minBy((o1, o2) -> Collections.frequency(soldiers, o1) -
+							Collections.frequency(soldiers, o2)))
+					.map(s -> Collections.frequency(soldiers, s)).orElse(0);
+
+			distributionTable.lookupAll(".table-row-cell").forEach(r -> r.lookupAll(".table-cell").forEach(c -> {
+				if (c instanceof ComboBoxTableCell) {
+					@SuppressWarnings("unchecked")
+					ComboBoxTableCell<DistributionRow, Soldier> cell = (ComboBoxTableCell<DistributionRow, Soldier>) c;
+					Soldier soldier = cell.getItem();
+					if (soldier != null) {
+						int stepSize = !Objects.equals(maxOccurrence, minOccurrence) ?
+								120 / (maxOccurrence - minOccurrence) : 0;
+						int frequency = Collections.frequency(soldiers, soldier);
+						float hue = (120f - (stepSize * (frequency - minOccurrence))) / 360f;
+						Color color = Color.getHSBColor(hue, 0.7f, 0.9f);
+						String rgba = "rgba(" + color.getRed() + ", " + color.getGreen() + ", " + color.getBlue() + ", .35)";
+						cell.setStyle(cell.getStyle() + "-fx-background-color:" + rgba + ";");
+					} else {
+						cell.setStyle(cell.getStyle().replaceAll(
+								"\\-fx\\-background\\-color:rgba\\(.*\\);", ""));
+					}
+				}
+			}));
+		} else {
+			distributionTable.lookupAll(".table-row-cell").forEach(r -> r.lookupAll(".table-cell").forEach(c -> {
+				if (c instanceof ComboBoxTableCell) {
+					@SuppressWarnings("unchecked")
+					ComboBoxTableCell<DistributionRow, Soldier> cell = (ComboBoxTableCell<DistributionRow, Soldier>) c;
+						cell.setStyle(cell.getStyle().replaceAll(
+								"\\-fx\\-background\\-color:rgba\\(.*\\);", ""));
+				}
+			}));
 		}
 	}
 

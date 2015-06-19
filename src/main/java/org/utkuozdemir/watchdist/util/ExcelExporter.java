@@ -50,6 +50,7 @@ public class ExcelExporter {
 			fillHourValues(sheets);
 			fillSoldierValues(sheets, watches);
 
+			Files.createDirectories(saveFile.toPath().getParent());
 			FileOutputStream outputStream = new FileOutputStream(saveFile);
 			workbook.write(outputStream);
 			outputStream.close();
