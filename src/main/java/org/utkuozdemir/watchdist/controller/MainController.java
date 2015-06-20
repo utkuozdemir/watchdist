@@ -195,11 +195,18 @@ public class MainController implements Initializable {
 				Group g = new Group(columnNameBox);
 				column.setGraphic(g);
 
-				column.setCellFactory(soldierBooleanTableColumn -> new CheckBoxTableCell<>());
-				column.setId(String.valueOf(j));
-
 				final int finalI = i;
 				final int finalJ = j;
+				column.setCellFactory(soldierBooleanTableColumn -> {
+					CheckBoxTableCell<SoldierFX, Boolean> cell = new CheckBoxTableCell<>();
+					String blueColor = finalJ % 2 == 0 ? "rgba(133, 194, 255, .2)" : "rgba(36, 107, 178, .2)";
+					String greenColor = finalJ % 2 == 0 ? "rgba(102, 255, 51, .2)" : "rgba(51, 128, 26, .2)";
+					cell.setStyle("-fx-background-color:" + (finalI % 2 == 0 ? blueColor : greenColor) + ";");
+					return cell;
+				});
+				column.setId(String.valueOf(j));
+
+
 				column.setCellValueFactory(value -> value.getValue().availabilitiesProperties()[finalI][finalJ]);
 				soldiersTable.getColumns().add(column);
 			}
