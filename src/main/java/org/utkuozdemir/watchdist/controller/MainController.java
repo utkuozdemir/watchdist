@@ -205,13 +205,10 @@ public class MainController implements Initializable {
 					return cell;
 				});
 				column.setId(String.valueOf(j));
-
-
 				column.setCellValueFactory(value -> value.getValue().availabilitiesProperties()[finalI][finalJ]);
 				soldiersTable.getColumns().add(column);
 			}
 		}
-
 
 		orderColumn.setCellValueFactory(new PropertyValueFactory<>("order"));
 

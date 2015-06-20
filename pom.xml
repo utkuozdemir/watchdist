@@ -99,6 +99,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>${javafx-maven-plugin.version}</version>
                 <configuration>
+                    <verbose>true</verbose>
                     <mainClass>org.utkuozdemir.watchdist.app.App</mainClass>
                     <vendor>Nobet</vendor>
                     <appName>NobetYonetim</appName>
