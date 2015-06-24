@@ -1,4 +1,4 @@
-# WatchDist
+# WatchDist [![Build Status](https://travis-ci.org/utkuozdemir/watchdist.svg?branch=master)](https://travis-ci.org/utkuozdemir/watchdist)
 WatchDist is a watch hours (a.k.a. guard duty) distribution application that runs on desktop and can be used in 
 military or police bases to create a fair distribution of watch duties.
  
