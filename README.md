@@ -23,7 +23,7 @@ template.
 ## Build
 The project uses maven as build tool and [Javafx Maven Plugin](https://github.com/javafx-maven-plugin) to create 
 runnable JARs/executables.  
-Maven should be using [**JDK 8**](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) to be able to build the project. 
+Maven should be using [**JDK 8u40 or later**](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) to be able to build the project. 
 
 To create native installers, in the project root directory, execute the maven goal
 
