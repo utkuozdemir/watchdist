@@ -112,6 +112,14 @@ public class DbManager {
 		}
 	}
 
+	public static long countAllAvailabilities() {
+		try {
+			return getInstance().availabilityDao.countOf();
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public static int deleteSoldiers(final Collection<Soldier> soldiers) {
 		try {
