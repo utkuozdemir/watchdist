@@ -104,7 +104,7 @@ public class Tests {
 		List<WatchPoint> dummyWatchPoints = createDummyWatchPoints(5, 2);
 		LocalDate date = LocalDate.of(1989, 9, 19);
 
-		Soldier[][] distribution = DistributionEngine.getInstance().distribute(date, dummySoldiers, dummyWatchPoints);
+		Soldier[][] distribution = DistributionEngine.create(date).distribute(dummySoldiers, dummyWatchPoints);
 		Map<Soldier, Set<Integer>> soldierWatchHoursMap = new HashMap<>();
 		IntStream.range(0, distribution.length).forEach(i -> Arrays.asList(distribution[i]).
 				stream().filter(s -> s != null).
@@ -149,8 +149,8 @@ public class Tests {
 				new Watch(dummySoldiers.get(9), dummyWatchPoints.get(2), 0, date.toString(), 11, 1.0)
 		);
 		DbManager.saveWatchesAddPointsDeleteOldWatches(date, watches);
-		Soldier[][] distribution = DistributionEngine.getInstance()
-				.distribute(date.plusDays(1), dummySoldiers, dummyWatchPoints);
+		Soldier[][] distribution = DistributionEngine.create(date.plusDays(1))
+				.distribute(dummySoldiers, dummyWatchPoints);
 
 		assertTrue(Arrays.stream(distribution[0]).filter(s -> s != null).count() == 0);
 	}
@@ -165,8 +165,7 @@ public class Tests {
 		List<WatchPoint> dummyWatchPoints = createDummyWatchPoints(5, 2);
 		dummyWatchPoints.forEach(wp -> DbManager.saveWatchPoint(wp, SaveMode.INSERT_OR_UPDATE));
 
-		Soldier[][] distribution = DistributionEngine.getInstance()
-				.distribute(date, dummySoldiers, dummyWatchPoints);
+		Soldier[][] distribution = DistributionEngine.create(date).distribute(dummySoldiers, dummyWatchPoints);
 
 		boolean unique = true;
 		for (Soldier[] soldiers : distribution) {

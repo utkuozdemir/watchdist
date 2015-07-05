@@ -362,8 +362,8 @@ public class DistributionController implements Initializable {
 						List<WatchPoint> watchPoints = watches.isEmpty() ?
 								DbManager.findAllActiveWatchPointsOrdered() :
 								watches.stream().map(Watch::getWatchPoint).distinct().collect(Collectors.toList());
-						return DistributionEngine.getInstance()
-								.distribute(getCurrentDate(), DbManager.findAllActiveSoldiersOrdered(), watchPoints);
+						return DistributionEngine.create(getCurrentDate())
+								.distribute(DbManager.findAllActiveSoldiersOrdered(), watchPoints);
 					}
 				};
 			}
