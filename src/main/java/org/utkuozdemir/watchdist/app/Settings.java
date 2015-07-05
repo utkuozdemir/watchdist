@@ -2,45 +2,48 @@ package org.utkuozdemir.watchdist.app;
 
 import org.utkuozdemir.watchdist.util.DbManager;
 
-import java.util.Optional;
-
 public class Settings {
-	private static Optional<Integer> totalWatchesInDay = Optional.empty();
-	private static Optional<Integer> watchDurationInHours = Optional.empty();
-	private static Optional<Integer> minWatchesBetweenTwoWatches = Optional.empty();
-	private static Optional<Integer> firstWatchStartHour = Optional.empty();
-	private static Optional<Integer> firstWatchStartMinute = Optional.empty();
+	private static Integer totalWatchesInDay = null;
+	private static Integer watchDurationInHours = null;
+	private static Integer minWatchesBetweenTwoWatches = null;
+	private static Integer firstWatchStartHour = null;
+	private static Integer firstWatchStartMinute = null;
 
 	public static int getTotalWatchesInDay() {
-		return totalWatchesInDay
-				.orElse(24 / Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS)));
+		if (totalWatchesInDay == null) totalWatchesInDay = 24 /
+				Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS));
+		return totalWatchesInDay;
 	}
 
 	public static int getOneWatchDurationInHours() {
-		return watchDurationInHours
-				.orElse(Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS)));
+		if (watchDurationInHours == null)
+			watchDurationInHours = Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS));
+		return watchDurationInHours;
 	}
 
 	public static int getMinWatchesBetweenTwoWatches() {
-		return minWatchesBetweenTwoWatches
-				.orElse(Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCHES_BETWEEN_TWO_WATCHES)));
+		if (minWatchesBetweenTwoWatches == null)
+			minWatchesBetweenTwoWatches = Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCHES_BETWEEN_TWO_WATCHES));
+		return minWatchesBetweenTwoWatches;
 	}
 
 	public static int getFirstWatchStartHour() {
-		return firstWatchStartHour
-				.orElse(Integer.parseInt(DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_HOUR)));
+		if (firstWatchStartHour == null)
+			firstWatchStartHour = Integer.parseInt(DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_HOUR));
+		return firstWatchStartHour;
 	}
 
 	public static int getFirstWatchStartMinute() {
-		return firstWatchStartMinute
-				.orElse(Integer.parseInt(DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_MINUTE)));
+		if (firstWatchStartMinute == null)
+			firstWatchStartMinute = Integer.parseInt(DbManager.getProperty(Constants.KEY_FIRST_WATCH_START_MINUTE));
+		return firstWatchStartMinute;
 	}
 
 	public static void invalidateCache() {
-		totalWatchesInDay = Optional.empty();
-		watchDurationInHours = Optional.empty();
-		minWatchesBetweenTwoWatches = Optional.empty();
-		firstWatchStartHour = Optional.empty();
-		firstWatchStartMinute = Optional.empty();
+		totalWatchesInDay = null;
+		watchDurationInHours = null;
+		minWatchesBetweenTwoWatches = null;
+		firstWatchStartHour = null;
+		firstWatchStartMinute = null;
 	}
 }

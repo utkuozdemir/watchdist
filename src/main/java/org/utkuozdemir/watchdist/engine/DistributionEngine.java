@@ -155,17 +155,13 @@ public class DistributionEngine {
 			availables.removeAll(availablesCopy);
 		}
 
-		Soldier[][] withoutPast = new Soldier[Settings.getTotalWatchesInDay()][soldierCountForWatch];
+		List<Soldier> soldiersFlatMap = new ArrayList<>();
 		for (int i = Settings.getMinWatchesBetweenTwoWatches();
 			 i < Settings.getTotalWatchesInDay() + Settings.getMinWatchesBetweenTwoWatches(); i++) {
-			System.arraycopy(distribution[i], 0, withoutPast[i - Settings.getMinWatchesBetweenTwoWatches()],
-					0, soldierCountForWatch);
+			for (int j = 0; j < soldierCountForWatch; j++) {
+				if (distribution[i][j] != null) soldiersFlatMap.add(distribution[i][j]);
+			}
 		}
-
-		List<Soldier> soldiersFlatMap
-				= Arrays.stream(withoutPast).flatMap(Arrays::stream)
-				.filter(s -> s != null)
-				.collect(Collectors.toList());
 
 		availables.removeAll(availables.stream()
 				.filter(s -> Collections.frequency(soldiersFlatMap, s) >= maxAssigns).collect(Collectors.toSet()));
