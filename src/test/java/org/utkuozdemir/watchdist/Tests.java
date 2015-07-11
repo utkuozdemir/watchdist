@@ -177,6 +177,33 @@ public class Tests {
 		assertTrue(unique);
 	}
 
+	// todo handle big data. optimize distribution engine.
+//	@Test
+//	public void testBigData() {
+//		List<Soldier> dummySoldiers = createDummySoldiers(5000);
+//		dummySoldiers.forEach(DbManager::saveSoldier);
+//
+//		List<WatchPoint> dummyWatchPoints = createDummyWatchPoints(20, 3);
+//		dummyWatchPoints.forEach(wp -> DbManager.saveWatchPoint(wp, SaveMode.INSERT_OR_UPDATE));
+//
+//		LocalDate date = LocalDate.of(2015, 6, 1);
+//		for (int i = 0; i < 30; i++) {
+//			Soldier[][] distribution = DistributionEngine.create(date.plusDays(i))
+//					.distribute(dummySoldiers, dummyWatchPoints);
+//
+//			Set<Watch> watches = new HashSet<>();
+//			for (int j = 0; j < distribution.length; j++) {
+//				for (int k = 0; k < distribution[j].length; k++) {
+//					Soldier soldier = distribution[j][k];
+//					Watch watch = new Watch(soldier, dummyWatchPoints.get((k + 1) / 3), k % 3, date.plusDays(i).toString(), j, WatchValues.get(j));
+//					watches.add(watch);
+//				}
+//			}
+//
+//			DbManager.saveWatchesAddPointsDeleteOldWatches(date.plusDays(i), watches);
+//		}
+//	}
+
 	@After
 	public void tearDown() {
 		DbManager.close();

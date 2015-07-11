@@ -11,7 +11,8 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sqlite-jdbc.version>3.7.2</sqlite-jdbc.version>
+        <sqlite-jdbc.version>3.8.10.1</sqlite-jdbc.version>
+        <nestedvm.version>1.0</nestedvm.version>
         <plugins.maven-compiler-plugin.version>3.1</plugins.maven-compiler-plugin.version>
         <poi.version>3.12</poi.version>
         <ormlite-jdbc.version>4.48</ormlite-jdbc.version>
@@ -22,7 +23,6 @@
         <javafx-maven-plugin.version>8.1.2</javafx-maven-plugin.version>
         <junit.version>4.12</junit.version>
         <jBCrypt.version>0.4</jBCrypt.version>
-        <testfx.version>4.0.1-alpha</testfx.version>
     </properties>
 
     <dependencies>
@@ -30,6 +30,11 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>${sqlite-jdbc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial.thirdparty</groupId>
+            <artifactId>nestedvm</artifactId>
+            <version>${nestedvm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -65,18 +70,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testfx</groupId>
-            <artifactId>testfx-core</artifactId>
-            <version>${testfx.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testfx</groupId>
-            <artifactId>testfx-junit</artifactId>
-            <version>${testfx.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
