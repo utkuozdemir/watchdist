@@ -112,6 +112,34 @@ public class DbManager {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	public static int saveSoldiers(final Collection<Soldier> soldiers) {
+		try {
+			return getInstance().transactionManager.callInTransaction(() -> {
+				int total = 0;
+				for (Soldier soldier : soldiers) {
+					DbManager dbManager = getInstance();
+					Dao.CreateOrUpdateStatus status = dbManager.soldierDao.createOrUpdate(soldier);
+
+					if (status.isUpdated()) {
+						PreparedQuery<Availability> preparedDelete
+								= dbManager.availabilityDao.deleteBuilder()
+								.where().eq("soldier", soldier.getId()).prepare();
+						dbManager.availabilityDao.delete((PreparedDelete<Availability>) preparedDelete);
+					}
+
+					for (Availability availability : soldier.getAvailabilities()) {
+						dbManager.availabilityDao.create(availability);
+					}
+					total += status.getNumLinesChanged();
+				}
+				return total;
+			});
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static long countAllAvailabilities() {
 		try {
 			return getInstance().availabilityDao.countOf();

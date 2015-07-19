@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.FileChooser;
+import javafx.util.converter.LocalDateStringConverter;
 import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.domain.NullSoldier;
 import org.utkuozdemir.watchdist.domain.Soldier;
@@ -27,10 +28,8 @@ import java.awt.*;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.text.DateFormatSymbols;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.List;
 import java.util.function.BinaryOperator;
@@ -40,17 +39,11 @@ import java.util.stream.IntStream;
 @SuppressWarnings("unused")
 public class DistributionController implements Initializable {
 	@FXML
+	private DatePicker currentDate;
+	@FXML
 	private TableView<DistributionRow> distributionTable;
 	@FXML
 	private TableColumn<DistributionRow, String> hoursColumn;
-	@FXML
-	private ComboBox<Integer> day;
-	@FXML
-	private ComboBox<String> month;
-	@FXML
-	private ComboBox<Integer> year;
-	@FXML
-	private Label dayName;
 	@FXML
 	private ProgressIndicator progressIndicator;
 	@FXML
@@ -83,22 +76,6 @@ public class DistributionController implements Initializable {
 		distributionService.restart();
 	}
 
-	private LocalDate getCurrentDate() {
-		Integer dayValue = day.getValue();
-		Integer monthValue = getSelectedMonth();
-		Integer yearValue = year.getValue();
-		if (dayValue == null || monthValue == null || yearValue == null) return null;
-		return LocalDate.of(yearValue, monthValue, dayValue);
-	}
-
-	private void setCurrentDate(LocalDate date) {
-		year.setValue(date.getYear());
-		List<String> monthNames = Arrays.asList(new DateFormatSymbols(Messages.getLocale()).getMonths());
-		this.month.setValue(monthNames.get(date.getMonthValue() - 1));
-		day.setValue(date.getDayOfMonth());
-		refreshDay();
-	}
-
 	private void loadDataToTable(Soldier[][] soldiers) {
 		DistributionRow[] distributionRows = new DistributionRow[Settings.getTotalWatchesInDay()];
 
@@ -121,9 +98,8 @@ public class DistributionController implements Initializable {
 
 	@SuppressWarnings("unused")
 	public void exportToExcel() {
-		LocalDate currentDate = getCurrentDate();
-		if (currentDate != null) {
-			List<Watch> watches = DbManager.findWatchesByDate(getCurrentDate());
+		if (currentDate.getValue() != null) {
+			List<Watch> watches = DbManager.findWatchesByDate(currentDate.getValue());
 			if (watches.isEmpty()) {
 				WindowManager.showWarningInfoAlert(Messages.get("distribution.approve.before.export.title"),
 						Messages.get("distribution.approve.before.export.message"));
@@ -158,7 +134,7 @@ public class DistributionController implements Initializable {
 				if (file != null) {
 					try {
 						if (!file.getName().endsWith(".xls")) file = new File(file.getPath() + ".xls");
-						ExcelExporter.export(file, currentDate, watches);
+						ExcelExporter.export(file, currentDate.getValue(), watches);
 						Desktop.getDesktop().open(file);
 					} catch (Exception e) {
 						throw new RuntimeException(e);
@@ -170,8 +146,7 @@ public class DistributionController implements Initializable {
 
 	@SuppressWarnings("unused")
 	public void approveDistribution() {
-		LocalDate currentDate = getCurrentDate();
-		if (currentDate != null) {
+		if (currentDate.getValue() != null) {
 			for (DistributionRow row : distributionTable.getItems()) {
 				Soldier[] soldiers = Arrays.copyOf(row.getSoldiers(), row.getSoldiers().length);
 				for (int i = 0; i < row.getSoldiers().length; i++) {
@@ -220,7 +195,7 @@ public class DistributionController implements Initializable {
 					}
 				}
 				DbManager.saveWatchesAddPointsDeleteOldWatches(
-						getCurrentDate(), watchesToBeSaved
+						currentDate.getValue(), watchesToBeSaved
 				);
 
 				WindowManager.showInfoAlert(Messages.get("success"), Messages.get("distribution.success.message"));
@@ -231,29 +206,25 @@ public class DistributionController implements Initializable {
 
 	@SuppressWarnings("unused")
 	public void goToToday() {
-		setCurrentDate(LocalDate.now());
+		currentDate.setValue(LocalDate.now());
 	}
 
 	@SuppressWarnings("unused")
 	public void jumpToPreviousDay() {
-		LocalDate currentDate = getCurrentDate();
-		if (currentDate != null) {
-			setCurrentDate(currentDate.minusDays(1));
+		if (currentDate.getValue() != null) {
+			currentDate.setValue(currentDate.getValue().minusDays(1));
 		}
-
 	}
 
 	@SuppressWarnings("unused")
 	public void jumpToNextDay() {
-		LocalDate currentDate = getCurrentDate();
-		if (currentDate != null) {
-			setCurrentDate(currentDate.plusDays(1));
+		if (currentDate.getValue() != null) {
+			currentDate.setValue(currentDate.getValue().plusDays(1));
 		}
 	}
 
 	private String buildConfirmMessage() {
-		LocalDate currentDate = getCurrentDate();
-		if (currentDate == null) throw new RuntimeException("Current date is null!");
+		if (currentDate.getValue() == null) throw new RuntimeException("Current date is null!");
 
 		boolean perfect = true;
 
@@ -273,7 +244,7 @@ public class DistributionController implements Initializable {
 			if (!perfect) break;
 		}
 
-		Set<Soldier> collidedSoldiers = getCollidedSoldiers(currentDate, rows);
+		Set<Soldier> collidedSoldiers = getCollidedSoldiers(currentDate.getValue(), rows);
 		if (!collidedSoldiers.isEmpty()) {
 			perfect = false;
 			String message = Messages.get(collidedSoldiers.size() > 1 ?
@@ -287,7 +258,7 @@ public class DistributionController implements Initializable {
 					.append(System.lineSeparator());
 		}
 
-		List<Watch> existingWatches = DbManager.findWatchesByDate(getCurrentDate());
+		List<Watch> existingWatches = DbManager.findWatchesByDate(currentDate.getValue());
 		if (!existingWatches.isEmpty()) {
 			perfect = false;
 			approveMessage.append(Messages.get("distribution.already.existing.records"))
@@ -331,12 +302,6 @@ public class DistributionController implements Initializable {
 		return collidedSoldiers;
 	}
 
-	public Integer getSelectedMonth() {
-		if (month.getValue() == null) return null;
-		List<String> monthNames = Arrays.asList(new DateFormatSymbols(Messages.getLocale()).getMonths());
-		return monthNames.indexOf(month.getValue()) + 1;
-	}
-
 	@Override
 	public void initialize(URL url, ResourceBundle resourceBundle) {
 		showColors.selectedProperty().addListener((observable, oldValue, newValue) -> refreshCellColors());
@@ -348,7 +313,13 @@ public class DistributionController implements Initializable {
 		hoursColumn.setStyle("-fx-alignment: CENTER;");
 
 		refreshTableColumns();
-		initDateFields();
+		currentDate.valueProperty().addListener((observable, oldValue, newValue) -> {
+			refreshData();
+			refreshNote();
+		});
+		currentDate.setConverter(new LocalDateStringConverter(FormatStyle.LONG,
+				Messages.getLocale(), currentDate.getChronology()));
+		currentDate.setValue(LocalDate.now());
 	}
 
 	private void initializeDistributionService() {
@@ -358,11 +329,11 @@ public class DistributionController implements Initializable {
 				return new Task<Soldier[][]>() {
 					@Override
 					protected Soldier[][] call() throws Exception {
-						List<Watch> watches = DbManager.findWatchesByDate(getCurrentDate());
+						List<Watch> watches = DbManager.findWatchesByDate(currentDate.getValue());
 						List<WatchPoint> watchPoints = watches.isEmpty() ?
 								DbManager.findAllActiveWatchPointsOrdered() :
 								watches.stream().map(Watch::getWatchPoint).distinct().collect(Collectors.toList());
-						return DistributionEngine.create(getCurrentDate())
+						return DistributionEngine.create(currentDate.getValue())
 								.distribute(DbManager.findAllActiveSoldiersOrdered(), watchPoints);
 					}
 				};
@@ -374,7 +345,7 @@ public class DistributionController implements Initializable {
 		});
 
 		progressIndicator.visibleProperty().bind(distributionService.runningProperty());
-		Arrays.asList(addOrEditNotes, distribute, exportToExcel, approve, today, previousDay, nextDay, day, month, year)
+		Arrays.asList(addOrEditNotes, distribute, exportToExcel, approve, today, previousDay, nextDay, currentDate)
 				.forEach(control -> control.disableProperty().bind(distributionService.runningProperty()));
 		distributionTable.editableProperty().bind(distributionService.runningProperty().not());
 	}
@@ -388,8 +359,7 @@ public class DistributionController implements Initializable {
 		}
 
 		List<WatchPoint> watchPoints;
-		LocalDate currentDate = getCurrentDate();
-		List<Watch> watches = DbManager.findWatchesByDate(currentDate != null ? currentDate : LocalDate.now());
+		List<Watch> watches = DbManager.findWatchesByDate(currentDate.getValue() != null ? currentDate.getValue() : LocalDate.now());
 		if (watches.isEmpty()) {
 			watchPoints = DbManager.findAllActiveWatchPointsOrdered();
 		} else {
@@ -487,81 +457,17 @@ public class DistributionController implements Initializable {
 		}
 	}
 
-	private void initDateFields() {
-		final List<Integer> years = new ArrayList<>();
-		for (int i = 2015; i < 2050; i++) {
-			years.add(i);
-		}
-
-		year.valueProperty().addListener((observableValue, integer, t1) -> {
-			if (day.getValue() != null && month.getValue() != null) {
-				refreshDay();
-				refreshData();
-				refreshNote();
-			}
-		});
-		month.valueProperty().addListener((observableValue, s, t1) -> {
-			if (day.getValue() != null && year.getValue() != null) {
-				refreshDay();
-				refreshData();
-				refreshNote();
-			}
-		});
-		day.valueProperty().addListener((observableValue, integer, t1) -> {
-			if (month.getValue() != null && year.getValue() != null) {
-				refreshDayName();
-				refreshData();
-				refreshNote();
-			}
-		});
-
-		year.setItems(FXCollections.observableArrayList(years));
-		month.setItems(FXCollections.observableArrayList(
-						Arrays.asList(new DateFormatSymbols(Messages.getLocale()).getMonths()))
-		);
-		setCurrentDate(LocalDate.now());
-	}
-
-	private void refreshDay() {
-		Integer originalValue = day.getValue();
-		int lastDay = LocalDate.of(year.getValue(), getSelectedMonth(), 1).lengthOfMonth();
-		List<Integer> days = new ArrayList<>();
-		for (int i = 1; i <= lastDay; i++) {
-			days.add(i);
-		}
-		day.setItems(FXCollections.observableArrayList(days));
-		if (day.getValue() == null) {
-			day.setValue(1);
-			return;
-		}
-		if (lastDay < day.getValue()) day.setValue(lastDay);
-		else day.setValue(originalValue);
-		refreshDayName();
-	}
-
-	private void refreshDayName() {
-		LocalDate watchDate = getCurrentDate();
-		if (watchDate != null) {
-			String dayName = new SimpleDateFormat("EEEE", Messages.getLocale()).format(
-					Date.from(watchDate.atStartOfDay(ZoneId.systemDefault()).toInstant())
-			);
-			this.dayName.setText(dayName);
-		}
-	}
-
 	public void refreshNote() {
-		LocalDate date = getCurrentDate();
-		if (date != null) {
-			String note = DbManager.getNote(date);
+		if (currentDate.getValue() != null) {
+			String note = DbManager.getNote(currentDate.getValue());
 			notes.setText((note == null || "".equals(note.trim())) ? Messages.get("no.notes") : note);
 		}
 	}
 
 	private void refreshData() {
-		LocalDate date = getCurrentDate();
-		if (date != null) {
+		if (currentDate.getValue() != null) {
 			refreshTableColumns();
-			List<Watch> watches = DbManager.findWatchesByDate(date);
+			List<Watch> watches = DbManager.findWatchesByDate(currentDate.getValue());
 
 			List<WatchPoint> watchPoints;
 			if (watches.isEmpty()) {
@@ -659,8 +565,8 @@ public class DistributionController implements Initializable {
 	}
 
 	public void addOrEditNotes() {
-		if (getCurrentDate() != null) {
-			WindowManager.showNotesWindow(this, getCurrentDate());
+		if (currentDate.getValue() != null) {
+			WindowManager.showNotesWindow(this, currentDate.getValue());
 		}
 	}
 }

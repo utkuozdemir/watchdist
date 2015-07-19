@@ -132,21 +132,12 @@ public class DistributionEngine {
 		Set<Soldier> unavailables
 				= getUnavailablesForIndex(distribution, index, soldiers, soldierCountForWatch, maxAssigns);
 
-		int dayNum = date.getDayOfWeek().getValue() - 1;
 		Set<Soldier> availables = soldiers.stream().filter(s -> !unavailables.contains(s)).collect(toSet());
+		int dayNum = date.getDayOfWeek().getValue() - 1;
+		double pointScale = availables.stream().mapToDouble(Soldier::getPoints).sum();
 		Map<Soldier, Integer> availablesTicketMap = availables.stream().collect(toMap(s -> s, s -> {
-					// tickets from availability times (inverse proportion)
-					long availabilityCountInDay
-							= s.getAvailabilities().stream()
-							.filter(availability -> availability.getDayNum() == dayNum).count();
-					int ticketCountFromAvailability = (int) (AVAILABILITY_EFFECT - (availabilityCountInDay - 1) *
-							(AVAILABILITY_EFFECT / (Settings.getTotalWatchesInDay() - 1)));
+					return calculateTicketCountForSoldier(s, dayNum, pointScale);
 
-					// tickets from points (inverse proportion)
-					double scale = availables.stream().mapToDouble(Soldier::getPoints).sum();
-					double rate = scale != 0 ? s.getPoints() / scale : 0;
-					int ticketCountFromPoints = (int) (POINTS_EFFECT - (POINTS_EFFECT * rate));
-					return ticketCountFromAvailability + ticketCountFromPoints;
 				}
 		));
 
@@ -154,6 +145,20 @@ public class DistributionEngine {
 				.map(Map::entrySet)
 				.flatMap(Collection::stream)
 				.collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
+	}
+
+	private Integer calculateTicketCountForSoldier(Soldier soldier, int dayNum, double pointScale) {
+		// tickets from availability times (inverse proportion)
+		long availabilityCountInDay
+				= soldier.getAvailabilities().stream()
+				.filter(availability -> availability.getDayNum() == dayNum).count();
+		int ticketCountFromAvailability = (int) (AVAILABILITY_EFFECT - (availabilityCountInDay - 1) *
+				(AVAILABILITY_EFFECT / (Settings.getTotalWatchesInDay() - 1)));
+
+		// tickets from points (inverse proportion)
+		double rate = pointScale != 0 ? soldier.getPoints() / pointScale : 0;
+		int ticketCountFromPoints = (int) (POINTS_EFFECT - (POINTS_EFFECT * rate));
+		return ticketCountFromAvailability + ticketCountFromPoints;
 	}
 
 	private Set<Soldier> getUnavailablesForIndex(Soldier[][] distribution,

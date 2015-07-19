@@ -3,16 +3,18 @@ package org.utkuozdemir.watchdist;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.utkuozdemir.watchdist.app.Constants;
+import org.mindrot.jbcrypt.BCrypt;
 import org.utkuozdemir.watchdist.app.Settings;
 import org.utkuozdemir.watchdist.domain.Soldier;
 import org.utkuozdemir.watchdist.domain.Watch;
 import org.utkuozdemir.watchdist.domain.WatchPoint;
 import org.utkuozdemir.watchdist.domain.WatchValue;
 import org.utkuozdemir.watchdist.engine.DistributionEngine;
+import org.utkuozdemir.watchdist.i18n.Language;
 import org.utkuozdemir.watchdist.util.DbManager;
 import org.utkuozdemir.watchdist.util.FileManager;
 import org.utkuozdemir.watchdist.util.SaveMode;
+import org.utkuozdemir.watchdist.util.WatchValues;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -22,6 +24,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.utkuozdemir.watchdist.app.Constants.*;
 
 public class Tests {
 	public static final int WATCH_DURATION_IN_HOURS = 2;
@@ -34,13 +37,16 @@ public class Tests {
 		DbManager.setDbPath(FileManager.getDatabasePath());
 		FileManager.resetDatabase();
 
-		DbManager.setProperty(Constants.KEY_WATCH_DURATION_IN_HOURS,
+		DbManager.setProperty(KEY_LOCALE, Language.TR.name());
+		DbManager.setProperty(KEY_APP_PASSWORD, BCrypt.hashpw("test", BCrypt.gensalt()));
+		DbManager.setProperty(KEY_DB_RESET_PASSWORD, BCrypt.hashpw("test", BCrypt.gensalt()));
+		DbManager.setProperty(KEY_WATCH_DURATION_IN_HOURS,
 				String.valueOf(WATCH_DURATION_IN_HOURS));
-		DbManager.setProperty(Constants.KEY_FIRST_WATCH_START_HOUR,
+		DbManager.setProperty(KEY_FIRST_WATCH_START_HOUR,
 				String.valueOf(FIRST_WATCH_START_HOUR));
-		DbManager.setProperty(Constants.KEY_WATCHES_BETWEEN_TWO_WATCHES,
+		DbManager.setProperty(KEY_WATCHES_BETWEEN_TWO_WATCHES,
 				String.valueOf(WATCHES_BETWEEN_TWO_WATCHES));
-		DbManager.setProperty(Constants.KEY_FIRST_WATCH_START_MINUTE,
+		DbManager.setProperty(KEY_FIRST_WATCH_START_MINUTE,
 				String.valueOf(FIRST_WATCH_START_MINUTE));
 		Settings.invalidateCache();
 
@@ -65,9 +71,11 @@ public class Tests {
 	}
 
 	private List<Soldier> createDummySoldiers(int count) {
+		int order = ((int) Math.log10((double) count)) + 1;
 		return IntStream.range(0, count).boxed().map(i -> {
-					Soldier s = new Soldier("Firstname" + i + " " + "Lastname" + i,
-							"Duty_" + i, true, false, 4, i + 1, false);
+					String numberString = String.format("%0" + order + "d", i);
+					Soldier s = new Soldier("Firstname" + numberString + " " + "Lastname" + numberString,
+							"Duty_" + numberString, true, false, 4, i + 1, false);
 					s.setId(i + 1);
 					return s;
 				}
@@ -77,14 +85,17 @@ public class Tests {
 	private List<WatchPoint> createDummyWatchPoints(int totalSoldierCount, int maxSoldierCountForOneWatchPoint) {
 		int id = 1;
 		List<WatchPoint> watchPoints = new ArrayList<>();
-		for (int i = 0; i < (totalSoldierCount / maxSoldierCountForOneWatchPoint); i++) {
-			WatchPoint wp = new WatchPoint("WatchPoint_" + i, maxSoldierCountForOneWatchPoint, true, id);
+		int count = totalSoldierCount / maxSoldierCountForOneWatchPoint;
+		int order = ((int) Math.log10((double) count)) + 1;
+		for (int i = 0; i < count; i++) {
+			String numberString = String.format("%0" + order + "d", i);
+			WatchPoint wp = new WatchPoint("WatchPoint_" + numberString, maxSoldierCountForOneWatchPoint, true, id);
 			wp.setId(id++);
 			watchPoints.add(wp);
 		}
 		WatchPoint lastWatchPoint = new WatchPoint(
-				"WatchPoint_" + (totalSoldierCount / maxSoldierCountForOneWatchPoint),
-				maxSoldierCountForOneWatchPoint, true, id);
+				"WatchPoint_" + count,
+				totalSoldierCount % maxSoldierCountForOneWatchPoint, true, id);
 		lastWatchPoint.setId(id);
 		watchPoints.add(lastWatchPoint);
 		return watchPoints;
@@ -95,7 +106,7 @@ public class Tests {
 		int soldierCount = 100;
 		createDummySoldiers(soldierCount).forEach(DbManager::saveSoldier);
 		assertEquals(DbManager.countAllAvailabilities(), soldierCount * (7 * (24 /
-				Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCH_DURATION_IN_HOURS)))));
+				Integer.parseInt(DbManager.getProperty(KEY_WATCH_DURATION_IN_HOURS)))));
 	}
 
 	@Test
@@ -115,7 +126,7 @@ public class Tests {
 					soldierWatchHoursMap.get(soldier).add(i);
 				}));
 
-		int gap = Integer.parseInt(DbManager.getProperty(Constants.KEY_WATCHES_BETWEEN_TWO_WATCHES));
+		int gap = Integer.parseInt(DbManager.getProperty(KEY_WATCHES_BETWEEN_TWO_WATCHES));
 		List<Soldier> faultySoldiers = new ArrayList<>();
 		for (Map.Entry<Soldier, Set<Integer>> entry : soldierWatchHoursMap.entrySet()) {
 			Integer[] hours = entry.getValue().toArray(new Integer[entry.getValue().size()]);
@@ -177,32 +188,32 @@ public class Tests {
 		assertTrue(unique);
 	}
 
-	// todo handle big data. optimize distribution engine.
-//	@Test
-//	public void testBigData() {
-//		List<Soldier> dummySoldiers = createDummySoldiers(5000);
-//		dummySoldiers.forEach(DbManager::saveSoldier);
-//
-//		List<WatchPoint> dummyWatchPoints = createDummyWatchPoints(20, 3);
-//		dummyWatchPoints.forEach(wp -> DbManager.saveWatchPoint(wp, SaveMode.INSERT_OR_UPDATE));
-//
-//		LocalDate date = LocalDate.of(2015, 6, 1);
-//		for (int i = 0; i < 30; i++) {
-//			Soldier[][] distribution = DistributionEngine.create(date.plusDays(i))
-//					.distribute(dummySoldiers, dummyWatchPoints);
-//
-//			Set<Watch> watches = new HashSet<>();
-//			for (int j = 0; j < distribution.length; j++) {
-//				for (int k = 0; k < distribution[j].length; k++) {
-//					Soldier soldier = distribution[j][k];
-//					Watch watch = new Watch(soldier, dummyWatchPoints.get((k + 1) / 3), k % 3, date.plusDays(i).toString(), j, WatchValues.get(j));
-//					watches.add(watch);
-//				}
-//			}
-//
-//			DbManager.saveWatchesAddPointsDeleteOldWatches(date.plusDays(i), watches);
-//		}
-//	}
+	@Test
+	public void testBigData() {
+		List<Soldier> dummySoldiers = createDummySoldiers(5000);
+		DbManager.saveSoldiers(dummySoldiers);
+
+		List<WatchPoint> dummyWatchPoints = createDummyWatchPoints(20, 3);
+		dummyWatchPoints.forEach(wp -> DbManager.saveWatchPoint(wp, SaveMode.INSERT_OR_UPDATE));
+
+		LocalDate date = LocalDate.of(2015, 6, 1);
+		for (int i = 0; i < 30; i++) {
+			Soldier[][] distribution = DistributionEngine.create(date.plusDays(i))
+					.distribute(dummySoldiers, dummyWatchPoints);
+
+			Set<Watch> watches = new HashSet<>();
+			for (int j = 0; j < distribution.length; j++) {
+				for (int k = 0; k < distribution[j].length; k++) {
+					Soldier soldier = distribution[j][k];
+					Watch watch = new Watch(soldier, dummyWatchPoints.get(k / 3), k % 3,
+							date.plusDays(i).toString(), j, WatchValues.get(j));
+					watches.add(watch);
+				}
+			}
+
+			DbManager.saveWatchesAddPointsDeleteOldWatches(date.plusDays(i), watches);
+		}
+	}
 
 	@After
 	public void tearDown() {
