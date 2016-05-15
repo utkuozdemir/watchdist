@@ -5,6 +5,8 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.time.format.DateTimeFormatter;
 
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+
 @SuppressWarnings("unused")
 @DatabaseTable(tableName = "watch")
 public class Watch {
@@ -43,7 +45,7 @@ public class Watch {
     }
 
     private void validateDate(String date) {
-        DateTimeFormatter.ISO_LOCAL_DATE.parse(date);
+        ISO_LOCAL_DATE.parse(date);
     }
 
     public Integer getId() {

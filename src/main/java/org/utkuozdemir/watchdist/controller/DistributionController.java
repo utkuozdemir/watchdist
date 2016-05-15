@@ -29,12 +29,15 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 
 @SuppressWarnings("unused")
 public class DistributionController implements Initializable {
@@ -107,25 +110,25 @@ public class DistributionController implements Initializable {
 				FileChooser fileChooser = new FileChooser();
 
 				FileChooser.ExtensionFilter extFilter
-						= new FileChooser.ExtensionFilter(Messages.get("distribution.excel.file") + " (*.xls)", "*.xls");
-				fileChooser.getExtensionFilters().add(extFilter);
-				fileChooser.setTitle(Messages.get("distribution.save.distribution.as.excel.file"));
-				String fileName = currentDate.toString() + "-" +
-						Messages.get("distribution.excel.file.name.suffix");
-				fileChooser.setInitialFileName(fileName + ".xls");
+                        = new FileChooser.ExtensionFilter(Messages.get("distribution.excel.file") + " (*.xls)", "*.xls");
+                fileChooser.getExtensionFilters().add(extFilter);
+                fileChooser.setTitle(Messages.get("distribution.save.distribution.as.excel.file"));
+                String fileName = currentDate.getValue().format(ISO_LOCAL_DATE) + "-" +
+                        Messages.get("distribution.excel.file.name.suffix");
+                fileChooser.setInitialFileName(fileName + ".xls");
 
-				File file = fileChooser.showSaveDialog(distributionTable.getScene().getWindow());
-				if (file == null) {
-					try {
-						String path = Paths.get(FileManager.class.getProtectionDomain()
-								.getCodeSource().getLocation().toURI()).getParent().toAbsolutePath()
-								+ File.separator + "Excel" + File.separator + fileName + ".xls";
-						boolean confirmed = WindowManager
-								.showConfirmationAlert(Messages.get("confirmation"),
-										Messages.get("file.could.not.be.selected", path),
-										Messages.get("save.and.continue"), Messages.get("dont.save"));
-						if (confirmed) {
-							file = Paths.get(path).toFile();
+                File file = fileChooser.showSaveDialog(distributionTable.getScene().getWindow());
+                if (file == null) {
+                    try {
+                        String path = Paths.get(FileManager.class.getProtectionDomain()
+                                .getCodeSource().getLocation().toURI()).getParent().toAbsolutePath()
+                                + File.separator + "Excel" + File.separator + fileName + ".xls";
+                        boolean confirmed = WindowManager
+                                .showConfirmationAlert(Messages.get("confirmation"),
+                                        Messages.get("file.could.not.be.selected", path),
+                                        Messages.get("save.and.continue"), Messages.get("dont.save"));
+                        if (confirmed) {
+                            file = Paths.get(path).toFile();
 						}
 					} catch (Exception e) {
 						throw new RuntimeException(e);
@@ -188,7 +191,7 @@ public class DistributionController implements Initializable {
 
 						if (soldier instanceof NullSoldier) soldier = null;
 						Watch watch = new Watch(soldier, watchPoint, Collections.frequency(used, watchPoint),
-								currentDate.toString(), i, WatchValues.get(i));
+								currentDate.getValue().format(ISO_LOCAL_DATE), i, WatchValues.get(i));
 						watchesToBeSaved.add(watch);
 
 						used.add(watchPoint);
