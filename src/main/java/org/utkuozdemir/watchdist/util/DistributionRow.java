@@ -1,8 +1,9 @@
 package org.utkuozdemir.watchdist.util;
 
+import org.utkuozdemir.watchdist.domain.Soldier;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import org.utkuozdemir.watchdist.domain.Soldier;
 
 @SuppressWarnings({"unused", "unchecked"})
 public class DistributionRow {

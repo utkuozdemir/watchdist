@@ -2,6 +2,7 @@ package org.utkuozdemir.watchdist.domain;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
 import org.utkuozdemir.watchdist.app.Settings;
 
 @SuppressWarnings("unused")
@@ -17,7 +18,8 @@ public class WatchValue {
     }
 
     public WatchValue(int hour, double value) {
-        if (hour < 0 || hour >= Settings.getTotalWatchesInDay()) throw new IllegalArgumentException();
+        if (hour < 0 || hour >= Settings.getTotalWatchesInDay())
+            throw new IllegalArgumentException();
         if (value <= 0) throw new IllegalArgumentException();
         this.hour = hour;
         this.value = value;
@@ -28,7 +30,8 @@ public class WatchValue {
     }
 
     public void setHour(int hour) {
-        if (hour < 0 || hour >= Settings.getTotalWatchesInDay()) throw new IllegalArgumentException();
+        if (hour < 0 || hour >= Settings.getTotalWatchesInDay())
+            throw new IllegalArgumentException();
         this.hour = hour;
     }
 

@@ -3,8 +3,6 @@ package org.utkuozdemir.watchdist.domain;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-import java.time.format.DateTimeFormatter;
-
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 
 @SuppressWarnings("unused")

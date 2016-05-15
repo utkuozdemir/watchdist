@@ -26,11 +26,11 @@ public class WatchPoint {
     WatchPoint() {
     }
 
-	public WatchPoint(String name, int requiredSoldierCount, boolean active, int order) {
-		this.name = name;
+    public WatchPoint(String name, int requiredSoldierCount, boolean active, int order) {
+        this.name = name;
         this.requiredSoldierCount = requiredSoldierCount;
-		this.active = active;
-		this.order = order;
+        this.active = active;
+        this.order = order;
     }
 
     public WatchPoint(Integer id, String name, int requiredSoldierCount, boolean active, int order) {

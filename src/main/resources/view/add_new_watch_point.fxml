@@ -1,25 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.Integer?>
 <?import javafx.collections.FXCollections?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-<?import java.lang.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity"
+            minHeight="-Infinity"
             minWidth="-Infinity"
             prefHeight="200.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/null"
             fx:controller="org.utkuozdemir.watchdist.controller.AddNewWatchPointController">
-    <Label layoutX="14.0" layoutY="14.0" text="%addnewwatchpoint.new.watch.point" AnchorPane.leftAnchor="14.0"
+    <Label layoutX="14.0" layoutY="14.0" text="%addnewwatchpoint.new.watch.point"
+           AnchorPane.leftAnchor="14.0"
            AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
     </Label>
-    <TextField fx:id="watchPointName" layoutX="14.0" layoutY="43.0" prefHeight="23.0" prefWidth="270.0"
+    <TextField fx:id="watchPointName" layoutX="14.0" layoutY="43.0" prefHeight="23.0"
+               prefWidth="270.0"
                promptText="%addnewwatchpoint.watch.point.name" AnchorPane.leftAnchor="14.0"
                AnchorPane.rightAnchor="14.0"/>
-    <ComboBox fx:id="requiredSoldierCount" layoutX="194.0" layoutY="80.0" prefHeight="23.0" prefWidth="90.0"
-              promptText="%required.soldier.count" AnchorPane.leftAnchor="196.0" AnchorPane.rightAnchor="14.0">
+    <ComboBox fx:id="requiredSoldierCount" layoutX="194.0" layoutY="80.0" prefHeight="23.0"
+              prefWidth="90.0"
+              promptText="%required.soldier.count" AnchorPane.leftAnchor="196.0"
+              AnchorPane.rightAnchor="14.0">
         <items>
             <FXCollections fx:factory="observableArrayList">
                 <Integer fx:value="1"/>
@@ -38,21 +46,27 @@
             <Integer fx:value="1"/>
         </value>
     </ComboBox>
-    <Label layoutX="14.0" layoutY="84.0" prefHeight="15.0" prefWidth="173.0" text="%required.soldier.count"
+    <Label layoutX="14.0" layoutY="84.0" prefHeight="15.0" prefWidth="173.0"
+           text="%required.soldier.count"
            AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="113.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
     </Label>
-    <Label fx:id="errorLabel" layoutX="14.0" layoutY="123.0" text="%addnewwatchpoint.watch.point.name.required"
-           textFill="RED" visible="false" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+    <Label fx:id="errorLabel" layoutX="14.0" layoutY="123.0"
+           text="%addnewwatchpoint.watch.point.name.required"
+           textFill="RED" visible="false" AnchorPane.leftAnchor="14.0"
+           AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="11.0"/>
         </font>
     </Label>
-    <Button fx:id="saveWatchPointButton" defaultButton="true" layoutX="84.0" layoutY="115.0" mnemonicParsing="false"
-            onAction="#saveWatchPoint" prefHeight="30.0" prefWidth="200.0" text="%addnewwatchpoint.save.watch.point"
-            AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0">
+    <Button fx:id="saveWatchPointButton" defaultButton="true" layoutX="84.0" layoutY="115.0"
+            mnemonicParsing="false"
+            onAction="#saveWatchPoint" prefHeight="30.0" prefWidth="200.0"
+            text="%addnewwatchpoint.save.watch.point"
+            AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0"
+            AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>

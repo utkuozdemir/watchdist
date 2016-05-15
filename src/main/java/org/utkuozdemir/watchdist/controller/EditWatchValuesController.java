@@ -1,5 +1,16 @@
 package org.utkuozdemir.watchdist.controller;
 
+import org.utkuozdemir.watchdist.app.Constants;
+import org.utkuozdemir.watchdist.app.Settings;
+import org.utkuozdemir.watchdist.fx.WatchValueFX;
+import org.utkuozdemir.watchdist.util.DbManager;
+import org.utkuozdemir.watchdist.util.WatchValues;
+
+import java.net.URL;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,16 +22,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Stage;
-import org.utkuozdemir.watchdist.app.Constants;
-import org.utkuozdemir.watchdist.app.Settings;
-import org.utkuozdemir.watchdist.fx.WatchValueFX;
-import org.utkuozdemir.watchdist.util.DbManager;
-import org.utkuozdemir.watchdist.util.WatchValues;
-
-import java.net.URL;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import static org.utkuozdemir.watchdist.util.Converters.DOUBLE_STRING_CONVERTER;
 
@@ -43,9 +44,9 @@ public class EditWatchValuesController implements Initializable {
                     (((i) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
             String endTime = String.format("%02d",
                     (((i + 1) * Settings.getOneWatchDurationInHours()) + Settings.getFirstWatchStartHour()) % 24);
-			String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
-			return new SimpleStringProperty(startTime + ":" + minute + " - " + endTime + ":" + minute);
-		});
+            String minute = String.format("%02d", Settings.getFirstWatchStartMinute());
+            return new SimpleStringProperty(startTime + ":" + minute + " - " + endTime + ":" + minute);
+        });
 
         valueColumn.setCellFactory(c -> new TextFieldTableCell<>(DOUBLE_STRING_CONVERTER));
         valueColumn.setCellValueFactory(new PropertyValueFactory<>("value"));

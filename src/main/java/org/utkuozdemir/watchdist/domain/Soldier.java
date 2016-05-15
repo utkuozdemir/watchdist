@@ -4,6 +4,7 @@ package org.utkuozdemir.watchdist.domain;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
+
 import org.utkuozdemir.watchdist.app.Settings;
 
 import java.util.ArrayList;
@@ -34,14 +35,14 @@ public class Soldier {
     @DatabaseField(columnName = "sergeant")
     private boolean sergeant;
 
-	@DatabaseField(columnName = "max_watches_per_day")
-	private int maxWatchesPerDay;
+    @DatabaseField(columnName = "max_watches_per_day")
+    private int maxWatchesPerDay;
 
-	@DatabaseField(columnName = "order")
-	private int order;
+    @DatabaseField(columnName = "order")
+    private int order;
 
-	@DatabaseField(columnName = "fixed_watch")
-	private boolean fixedWatch;
+    @DatabaseField(columnName = "fixed_watch")
+    private boolean fixedWatch;
 
     @ForeignCollectionField(eager = true)
     private Collection<Availability> availabilities;
@@ -49,30 +50,30 @@ public class Soldier {
     Soldier() {
     }
 
-	public Soldier(String fullName, String duty, boolean available, boolean sergeant,
-				   int maxWatchesPerDay, int order, boolean fixedWatch) {
-		if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
+    public Soldier(String fullName, String duty, boolean available, boolean sergeant,
+                   int maxWatchesPerDay, int order, boolean fixedWatch) {
+        if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
             throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
 
         this.fullName = fullName;
         this.duty = duty;
         this.available = available;
         this.sergeant = sergeant;
-		this.maxWatchesPerDay = maxWatchesPerDay;
-		this.order = order;
-		this.fixedWatch = fixedWatch;
+        this.maxWatchesPerDay = maxWatchesPerDay;
+        this.order = order;
+        this.fixedWatch = fixedWatch;
 
-		this.availabilities = new ArrayList<>();
-		for (int i = 0; i < 7; i++) {
+        this.availabilities = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
             for (int j = 0; j < Settings.getTotalWatchesInDay(); j++) {
                 Availability availability = new Availability(this, i, j);
-				this.availabilities.add(availability);
+                this.availabilities.add(availability);
             }
         }
     }
 
-	public Integer getId() {
-		return id;
+    public Integer getId() {
+        return id;
     }
 
     public void setId(Integer id) {
@@ -127,39 +128,39 @@ public class Soldier {
         this.sergeant = sergeant;
     }
 
-	public int getMaxWatchesPerDay() {
-		return maxWatchesPerDay;
-	}
+    public int getMaxWatchesPerDay() {
+        return maxWatchesPerDay;
+    }
 
-	public void setMaxWatchesPerDay(int maxWatchesPerDay) {
+    public void setMaxWatchesPerDay(int maxWatchesPerDay) {
         if (maxWatchesPerDay < 1 || maxWatchesPerDay > Settings.getTotalWatchesInDay())
             throw new IllegalArgumentException("Invalid value for maxWatchesPerDay!");
-		this.maxWatchesPerDay = maxWatchesPerDay;
-	}
+        this.maxWatchesPerDay = maxWatchesPerDay;
+    }
 
-	public int getOrder() {
-		return order;
-	}
+    public int getOrder() {
+        return order;
+    }
 
-	public void setOrder(int order) {
-		this.order = order;
-	}
+    public void setOrder(int order) {
+        this.order = order;
+    }
 
-	public boolean isFixedWatch() {
-		return fixedWatch;
-	}
+    public boolean isFixedWatch() {
+        return fixedWatch;
+    }
 
-	public void setFixedWatch(boolean fixedWatch) {
-		this.fixedWatch = fixedWatch;
-	}
+    public void setFixedWatch(boolean fixedWatch) {
+        this.fixedWatch = fixedWatch;
+    }
 
-	public Collection<Availability> getAvailabilities() {
-		return availabilities;
-	}
+    public Collection<Availability> getAvailabilities() {
+        return availabilities;
+    }
 
-	public void setAvailabilities(Collection<Availability> availabilities) {
-		this.availabilities = availabilities;
-	}
+    public void setAvailabilities(Collection<Availability> availabilities) {
+        this.availabilities = availabilities;
+    }
 
     @Override
     public String toString() {

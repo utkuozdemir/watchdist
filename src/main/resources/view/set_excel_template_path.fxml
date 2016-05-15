@@ -1,34 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity"
+            minHeight="-Infinity"
             minWidth="-Infinity"
             prefHeight="170.0" prefWidth="450.0" xmlns="http://javafx.com/javafx/null"
             fx:controller="org.utkuozdemir.watchdist.controller.SetExcelTemplatePathController">
-    <Label fx:id="info" layoutX="14.0" layoutY="14.0" prefHeight="60.0" prefWidth="422.0" text="-" wrapText="true"
+    <Label fx:id="info" layoutX="14.0" layoutY="14.0" prefHeight="60.0" prefWidth="422.0" text="-"
+           wrapText="true"
            AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
     </Label>
-    <TextField fx:id="filePath" editable="false" layoutX="14.0" layoutY="85.0" prefHeight="30.0" prefWidth="280.0"
+    <TextField fx:id="filePath" editable="false" layoutX="14.0" layoutY="85.0" prefHeight="30.0"
+               prefWidth="280.0"
                AnchorPane.leftAnchor="14.0"/>
-    <Button layoutX="306.0" layoutY="85.0" mnemonicParsing="false" onAction="#chooseFile" prefHeight="30.0"
+    <Button layoutX="306.0" layoutY="85.0" mnemonicParsing="false" onAction="#chooseFile"
+            prefHeight="30.0"
             prefWidth="130.0" text="%choose.file" AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
-    <Button defaultButton="true" layoutX="206.0" layoutY="75.0" mnemonicParsing="false" onAction="#saveAndContinue"
-            prefHeight="30.0" prefWidth="230.0" text="%save.and.continue" AnchorPane.bottomAnchor="14.0"
+    <Button defaultButton="true" layoutX="206.0" layoutY="75.0" mnemonicParsing="false"
+            onAction="#saveAndContinue"
+            prefHeight="30.0" prefWidth="230.0" text="%save.and.continue"
+            AnchorPane.bottomAnchor="14.0"
             AnchorPane.rightAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
         </font>
     </Button>
-    <Label fx:id="errorLabel" layoutX="-64.0" layoutY="134.0" text="-" textFill="RED" visible="false"
+    <Label fx:id="errorLabel" layoutX="-64.0" layoutY="134.0" text="-" textFill="RED"
+           visible="false"
            AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="14.0">
         <font>
             <Font name="System Bold" size="12.0"/>
