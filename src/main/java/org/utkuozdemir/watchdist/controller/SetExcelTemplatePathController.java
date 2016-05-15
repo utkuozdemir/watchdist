@@ -29,8 +29,6 @@ public class SetExcelTemplatePathController {
 
     private Path path;
 
-    private String infoMessage;
-
     public void chooseFile() {
         FileChooser fileChooser = new FileChooser();
 

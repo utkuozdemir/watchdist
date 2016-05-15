@@ -120,9 +120,7 @@ public class Tests {
 		IntStream.range(0, distribution.length).forEach(i -> Arrays.asList(distribution[i]).
 				stream().filter(s -> s != null).
 				forEach(soldier -> {
-					if (soldierWatchHoursMap.get(soldier) == null) {
-						soldierWatchHoursMap.put(soldier, new TreeSet<>());
-					}
+					soldierWatchHoursMap.putIfAbsent(soldier, new TreeSet<>());
 					soldierWatchHoursMap.get(soldier).add(i);
 				}));
 

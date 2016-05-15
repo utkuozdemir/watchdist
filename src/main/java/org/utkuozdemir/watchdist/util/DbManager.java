@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class DbManager {
     private static Path dbPath = null;
 
-    private static volatile DbManager INSTANCE;
+    private static volatile DbManager instance;
 
     private ConnectionSource connectionSource;
     private TransactionManager transactionManager;
@@ -64,15 +64,15 @@ public class DbManager {
     private static DbManager getInstance() {
         if (dbPath == null)
             throw new RuntimeException("Cannot initialize DbManager: database path is null!");
-        if (INSTANCE == null) {
+        DbManager result = instance;
+        if (result == null) { // First check (no locking)
             synchronized (DbManager.class) {
-                //double checking Singleton instance
-                if (INSTANCE == null) {
-                    INSTANCE = new DbManager();
-                }
+                result = instance;
+                if (result == null) // Second check (with locking)
+                    instance = result = new DbManager();
             }
         }
-        return INSTANCE;
+        return result;
     }
 
     public static void close() {
@@ -374,7 +374,7 @@ public class DbManager {
     public synchronized static void setDbPath(Path dbPath) {
         if (dbPath == null) throw new NullPointerException();
         DbManager.dbPath = dbPath;
-        INSTANCE = null;
+        instance = null;
     }
 
     @SuppressWarnings("unchecked")

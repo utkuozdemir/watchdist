@@ -50,8 +50,8 @@ public class LanguageSelectionController implements Initializable {
         DbManager.setProperty(Constants.KEY_LOCALE, language.getValue().name());
         Messages.setLocale(language.getValue().getLocale());
 
-        WindowManager.showInitializationInfo(AppContext.getInstance().isNewDbInitialized() ?
-                AppContext.getInstance().getInitializedDbDirectory() : null);
+        WindowManager.showInitializationInfo(AppContext.get().isNewDbInitialized() ?
+                AppContext.get().getInitializedDbDirectory() : null);
         initializePasswordPrompt();
         ((Stage) language.getScene().getWindow()).close();
     }

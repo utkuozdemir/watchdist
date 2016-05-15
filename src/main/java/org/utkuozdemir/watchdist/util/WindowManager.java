@@ -274,7 +274,7 @@ public class WindowManager {
         try {
             if (alreadyOpened(MAIN)) return;
 
-            Stage stage = AppContext.getInstance().getMainStage();
+            Stage stage = AppContext.get().getMainStage();
             URL resource = App.class.getClassLoader().getResource("view/main.fxml");
             if (resource == null) throw new NullPointerException("Resources is null!");
 

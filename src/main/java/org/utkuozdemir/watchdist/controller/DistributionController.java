@@ -199,6 +199,7 @@ public class DistributionController implements Initializable {
 
                     Optional<WatchPoint> watchPointOptional
                             = DbManager.findWatchPointById(Integer.parseInt(watchPointId));
+                    //noinspection OptionalGetWithoutIsPresent
                     columnWatchPointMap.put(column, watchPointOptional.get());
                 }
 
@@ -485,7 +486,7 @@ public class DistributionController implements Initializable {
         }
     }
 
-    public void refreshNote() {
+    void refreshNote() {
         if (currentDate.getValue() != null) {
             String note = DbManager.getNote(currentDate.getValue());
             notes.setText((note == null || "".equals(note.trim())) ? Messages.get("no.notes") : note);
@@ -543,7 +544,7 @@ public class DistributionController implements Initializable {
         }
     }
 
-    public void refreshCellColors() {
+    private void refreshCellColors() {
         if (showColors.selectedProperty().get()) {
 
             List<Soldier> soldiers =

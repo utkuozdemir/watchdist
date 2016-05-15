@@ -20,7 +20,7 @@ import javafx.stage.Stage;
 
 public class AppContext {
     private static final Logger logger = LoggerFactory.getLogger(AppContext.class);
-    private static volatile AppContext INSTANCE;
+    private static volatile AppContext instance = new AppContext();
     private boolean newDbInitialized;
     private String initializedDbDirectory;
 
@@ -29,29 +29,11 @@ public class AppContext {
     private AppContext() {
     }
 
-    public static AppContext getInstance() {
-        if (INSTANCE == null) {
-            synchronized (DbManager.class) {
-                //double checking Singleton instance
-                if (INSTANCE == null) {
-                    INSTANCE = new AppContext();
-                }
-            }
-        }
-        return INSTANCE;
+    public static AppContext get() {
+        return instance;
     }
 
-    private boolean isValidLanguage(String language) {
-        try {
-            Language l = Language.valueOf(language);
-            return l != null;
-        } catch (IllegalArgumentException e) {
-            logger.info("Invalid language name: " + language);
-            return false;
-        }
-    }
-
-    public void launch(Stage mainStage) throws Exception {
+    void launch(Stage mainStage) throws Exception {
         PlatformImpl.addListener(new PlatformImpl.FinishListener() {
             @Override
             public void idle(boolean implicitExit) {
@@ -74,13 +56,8 @@ public class AppContext {
         if (language == null) {
             WindowManager.showLanguageSelectionWindow();
         } else {
-            if (!isValidLanguage(language)) {
-                DbManager.setProperty(Constants.KEY_LOCALE, null);
-                WindowManager.showLanguageSelectionWindow();
-            } else {
-                Messages.setLocale(Language.valueOf(language).getLocale());
-                initializePasswordPrompt();
-            }
+            Messages.setLocale(Language.valueOf(language).getLocale());
+            initializePasswordPrompt();
         }
     }
 
