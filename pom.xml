@@ -21,7 +21,7 @@
         <slf4j-api.version>1.7.21</slf4j-api.version>
         <logback-classic.version>1.1.7</logback-classic.version>
         <javafx-maven-plugin.version>8.1.2</javafx-maven-plugin.version>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
         <jBCrypt.version>0.4.1</jBCrypt.version>
         <controlsfx.version>8.40.10</controlsfx.version>
         <versions-maven-plugin.version>2.2</versions-maven-plugin.version>
