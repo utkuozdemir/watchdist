@@ -14,7 +14,7 @@
         <sqlite-jdbc.version>3.8.11.2</sqlite-jdbc.version>
         <nestedvm.version>1.0</nestedvm.version>
         <plugins.maven-compiler-plugin.version>3.5.1</plugins.maven-compiler-plugin.version>
-        <poi.version>3.17</poi.version>
+        <poi.version>4.1.1</poi.version>
         <ormlite-jdbc.version>4.48</ormlite-jdbc.version>
         <onejar-maven-plugin.version>1.4.4</onejar-maven-plugin.version>
         <maven-antrun-plugin.version>1.8</maven-antrun-plugin.version>
