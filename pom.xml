@@ -11,7 +11,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sqlite-jdbc.version>3.8.11.2</sqlite-jdbc.version>
+        <sqlite-jdbc.version>3.41.2.2</sqlite-jdbc.version>
         <nestedvm.version>1.0</nestedvm.version>
         <plugins.maven-compiler-plugin.version>3.5.1</plugins.maven-compiler-plugin.version>
         <poi.version>3.17</poi.version>
